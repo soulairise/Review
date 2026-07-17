@@ -1,0 +1,943 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>PRD — 짓다 (JITDA) 웹툰 오픈 플랫폼</title>
+<style>
+  :root {
+    --font-sans: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Segoe UI", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+    --paper: #f4f3f0;
+    --surface: #ffffff;
+    --ink: #17141a;
+    --ink-2: #3f3946;
+    --muted: #7a7480;
+    --line: #e6e2dd;
+    --line-2: #d8d3cc;
+    --accent: #ee2c56;
+    --gold: #c78e28;
+    --success: #2f8f5d;
+    --radius: 6px;
+    --radius-lg: 10px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0d0c10;
+      --surface: #17151b;
+      --ink: #f0edf1;
+      --ink-2: #cac4d0;
+      --muted: #8b8492;
+      --line: #24222a;
+      --line-2: #33303a;
+      --accent: #ff5573;
+      --gold: #e8b13a;
+      --success: #4bb87a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0d0c10;
+    --surface: #17151b;
+    --ink: #f0edf1;
+    --ink-2: #cac4d0;
+    --muted: #8b8492;
+    --line: #24222a;
+    --line-2: #33303a;
+    --accent: #ff5573;
+    --gold: #e8b13a;
+    --success: #4bb87a;
+  }
+  :root[data-theme="light"] {
+    --paper: #f4f3f0;
+    --surface: #ffffff;
+    --ink: #17141a;
+    --ink-2: #3f3946;
+    --muted: #7a7480;
+    --line: #e6e2dd;
+    --line-2: #d8d3cc;
+    --accent: #ee2c56;
+    --gold: #c78e28;
+    --success: #2f8f5d;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { min-height: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 15.5px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  button {
+    font-family: inherit; font-size: inherit; color: inherit;
+    background: none; border: 0; padding: 0; cursor: pointer;
+  }
+  h1, h2, h3, h4 { text-wrap: balance; margin: 0; font-weight: 700; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .page {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 60px;
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 40px 32px 80px;
+  }
+  @media (max-width: 900px) {
+    .page { grid-template-columns: 1fr; gap: 32px; padding: 24px 20px 60px; }
+  }
+
+  /* TOC sidebar */
+  .toc {
+    position: sticky;
+    top: 32px;
+    align-self: start;
+    max-height: calc(100vh - 64px);
+    overflow-y: auto;
+    padding-right: 8px;
+    font-size: 13px;
+    line-height: 1.55;
+    scrollbar-width: thin;
+  }
+  @media (max-width: 900px) {
+    .toc {
+      position: static;
+      max-height: none;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      background: var(--surface);
+    }
+  }
+  .toc-title {
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .toc ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .toc a {
+    color: var(--ink-2);
+    display: flex;
+    gap: 10px;
+    padding: 5px 0;
+    border-radius: 3px;
+    text-decoration: none;
+    transition: color 0.12s;
+  }
+  .toc a:hover { color: var(--accent); text-decoration: none; }
+  .toc-num {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    flex-shrink: 0;
+    width: 22px;
+  }
+
+  /* Doc content */
+  .doc { max-width: 720px; min-width: 0; }
+
+  .doc-header {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 32px;
+    margin-bottom: 44px;
+  }
+  .doc-brand {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .brand-mark {
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+  }
+  .brand-mark::after {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    margin-left: 3px;
+    transform: translateY(-1px);
+  }
+  .brand-sub {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .doc-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  h1.doc-title {
+    font-size: 40px;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+    margin-bottom: 20px;
+    font-weight: 800;
+  }
+  @media (max-width: 640px) {
+    h1.doc-title { font-size: 30px; }
+  }
+  .doc-lede {
+    color: var(--ink-2);
+    font-size: 17px;
+    line-height: 1.55;
+    margin-bottom: 24px;
+    max-width: 60ch;
+  }
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(4, auto);
+    gap: 6px 28px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  @media (max-width: 560px) {
+    .meta-grid { grid-template-columns: repeat(2, auto); }
+  }
+  .meta-grid dt {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--muted);
+    margin: 0;
+  }
+  .meta-grid dd {
+    color: var(--ink);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    margin: 0;
+  }
+  .status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--accent);
+    color: white;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  /* Section / heading */
+  h2.section {
+    font-size: 26px;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+    margin-top: 60px;
+    margin-bottom: 20px;
+    padding-top: 12px;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    scroll-margin-top: 24px;
+  }
+  h2.section .num {
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+  h3 {
+    font-size: 17px;
+    letter-spacing: -0.01em;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    color: var(--ink);
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  h3 .num {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+  h4 {
+    font-size: 14px;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    color: var(--ink-2);
+    letter-spacing: 0.02em;
+  }
+
+  p { margin: 0 0 14px; }
+  ul, ol {
+    padding-left: 22px;
+    margin: 0 0 16px;
+  }
+  li { margin-bottom: 6px; }
+  li > ul, li > ol { margin-top: 6px; margin-bottom: 8px; }
+
+  strong { color: var(--ink); font-weight: 700; }
+
+  code {
+    font-family: var(--font-mono);
+    padding: 1px 6px;
+    background: var(--line);
+    border-radius: 3px;
+    font-size: 0.88em;
+    color: var(--ink-2);
+  }
+  pre {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 16px 18px;
+    border-radius: var(--radius);
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.55;
+    margin: 16px 0 20px;
+  }
+  pre code { background: none; padding: 0; font-size: inherit; color: var(--ink); }
+
+  /* Tables */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 16px 0 24px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 13.5px;
+    background: var(--surface);
+  }
+  th, td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  tr:last-child th, tr:last-child td { border-bottom: 0; }
+  th {
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--paper);
+  }
+  td code { font-size: 12px; }
+
+  /* Callout */
+  .callout {
+    border-left: 3px solid var(--accent);
+    padding: 4px 0 4px 16px;
+    margin: 20px 0;
+    color: var(--ink-2);
+    font-size: 14.5px;
+    line-height: 1.6;
+  }
+  .callout strong { color: var(--accent); }
+
+  /* Phase cards */
+  .phase-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin: 20px 0 8px;
+  }
+  @media (max-width: 640px) {
+    .phase-grid { grid-template-columns: 1fr; }
+  }
+  .phase {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    position: relative;
+  }
+  .phase-label {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .phase-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--ink);
+  }
+  .phase ul {
+    padding-left: 18px;
+    font-size: 13.5px;
+    color: var(--ink-2);
+  }
+  .phase li { margin-bottom: 4px; }
+
+  /* Checklist */
+  .checklist {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0 24px;
+  }
+  .checklist li {
+    padding-left: 26px;
+    position: relative;
+    margin-bottom: 8px;
+    color: var(--ink-2);
+    font-size: 14.5px;
+  }
+  .checklist li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 5px;
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid var(--line-2);
+    border-radius: 3px;
+    background: var(--surface);
+  }
+
+  /* Footer */
+  .doc-footer {
+    margin-top: 80px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 12.5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  /* Theme toggle */
+  .theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    height: 36px;
+    width: 36px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    border: 1px solid var(--line);
+    background: var(--surface);
+    transition: border-color 0.15s, color 0.15s;
+    z-index: 40;
+  }
+  .theme-toggle:hover { border-color: var(--ink-2); color: var(--ink); }
+  .theme-toggle svg { width: 15px; height: 15px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: 0ms !important; }
+  }
+
+  ::selection { background: var(--accent); color: white; }
+</style>
+
+<button class="theme-toggle" id="themeToggle" aria-label="테마 전환" title="테마 전환">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+</button>
+
+<div class="page">
+  <aside class="toc" aria-label="목차">
+    <div class="toc-title">Contents</div>
+    <ol>
+      <li><a href="#s1"><span class="toc-num">01</span>제품 개요</a></li>
+      <li><a href="#s2"><span class="toc-num">02</span>타겟 사용자</a></li>
+      <li><a href="#s3"><span class="toc-num">03</span>핵심 시나리오</a></li>
+      <li><a href="#s4"><span class="toc-num">04</span>정보 아키텍처</a></li>
+      <li><a href="#s5"><span class="toc-num">05</span>기능 요구사항</a></li>
+      <li><a href="#s6"><span class="toc-num">06</span>데이터 모델</a></li>
+      <li><a href="#s7"><span class="toc-num">07</span>기술 요구사항</a></li>
+      <li><a href="#s8"><span class="toc-num">08</span>비기능 요구사항</a></li>
+      <li><a href="#s9"><span class="toc-num">09</span>정책</a></li>
+      <li><a href="#s10"><span class="toc-num">10</span>로드맵</a></li>
+      <li><a href="#s11"><span class="toc-num">11</span>오픈 이슈</a></li>
+    </ol>
+  </aside>
+
+  <article class="doc">
+    <header class="doc-header">
+      <div class="doc-brand">
+        <span class="brand-mark">짓다</span>
+        <span class="brand-sub">JITDA</span>
+      </div>
+      <div class="doc-eyebrow">Product Requirements Document</div>
+      <h1 class="doc-title">웹툰 작가 오픈 플랫폼</h1>
+      <p class="doc-lede">
+        누구나 자신의 웹툰·일러스트를 올리고, 팬을 모으고, 유료 구독·후원으로 수익화할 수 있는 오픈 플랫폼.
+      </p>
+      <dl class="meta-grid">
+        <dt>버전</dt>
+        <dt>작성일</dt>
+        <dt>상태</dt>
+        <dt>대상</dt>
+        <dd>0.1 (초안)</dd>
+        <dd>2026.07.15</dd>
+        <dd><span class="status-badge">DRAFT</span></dd>
+        <dd>기획 · 개발 · 디자인</dd>
+      </dl>
+    </header>
+
+    <!-- 1 -->
+    <h2 class="section" id="s1"><span class="num">01</span>제품 개요</h2>
+
+    <h3><span class="num">1.1</span>배경</h3>
+    <ul>
+      <li>국내 웹툰 플랫폼(네이버·카카오)은 진입 심사가 높아 신인·아마추어의 발표 장벽이 크다.</li>
+      <li>포스타입·픽시브·Patreon은 각각 한계 존재 — 수익모델 미비, 지역 편향, 웹툰 최적화 부재.</li>
+      <li>"오픈 게시 + 팬 기반 수익화 + 웹툰 최적 뷰어"를 한국·영어권 동시 타겟으로 잡을 여지가 있다.</li>
+    </ul>
+
+    <h3><span class="num">1.2</span>제품 목표</h3>
+    <ol>
+      <li>작가가 5분 안에 계정을 만들고 첫 작품을 올릴 수 있다.</li>
+      <li>독자가 로그인 없이도 랭킹·장르 카테고리로 원하는 작품을 발견할 수 있다.</li>
+      <li>팬은 <strong>무료(팔로우)</strong>와 <strong>유료(구독·후원)</strong> 두 층위로 작가를 지원할 수 있다.</li>
+      <li>작가는 월 1회 정산으로 실수령금을 자동으로 받는다.</li>
+    </ol>
+
+    <h3><span class="num">1.3</span>성공 지표 (KPI)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>층위</th><th>지표</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>유입</td><td>MAU · 회차 조회수 · 검색 노출 클릭율</td></tr>
+          <tr><td>인게이지먼트</td><td>팔로우 전환율 · D7/D30 재방문율 · 회차당 평균 체류시간</td></tr>
+          <tr><td>수익화</td><td>유료 구독 전환율(팔로워→구독자) · ARPPU · 후원 건수</td></tr>
+          <tr><td>공급</td><td>신규 작가 등록 수 · 주간 신규 회차 수 · 활성 작가 비율</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 2 -->
+    <h2 class="section" id="s2"><span class="num">02</span>타겟 사용자</h2>
+
+    <h3><span class="num">2.1</span>작가 (공급자)</h3>
+    <ul>
+      <li>아마추어~세미프로 웹툰·일러스트 작가</li>
+      <li>자기 페이지를 갖고 싶고, 팬 기반의 정기 수익이 필요함</li>
+      <li>한국어·영어 독자를 함께 만나고 싶음</li>
+    </ul>
+
+    <h3><span class="num">2.2</span>독자 (수요자)</h3>
+    <ul>
+      <li>웹툰·일러스트를 즐기는 10대 후반 ~ 30대</li>
+      <li>좋아하는 작가에게 소액이라도 직접 지불할 의향 있음</li>
+      <li>데스크톱·모바일 웹 브라우저로 접근</li>
+    </ul>
+
+    <h3><span class="num">2.3</span>관리자 (내부)</h3>
+    <ul>
+      <li>신고 처리, 정산, 저작권 침해 대응, 성인 콘텐츠 심의(Phase 2)</li>
+    </ul>
+
+    <!-- 3 -->
+    <h2 class="section" id="s3"><span class="num">03</span>핵심 사용자 시나리오</h2>
+    <ol>
+      <li><strong>작가 온보딩</strong> — 소셜·이메일 가입 → 프로필 세팅 → 구독료 설정(선택) → 첫 회차 업로드</li>
+      <li><strong>독자 발견</strong> — 메인 접속 → "인기 작품 TOP 10" 탭 확인 → 작품 상세 진입 → 무료 회차 감상 → 마음에 들면 팔로우</li>
+      <li><strong>팬 전환</strong> — 팔로우 상태에서 "구독자 전용" 회차 배지 노출 → 구독 결제 → 잠금 해제</li>
+      <li><strong>일회성 후원</strong> — 회차 감상 후 하단 "팁" 버튼 → 자유 금액 입력 → 결제</li>
+      <li><strong>작가 정산</strong> — 매월 말 자동 집계 → 이메일로 정산 명세 → 익월 중순 계좌 입금</li>
+    </ol>
+
+    <!-- 4 -->
+    <h2 class="section" id="s4"><span class="num">04</span>정보 아키텍처</h2>
+
+    <h3><span class="num">4.1</span>사이트맵</h3>
+<pre><code>/                        메인 (탭: 인기 작품 TOP10 / 인기 포스트 TOP10 / 최신작 TOP3)
+/explore                 탐색 (장르 카테고리, 검색)
+/search?q=...            검색 결과
+/@{author}               작가 페이지 (프로필, 시리즈, 개별 포스트, 사랑방[Phase2])
+/@{author}/series/{id}   시리즈 상세 (회차 목록)
+/@{author}/post/{id}     개별 포스트 뷰어
+/@{author}/episode/{id}  회차 뷰어
+/settings                내 설정
+/settings/subscriptions  내 구독 목록
+/settings/payouts        내 정산 (작가 전용)
+/studio                  작가 대시보드 (업로드, 통계, 정산)
+/notifications           알림
+/login  /signup
+/admin                   관리자 (내부)</code></pre>
+
+    <h3><span class="num">4.2</span>메인 화면 구성</h3>
+    <ul>
+      <li><strong>상단</strong>: 로고 · 검색바 · 로그인·가입 or 프로필 메뉴</li>
+      <li><strong>탭 히어로 영역</strong>: <code>인기 작품 TOP 10</code> · <code>인기 포스트 TOP 10</code> · <code>최신작 TOP 3</code></li>
+      <li><strong>장르 카테고리 스트립</strong>: 로맨스 · 판타지 · 스릴러 · 일상 · BL/GL · 액션 · 개그 · 드라마 · 청춘 · 공포 (초기 8~10개)</li>
+      <li><strong>최근 팔로우 작가의 새 회차</strong> (로그인 시)</li>
+    </ul>
+
+    <!-- 5 -->
+    <h2 class="section" id="s5"><span class="num">05</span>기능 요구사항</h2>
+
+    <h3><span class="num">5.1</span>계정 · 인증</h3>
+    <ul>
+      <li><strong>가입/로그인</strong>: 이메일+비밀번호 · Google OAuth · Apple OAuth</li>
+      <li><strong>프로필 필드</strong>: 필명, 자기소개(마크다운 일부), 아바타, 배너, 외부 링크</li>
+      <li><strong>작가 활성화</strong>: 모든 유저는 기본으로 "작가"가 될 수 있다 (별도 신청 불필요, 오픈 플랫폼 원칙)</li>
+      <li><strong>연령 확인 (Phase 2)</strong>: 성인 콘텐츠 접근 시 별도 인증 (본인인증·신용카드 인증 등)</li>
+      <li><strong>탈퇴</strong>: 30일 유예 후 계정 삭제, 유료 구독 자동 해지</li>
+    </ul>
+
+    <h3><span class="num">5.2</span>작가 페이지 (<code>/@{author}</code>)</h3>
+    <ul>
+      <li>프로필 헤더: 배너 · 아바타 · 자기소개 · 팔로워 수 · 구독자 수</li>
+      <li><strong>버튼</strong>: <code>팔로우 (무료)</code> · <code>구독하기 (월 ₩X,XXX)</code> · <code>팁 보내기</code></li>
+      <li>탭: <code>시리즈</code> · <code>개별 포스트</code> · <code>사랑방(구독자 전용, Phase 2)</code></li>
+      <li>정렬: 최신순 · 인기순</li>
+    </ul>
+
+    <h3><span class="num">5.3</span>작품 · 회차 관리</h3>
+    <h4>콘텐츠 단위</h4>
+    <ul>
+      <li><strong>시리즈(작품)</strong>: 여러 회차를 묶는 단위 (연재물)</li>
+      <li><strong>개별 포스트</strong>: 단독 게시물 (일상 그림·낙서·단편)</li>
+    </ul>
+    <h4>회차·포스트 필드</h4>
+    <ul>
+      <li>제목 · 설명 · 태그(장르 카테고리 중 선택 + 자유 태그 몇 개)</li>
+      <li>이미지 파일들 (드래그앤드롭, 순서 조정)</li>
+      <li><strong>뷰어 형식</strong>: <code>세로 스크롤</code> · <code>페이지 넘기기</code> 중 선택</li>
+      <li><strong>공개 범위</strong>: <code>전체 공개</code> · <code>구독자 전용</code></li>
+      <li>예약 발행 시간</li>
+      <li>성인 콘텐츠 여부 (Phase 2)</li>
+    </ul>
+    <p><strong>업로드 제약</strong>: 최대 파일 크기 회당 100MB 예상. 이미지 자동 리사이즈·WebP 변환은 백엔드에서 처리.</p>
+
+    <h3><span class="num">5.4</span>뷰어</h3>
+    <ul>
+      <li><strong>세로 스크롤 모드</strong>: 이미지들을 세로로 이어붙여 렌더링 (한국 웹툰 표준)</li>
+      <li><strong>페이지 모드</strong>: 좌·우 페이지 넘기기, 키보드 화살표 지원</li>
+      <li>공통 하단 액션: <code>이전 회차 / 다음 회차</code> · <code>좋아요</code> · <code>공유</code> · <code>팁 보내기</code> · <code>댓글</code></li>
+      <li>구독자 전용 회차는 잠금 상태 UI + <code>구독하기</code> CTA</li>
+    </ul>
+
+    <h3><span class="num">5.5</span>발견 (탐색)</h3>
+    <ul>
+      <li><strong>장르 카테고리 페이지</strong>: 카테고리별 인기·최신 리스트 (<code>/explore/romance</code> 등)</li>
+      <li><strong>검색</strong>: 제목·태그·작가명 통합. Phase 1은 단순 LIKE 검색, Phase 2에서 검색 엔진 도입 검토.</li>
+    </ul>
+
+    <h3><span class="num">5.6</span>랭킹</h3>
+    <ul>
+      <li><strong>집계 대상</strong>: 시리즈(작품) · 개별 포스트 · 작가 3종</li>
+      <li><strong>인기 점수 공식 (초안)</strong>:
+<pre><code>score = w1·조회수(7d) + w2·좋아요(7d) + w3·댓글(7d)
+      + w4·신규 팔로워(7d) + w5·신규 구독자(7d)
+가중치는 관리자 콘솔에서 튜닝 가능한 변수로 설계</code></pre>
+      </li>
+      <li><strong>어뷰징 방지</strong>: 동일 IP·계정 중복 조회 필터, 팔로워 없는 신규 계정 가중치 감소</li>
+      <li><strong>갱신 주기</strong>: 1시간마다 배치 재계산 (Phase 1). 실시간은 v2.</li>
+    </ul>
+
+    <h3><span class="num">5.7</span>팔로우 · 구독 · 후원</h3>
+    <h4>팔로우 (무료)</h4>
+    <ul>
+      <li>원클릭. 로그인 시 새 회차 알림 자동 구독</li>
+      <li>상호 팔로우 개념 없음(단방향)</li>
+    </ul>
+    <h4>구독 (유료 정기결제)</h4>
+    <ul>
+      <li>작가가 단일 월 구독료 설정 (예: ₩3,000 ~ ₩30,000 사이, 관리자 캡 있음)</li>
+      <li>결제 주기: 매월 결제일 = 최초 결제일 기준</li>
+      <li>결제 실패 시 3회 재시도 후 자동 해지</li>
+      <li>해지: 언제든 가능. 남은 기간까지는 접근 유지.</li>
+    </ul>
+    <h4>후원 (일회성 팁)</h4>
+    <ul>
+      <li>자유 금액 or 프리셋 (₩1,000 · ₩3,000 · ₩5,000 · ₩10,000)</li>
+      <li>짧은 메시지 첨부 가능 (공개·비공개 선택)</li>
+    </ul>
+    <div class="callout">
+      <strong>취소·환불</strong> — 구독은 결제 후 7일 이내 미시청 시 환불 가능, 팁은 원칙적으로 환불 불가(부정 결제 예외).
+    </div>
+
+    <h3><span class="num">5.8</span>커뮤니티</h3>
+    <ul>
+      <li><strong>회차·포스트 댓글</strong>: 대댓글 1단계, 이모지 반응·좋아요, 작가의 고정·답변 표시, 삭제·신고</li>
+      <li><strong>구독자 전용 사랑방 (Phase 2)</strong>: 작가 페이지 내 별도 게시판. 구독자만 글 작성.</li>
+    </ul>
+
+    <h3><span class="num">5.9</span>알림</h3>
+    <ul>
+      <li><strong>채널</strong>: 사이트 내 알림(종 아이콘) + 이메일</li>
+      <li><strong>트리거</strong>: 팔로우 중인 작가의 새 회차·포스트 · 내 회차·댓글에 댓글·좋아요·팁 · 새 구독자·팔로워 · 결제 성공·실패, 정산 완료</li>
+      <li><strong>설정</strong>: 종류별 on/off, 이메일 다이제스트(즉시·일간·주간)</li>
+    </ul>
+
+    <h3><span class="num">5.10</span>정산</h3>
+    <ul>
+      <li><strong>주기</strong>: 매월 1일 자동 집계 (전월 1일 ~ 말일 매출)</li>
+      <li><strong>차감</strong>: 결제 수수료(Stripe 실비) → 플랫폼 수수료(5~10%, 관리자 변수) → 환불 준비금</li>
+      <li><strong>최소 지급액</strong>: 입금 수수료를 상쇄하는 수준 (예: ₩10,000)</li>
+      <li><strong>지급일</strong>: 익월 15일 (은행 이체 or Stripe Connect Payout)</li>
+      <li><strong>작가 화면</strong>: 이번 달 예상 수익 · 이전 정산 내역 · 세금 관련 문서(간이 명세)</li>
+    </ul>
+
+    <h3><span class="num">5.11</span>모더레이션 · 저작권</h3>
+    <h4>신고 시스템 (사후 신고 기반)</h4>
+    <ul>
+      <li>신고 카테고리: 저작권 침해 · 성인 콘텐츠(SFW 정책 위반) · 폭력·혐오 · 스팸 · 기타</li>
+      <li>처리 SLA 목표: 72시간 이내 1차 응답</li>
+      <li>위반 시: 콘텐츠 비공개 → 작가에게 통보·이의제기 창구</li>
+      <li>누적 위반: 3회 이상 시 계정 정지 (관리자 재량)</li>
+      <li>저작권 신고 폼: DMCA 유사 표준 (신고자 신원, 원본 링크, 침해 링크, 서약)</li>
+    </ul>
+
+    <h3><span class="num">5.12</span>관리자 콘솔</h3>
+    <ul>
+      <li>신고 대기열, 처리 상태 관리</li>
+      <li>정산 실행·검토</li>
+      <li>작가·유저 검색 및 상태 변경</li>
+      <li>랭킹 가중치 · 수수료율 · 구독료 캡 등 변수 조정</li>
+      <li>통계 대시보드</li>
+    </ul>
+
+    <!-- 6 -->
+    <h2 class="section" id="s6"><span class="num">06</span>데이터 모델</h2>
+    <p>향후 백엔드 개발자가 그대로 구현 가능한 수준의 개체 목록.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 22%">엔티티</th>
+            <th>주요 필드</th>
+            <th style="width: 22%">관계</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>User</code></td><td>id, email, password_hash, oauth_providers[], display_name, avatar_url, banner_url, bio, created_at, is_adult_verified</td><td>← authors, subscriptions, tips_sent</td></tr>
+          <tr><td><code>AuthorProfile</code></td><td>user_id, subscription_price(KRW), payout_account_ref (Stripe Connect id), external_links[]</td><td>1:1 User</td></tr>
+          <tr><td><code>Series</code></td><td>id, author_id, title, description, cover_image, viewer_mode(scroll/page), status, created_at</td><td>→ Episodes</td></tr>
+          <tr><td><code>Episode</code></td><td>id, series_id, title, order, viewer_mode, is_subscriber_only, is_adult, published_at, view_count</td><td>→ Images</td></tr>
+          <tr><td><code>Post</code></td><td>id, author_id, title, description, viewer_mode, is_subscriber_only, is_adult, published_at, view_count</td><td>→ Images</td></tr>
+          <tr><td><code>Image</code></td><td>id, owner_type(episode/post), owner_id, url, order, width, height, file_size</td><td>저장은 오브젝트 스토리지</td></tr>
+          <tr><td><code>Tag</code></td><td>id, name, is_genre(bool)</td><td>M:N with Series/Post</td></tr>
+          <tr><td><code>Follow</code></td><td>follower_id, author_id, created_at</td><td></td></tr>
+          <tr><td><code>Subscription</code></td><td>id, subscriber_id, author_id, price, status(active/canceled/failed), started_at, current_period_end, stripe_subscription_id</td><td></td></tr>
+          <tr><td><code>Tip</code></td><td>id, sender_id, author_id, amount, message, message_public, created_at, stripe_payment_intent_id</td><td></td></tr>
+          <tr><td><code>Comment</code></td><td>id, target_type(episode/post/salon), target_id, author_id, parent_id, body, created_at, deleted_at</td><td></td></tr>
+          <tr><td><code>Reaction</code></td><td>id, target_type, target_id, user_id, type(like/heart/etc)</td><td></td></tr>
+          <tr><td><code>Notification</code></td><td>id, user_id, type, payload(json), read_at, created_at</td><td></td></tr>
+          <tr><td><code>Report</code></td><td>id, reporter_id, target_type, target_id, category, description, status, handled_by, handled_at</td><td></td></tr>
+          <tr><td><code>Payout</code></td><td>id, author_id, period, gross, platform_fee, stripe_fee, net, status, paid_at</td><td></td></tr>
+          <tr><td><code>RankingSnapshot</code></td><td>id, type(series/post/author), target_id, score, computed_at</td><td>시간별 배치</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 7 -->
+    <h2 class="section" id="s7"><span class="num">07</span>기술 요구사항</h2>
+
+    <h3><span class="num">7.1</span>프론트엔드</h3>
+    <ul>
+      <li><strong>프레임워크</strong>: Next.js (App Router, TypeScript) — SEO·이미지 최적화 필수</li>
+      <li><strong>UI</strong>: TailwindCSS + shadcn/ui 또는 유사 컴포넌트 라이브러리</li>
+      <li><strong>상태 관리</strong>: React Query(서버 상태) + Zustand(로컬 상태) 정도로 최소화</li>
+      <li><strong>i18n</strong>: <code>next-intl</code> 등으로 한/영 라우팅 분리 (<code>/ko/</code>, <code>/en/</code>)</li>
+      <li><strong>이미지</strong>: <code>next/image</code>, 뷰어에서는 lazy loading + prefetch 조합</li>
+    </ul>
+
+    <h3><span class="num">7.2</span>백엔드 (추후 구현)</h3>
+    <p>처음부터 프론트/백 분리 전제 → 프론트는 REST/tRPC/GraphQL API를 소비.</p>
+    <h4>후보 스택</h4>
+    <ul>
+      <li><strong>A. Next.js API Routes + Prisma + PostgreSQL</strong> — 프론트와 동일 저장소, 초기 속도 최우선</li>
+      <li><strong>B. NestJS + Prisma + PostgreSQL</strong> — 백엔드 팀이 별도로 붙을 때 확장성 확보</li>
+      <li><strong>C. Django + DRF</strong> — 관리자·모더레이션 UI를 Django Admin에 얹기 가능</li>
+    </ul>
+    <div class="callout">
+      <strong>백엔드 통합 지점을 미리 설계</strong> — 인증·저장·결제 각각의 이후 통합 지점을 프론트 코드에서 인터페이스 형태로 명확히 정의해 두어, 백엔드 구현 시 어댑터만 갈아끼움.
+    </div>
+<pre><code>interface AuthProvider { signIn(...): Promise&lt;Session&gt;; ... }
+interface StorageProvider { uploadImage(file): Promise&lt;ImageRef&gt;; ... }
+interface PaymentProvider { createSubscription(...): ...; createTip(...): ...; }</code></pre>
+    <p>초기 개발 시에는 모두 로컬 목(mock) 구현으로 시작 → Phase 1 후반에 실제 서비스로 교체.</p>
+
+    <h3><span class="num">7.3</span>외부 서비스</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th style="width: 25%">영역</th><th>후보</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>인증</td><td>NextAuth.js + Google · Apple OAuth</td></tr>
+          <tr><td>결제</td><td>Stripe (Payment Intents, Subscriptions, Connect)</td></tr>
+          <tr><td>스토리지</td><td>Cloudflare R2 or AWS S3 (이미지)</td></tr>
+          <tr><td>CDN</td><td>Cloudflare</td></tr>
+          <tr><td>이메일</td><td>Resend or Postmark</td></tr>
+          <tr><td>검색</td><td>Postgres full-text → 이후 Meilisearch · Typesense</td></tr>
+          <tr><td>모니터링</td><td>Sentry + PostHog(제품 분석)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3><span class="num">7.4</span>인프라</h3>
+    <ul>
+      <li><strong>DB</strong>: PostgreSQL (관리형 — Supabase · Neon · AWS RDS)</li>
+      <li><strong>배포</strong>: Vercel (프론트) + 별도 백엔드 서버(백엔드 도입 시)</li>
+      <li><strong>환경 분리</strong>: dev · staging · prod</li>
+    </ul>
+
+    <!-- 8 -->
+    <h2 class="section" id="s8"><span class="num">08</span>비기능 요구사항</h2>
+    <ul>
+      <li><strong>성능</strong>: 메인 페이지 LCP &lt; 2.5s(모바일) · 뷰어 첫 이미지 표시 &lt; 1.5s · API p95 &lt; 300ms</li>
+      <li><strong>접근성</strong>: WCAG 2.1 AA 지향 (뷰어 키보드 조작, 스크린리더 alt 필수)</li>
+      <li><strong>SEO</strong>: 작품·회차 페이지 서버 렌더링, OG 태그, sitemap.xml</li>
+      <li><strong>보안</strong>: HTTPS 강제, XSS·CSRF 대응, 결제 정보는 Stripe에 직접(자체 저장 금지)</li>
+      <li><strong>로그·감사</strong>: 결제·정산·모더레이션 액션은 감사 로그 필수</li>
+    </ul>
+
+    <!-- 9 -->
+    <h2 class="section" id="s9"><span class="num">09</span>정책</h2>
+
+    <h3><span class="num">9.1</span>콘텐츠 정책 (Phase 1)</h3>
+    <ul>
+      <li>SFW 원칙, 성인 콘텐츠 업로드 금지</li>
+      <li>실존 인물 명예훼손 · 아동 관련 부적절 표현 · 명확한 저작권 침해 즉시 삭제</li>
+    </ul>
+
+    <h3><span class="num">9.2</span>성인 콘텐츠 (Phase 2)</h3>
+    <ul>
+      <li>별도 "성인관" 개설, 연령 인증 후 접근</li>
+      <li>Stripe 정책 검토 필수 — 필요 시 성인 전용 결제사(CCBill 등) 분리</li>
+    </ul>
+
+    <h3><span class="num">9.3</span>환불</h3>
+    <ul>
+      <li>구독: 최초 결제 후 7일 이내, 회차 미열람 시 환불</li>
+      <li>팁: 원칙적으로 환불 불가, 부정 결제 확인 시 예외</li>
+    </ul>
+
+    <h3><span class="num">9.4</span>저작권</h3>
+    <ul>
+      <li>신고 폼 접수 후 72시간 내 1차 검토</li>
+      <li>반복 위반자 3-strike 정책</li>
+    </ul>
+
+    <!-- 10 -->
+    <h2 class="section" id="s10"><span class="num">10</span>로드맵</h2>
+    <div class="phase-grid">
+      <div class="phase">
+        <div class="phase-label">Phase 1 · MVP</div>
+        <div class="phase-title">감상 + 수익화 통합</div>
+        <ul>
+          <li>계정·인증 (이메일 + Google·Apple)</li>
+          <li>작가 페이지</li>
+          <li>시리즈·개별 포스트 업로드 (세로스크롤·페이지 뷰어)</li>
+          <li>무료 팔로우</li>
+          <li>유료 구독 (단일 가격) + 일회성 팁</li>
+          <li>랭킹 (인기 작품·포스트 TOP 10, 최신작 TOP 3)</li>
+          <li>장르 카테고리 + 검색</li>
+          <li>회차 댓글</li>
+          <li>사이트 내 알림 + 이메일</li>
+          <li>월 1회 정산</li>
+          <li>신고 폼 + 관리자 콘솔 기본형</li>
+          <li>한국어 UI</li>
+        </ul>
+      </div>
+      <div class="phase">
+        <div class="phase-label">Phase 2 · Expansion</div>
+        <div class="phase-title">커뮤니티 · 성인 · 글로벌</div>
+        <ul>
+          <li>영어 UI (i18n)</li>
+          <li>구독자 전용 사랑방</li>
+          <li>성인 콘텐츠 별도 구독업 + 연령 인증</li>
+          <li>검색 엔진 도입, 추천 개선</li>
+          <li>웹 푸시 알림</li>
+          <li>정산 자동화 고도화 (Stripe Connect Express)</li>
+        </ul>
+      </div>
+    </div>
+    <p style="font-size: 13px; color: var(--muted); margin-top: 10px;">
+      <strong style="color: var(--ink-2);">Phase 3 (참고, 미확정)</strong> — 모바일 앱 · 다국어(일·중·서) 확장 · AI 자동 모더레이션 필터
+    </p>
+
+    <!-- 11 -->
+    <h2 class="section" id="s11"><span class="num">11</span>오픈 이슈</h2>
+    <ul class="checklist">
+      <li>서비스명·도메인 미정 <em style="color: var(--muted); font-size: 12px;">(현재 코드네임: 짓다 · JITDA)</em></li>
+      <li>최신작 TOP 3의 집계 대상 정의 — 시리즈 · 포스트 · 혼합</li>
+      <li>플랫폼 수수료 최종 확정 (5~10% 범위 내)</li>
+      <li>Stripe 심사 통과 여부 — 사업자·계좌 준비 필요</li>
+      <li>사업자 형태(개인·법인) 및 세금 처리 방식</li>
+      <li>관리자 콘솔의 상세 화면 요구사항</li>
+      <li>각 KPI의 초기 목표치 수치</li>
+    </ul>
+
+    <footer class="doc-footer">
+      <div>© 2026 짓다 · JITDA · <span class="status-badge">DRAFT v0.1</span></div>
+      <div>PRD · Product Requirements Document</div>
+    </footer>
+  </article>
+</div>
+
+<script>
+  var toggle = document.getElementById('themeToggle');
+  toggle.addEventListener('click', function () {
+    var root = document.documentElement;
+    var curr = root.getAttribute('data-theme');
+    var systemDark = matchMedia('(prefers-color-scheme: dark)').matches;
+    var isDark = curr === 'dark' || (!curr && systemDark);
+    root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  });
+
+  // smooth scroll for TOC
+  document.querySelectorAll('.toc a').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      var id = a.getAttribute('href');
+      var el = document.querySelector(id);
+      if (el) {
+        e.preventDefault();
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.replaceState(null, '', id);
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

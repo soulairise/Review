@@ -1,0 +1,2445 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>API 명세 — 짓다 (JITDA)</title>
+<style>
+  :root {
+    --font-sans: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Segoe UI", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+    --paper: #f4f3f0;
+    --surface: #ffffff;
+    --surface-2: #ecebe6;
+    --ink: #17141a;
+    --ink-2: #3f3946;
+    --muted: #7a7480;
+    --line: #e6e2dd;
+    --line-2: #d8d3cc;
+    --accent: #ee2c56;
+    --gold: #c78e28;
+
+    --m-get: #2b7fa0;
+    --m-post: #2f8f5d;
+    --m-patch: #c78e28;
+    --m-delete: #c94848;
+
+    --radius: 6px;
+    --radius-lg: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0d0c10;
+      --surface: #17151b;
+      --surface-2: #1f1c25;
+      --ink: #f0edf1;
+      --ink-2: #cac4d0;
+      --muted: #8b8492;
+      --line: #24222a;
+      --line-2: #33303a;
+      --accent: #ff5573;
+      --gold: #e8b13a;
+
+      --m-get: #5aaecc;
+      --m-post: #4bb87a;
+      --m-patch: #e8b13a;
+      --m-delete: #e07070;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0d0c10;
+    --surface: #17151b;
+    --surface-2: #1f1c25;
+    --ink: #f0edf1;
+    --ink-2: #cac4d0;
+    --muted: #8b8492;
+    --line: #24222a;
+    --line-2: #33303a;
+    --accent: #ff5573;
+    --gold: #e8b13a;
+    --m-get: #5aaecc;
+    --m-post: #4bb87a;
+    --m-patch: #e8b13a;
+    --m-delete: #e07070;
+  }
+  :root[data-theme="light"] {
+    --paper: #f4f3f0;
+    --surface: #ffffff;
+    --surface-2: #ecebe6;
+    --ink: #17141a;
+    --ink-2: #3f3946;
+    --muted: #7a7480;
+    --line: #e6e2dd;
+    --line-2: #d8d3cc;
+    --accent: #ee2c56;
+    --gold: #c78e28;
+    --m-get: #2b7fa0;
+    --m-post: #2f8f5d;
+    --m-patch: #c78e28;
+    --m-delete: #c94848;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { min-height: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font-family: inherit; font-size: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  h1, h2, h3, h4, h5 { margin: 0; font-weight: 700; text-wrap: balance; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .page {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 60px;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 40px 32px 80px;
+  }
+  @media (max-width: 960px) {
+    .page { grid-template-columns: 1fr; gap: 24px; padding: 24px 18px 60px; }
+  }
+
+  /* TOC */
+  .toc {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    padding-right: 8px;
+    font-size: 13px;
+    scrollbar-width: thin;
+  }
+  @media (max-width: 960px) {
+    .toc {
+      position: static;
+      max-height: none;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      background: var(--surface);
+    }
+  }
+  .toc-title {
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .toc ol { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 2px; }
+  .toc a { color: var(--ink-2); display: flex; gap: 10px; padding: 4px 0; }
+  .toc a:hover { color: var(--accent); text-decoration: none; }
+  .toc-num {
+    color: var(--muted); font-variant-numeric: tabular-nums; font-weight: 600;
+    flex-shrink: 0; width: 22px;
+  }
+
+  /* Doc */
+  .doc { max-width: 820px; min-width: 0; }
+
+  .doc-header { border-bottom: 1px solid var(--line); padding-bottom: 28px; margin-bottom: 40px; }
+  .doc-brand { display: flex; align-items: baseline; gap: 10px; margin-bottom: 20px; }
+  .brand-mark {
+    font-size: 20px; font-weight: 900; letter-spacing: -0.03em; color: var(--ink);
+  }
+  .brand-mark::after {
+    content: ""; display: inline-block; width: 6px; height: 6px; background: var(--accent);
+    border-radius: 50%; margin-left: 3px; transform: translateY(-1px);
+  }
+  .brand-sub {
+    font-size: 10px; color: var(--muted); letter-spacing: 0.24em;
+    text-transform: uppercase; font-weight: 700;
+  }
+  .doc-eyebrow {
+    font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--accent); font-weight: 700; margin-bottom: 12px;
+  }
+  h1.doc-title {
+    font-size: 36px; letter-spacing: -0.035em; line-height: 1.05;
+    margin-bottom: 18px; font-weight: 800;
+  }
+  @media (max-width: 640px) { h1.doc-title { font-size: 28px; } }
+  .doc-lede { color: var(--ink-2); font-size: 16px; line-height: 1.55; max-width: 60ch; margin-bottom: 24px; }
+  .meta-grid {
+    display: grid; grid-template-columns: repeat(4, auto); gap: 6px 28px;
+    font-size: 13px; color: var(--muted);
+  }
+  @media (max-width: 560px) { .meta-grid { grid-template-columns: repeat(2, auto); } }
+  .meta-grid dt {
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    font-weight: 700; color: var(--muted); margin: 0;
+  }
+  .meta-grid dd {
+    color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; margin: 0;
+  }
+  .status-badge {
+    display: inline-block; padding: 2px 8px; background: var(--accent); color: white;
+    border-radius: 3px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+  }
+
+  h2.section {
+    font-size: 24px; letter-spacing: -0.02em; line-height: 1.15;
+    margin-top: 52px; margin-bottom: 20px; padding-top: 12px;
+    display: flex; align-items: baseline; gap: 14px; scroll-margin-top: 24px;
+  }
+  h2.section .num {
+    color: var(--muted); font-size: 14px; font-weight: 700; letter-spacing: 0.08em;
+    font-variant-numeric: tabular-nums; flex-shrink: 0;
+  }
+  h3.subhead {
+    font-size: 15px; margin-top: 26px; margin-bottom: 8px; color: var(--ink);
+    letter-spacing: 0.02em; font-weight: 700; text-transform: uppercase;
+    font-size: 11px; letter-spacing: 0.2em; color: var(--muted);
+  }
+
+  p { margin: 0 0 14px; }
+  ul { padding-left: 22px; margin: 0 0 16px; }
+  li { margin-bottom: 4px; }
+  strong { color: var(--ink); font-weight: 700; }
+  code {
+    font-family: var(--font-mono); padding: 1px 6px; background: var(--surface-2);
+    border-radius: 3px; font-size: 0.87em; color: var(--ink);
+  }
+  pre {
+    background: var(--surface); border: 1px solid var(--line);
+    padding: 14px 16px; border-radius: var(--radius);
+    overflow-x: auto; font-family: var(--font-mono);
+    font-size: 12.5px; line-height: 1.55; margin: 10px 0 16px; color: var(--ink-2);
+  }
+  pre code { background: none; padding: 0; font-size: inherit; color: inherit; }
+  pre .k { color: var(--accent); }
+  pre .s { color: var(--m-post); }
+  pre .n { color: var(--m-patch); }
+  pre .c { color: var(--muted); font-style: italic; }
+
+  .table-wrap { overflow-x: auto; margin: 12px 0 20px; border: 1px solid var(--line); border-radius: var(--radius); }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; background: var(--surface); }
+  th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  th {
+    font-weight: 700; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--muted); background: var(--paper);
+  }
+  td code { font-size: 11.5px; }
+
+  .callout {
+    border-left: 3px solid var(--accent); padding: 4px 0 4px 14px;
+    margin: 16px 0; color: var(--ink-2); font-size: 14px; line-height: 1.55;
+  }
+  .callout strong { color: var(--accent); }
+
+  /* Endpoint */
+  .endpoint {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px 4px;
+    margin-bottom: 20px;
+    scroll-margin-top: 20px;
+  }
+  .endpoint-head {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding-bottom: 10px; margin-bottom: 6px;
+  }
+  .method {
+    display: inline-block; padding: 3px 8px; border-radius: 4px;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.06em; color: white; min-width: 52px; text-align: center;
+    flex-shrink: 0;
+  }
+  .method-get    { background: var(--m-get); }
+  .method-post   { background: var(--m-post); }
+  .method-patch  { background: var(--m-patch); }
+  .method-delete { background: var(--m-delete); }
+  .endpoint-path {
+    font-family: var(--font-mono); font-size: 13.5px; color: var(--ink);
+    background: none; padding: 0; border: 0;
+    word-break: break-all;
+  }
+  .auth-tag {
+    margin-left: auto; padding: 2px 8px; border-radius: 3px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+    font-family: var(--font-mono);
+  }
+  .auth-public { background: var(--surface-2); color: var(--muted); }
+  .auth-user   { background: rgba(43, 127, 160, 0.12); color: var(--m-get); }
+  .auth-author { background: rgba(199, 142, 40, 0.15); color: var(--gold); }
+  .auth-admin  { background: rgba(201, 72, 72, 0.12); color: var(--m-delete); }
+
+  .endpoint-desc { color: var(--ink-2); font-size: 14px; margin: 0 0 12px; line-height: 1.55; }
+  .params { margin-bottom: 10px; }
+  .params .subhead { margin-top: 8px; }
+
+  .req-res {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+    padding-bottom: 14px;
+  }
+  @media (max-width: 720px) { .req-res { grid-template-columns: 1fr; } }
+  .req-res pre { margin: 0; }
+
+  .block-label {
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    font-weight: 700; color: var(--muted); margin-bottom: 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .status-pill {
+    display: inline-block; padding: 1px 6px; border-radius: 3px;
+    font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+  }
+  .status-200 { background: rgba(47, 143, 93, 0.15); color: var(--m-post); }
+  .status-201 { background: rgba(47, 143, 93, 0.15); color: var(--m-post); }
+  .status-204 { background: rgba(47, 143, 93, 0.15); color: var(--m-post); }
+  .status-4xx { background: rgba(201, 72, 72, 0.12); color: var(--m-delete); }
+
+  .doc-footer {
+    margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--line);
+    color: var(--muted); font-size: 12.5px;
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  }
+  .theme-toggle {
+    position: fixed; top: 20px; right: 20px; height: 36px; width: 36px;
+    border-radius: 999px; display: flex; align-items: center; justify-content: center;
+    color: var(--muted); border: 1px solid var(--line); background: var(--surface);
+    transition: border-color 0.15s, color 0.15s; z-index: 40;
+  }
+  .theme-toggle:hover { border-color: var(--ink-2); color: var(--ink); }
+  .theme-toggle svg { width: 15px; height: 15px; }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration: 0ms !important; } }
+  ::selection { background: var(--accent); color: white; }
+</style>
+
+<button class="theme-toggle" id="themeToggle" aria-label="테마 전환" title="테마 전환">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+</button>
+
+<div class="page">
+  <aside class="toc" aria-label="목차">
+    <div class="toc-title">Contents</div>
+    <ol>
+      <li><a href="#s1"><span class="toc-num">01</span>공통 규약</a></li>
+      <li><a href="#s2"><span class="toc-num">02</span>공통 스키마</a></li>
+      <li><a href="#s3"><span class="toc-num">03</span>인증 (Auth)</a></li>
+      <li><a href="#s4"><span class="toc-num">04</span>사용자 (Users)</a></li>
+      <li><a href="#s5"><span class="toc-num">05</span>작가 (Authors)</a></li>
+      <li><a href="#s6"><span class="toc-num">06</span>시리즈·회차</a></li>
+      <li><a href="#s7"><span class="toc-num">07</span>포스트</a></li>
+      <li><a href="#s8"><span class="toc-num">08</span>업로드</a></li>
+      <li><a href="#s9"><span class="toc-num">09</span>탐색·랭킹</a></li>
+      <li><a href="#s10"><span class="toc-num">10</span>팔로우·구독·후원</a></li>
+      <li><a href="#s11"><span class="toc-num">11</span>댓글·반응</a></li>
+      <li><a href="#s12"><span class="toc-num">12</span>알림</a></li>
+      <li><a href="#s13"><span class="toc-num">13</span>정산</a></li>
+      <li><a href="#s14"><span class="toc-num">14</span>신고·관리자</a></li>
+      <li><a href="#s15"><span class="toc-num">15</span>Webhooks</a></li>
+    </ol>
+  </aside>
+
+  <article class="doc">
+    <header class="doc-header">
+      <div class="doc-brand">
+        <span class="brand-mark">짓다</span>
+        <span class="brand-sub">JITDA · API</span>
+      </div>
+      <div class="doc-eyebrow">API Specification</div>
+      <h1 class="doc-title">엔드포인트 & 요청/응답 명세</h1>
+      <p class="doc-lede">
+        PRD v0.1을 기반으로 한 REST API 계약. 프론트엔드와 백엔드는 이 문서를 단일 진실 원본(single source of truth)으로 삼는다.
+      </p>
+      <dl class="meta-grid">
+        <dt>버전</dt><dt>기준 PRD</dt><dt>상태</dt><dt>범위</dt>
+        <dd>0.1 (초안)</dd>
+        <dd>PRD v0.1</dd>
+        <dd><span class="status-badge">DRAFT</span></dd>
+        <dd>Phase 1 · 2</dd>
+      </dl>
+    </header>
+
+    <!-- 1 -->
+    <h2 class="section" id="s1"><span class="num">01</span>공통 규약</h2>
+
+    <h3 class="subhead">Base URL & 버전</h3>
+    <ul>
+      <li>Prefix: <code>/api/v1</code></li>
+      <li>Production: <code>https://api.jitda.com/api/v1</code></li>
+      <li>Staging: <code>https://api.staging.jitda.com/api/v1</code></li>
+      <li>Local: <code>http://localhost:3000/api/v1</code></li>
+    </ul>
+
+    <h3 class="subhead">인증 헤더</h3>
+    <ul>
+      <li>모든 인증 필요 엔드포인트는 <code>Authorization: Bearer &lt;access_token&gt;</code> 헤더 필수</li>
+      <li>Access token 만료: 1시간. Refresh token 만료: 30일.</li>
+      <li>Access token은 JWT (payload에 <code>sub</code>, <code>role</code>, <code>exp</code> 포함)</li>
+    </ul>
+
+    <h3 class="subhead">Content-Type & 언어</h3>
+    <ul>
+      <li>요청·응답 모두 <code>application/json; charset=utf-8</code> (업로드 제외)</li>
+      <li>언어 협상: <code>Accept-Language: ko</code> / <code>en</code> (기본 <code>ko</code>) — 에러 메시지 다국어화용</li>
+    </ul>
+
+    <h3 class="subhead">ID 규칙</h3>
+    <p>모든 리소스 ID는 <strong>접두어가 있는 문자열</strong>. 예: <code>usr_2fN1a</code>, <code>srs_v7QeK</code>, <code>epi_8mBnc</code>.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>접두어</th><th>리소스</th><th>접두어</th><th>리소스</th></tr></thead>
+      <tbody>
+        <tr><td><code>usr_</code></td><td>User</td><td><code>sub_</code></td><td>Subscription</td></tr>
+        <tr><td><code>srs_</code></td><td>Series</td><td><code>tip_</code></td><td>Tip</td></tr>
+        <tr><td><code>epi_</code></td><td>Episode</td><td><code>cmt_</code></td><td>Comment</td></tr>
+        <tr><td><code>pst_</code></td><td>Post</td><td><code>ntf_</code></td><td>Notification</td></tr>
+        <tr><td><code>img_</code></td><td>Image</td><td><code>rep_</code></td><td>Report</td></tr>
+        <tr><td><code>tag_</code></td><td>Tag</td><td><code>pyt_</code></td><td>Payout</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3 class="subhead">타임스탬프 · 통화</h3>
+    <ul>
+      <li>모든 시각은 ISO 8601 UTC 문자열 — <code>"2026-07-15T14:32:10Z"</code></li>
+      <li>금액은 정수 (최소 단위). KRW의 경우 <strong>원 단위 정수</strong> — <code>4900</code> = ₩4,900. USD는 센트 — <code>499</code> = $4.99</li>
+      <li>통화 코드는 별도 필드 <code>currency: "KRW" | "USD"</code></li>
+    </ul>
+
+    <h3 class="subhead">페이지네이션 (커서 기반)</h3>
+    <p>목록 엔드포인트는 <strong>cursor pagination</strong> 사용. 쿼리 파라미터:</p>
+    <ul>
+      <li><code>limit</code>: 페이지 크기 (기본 20, 최대 100)</li>
+      <li><code>cursor</code>: 이전 응답의 <code>next_cursor</code> 값</li>
+      <li><code>sort</code>: 엔드포인트별로 정의 (예: <code>latest</code>, <code>popular</code>)</li>
+    </ul>
+    <p>응답 구조:</p>
+<pre><code>{
+  "items": [ ... ],
+  "next_cursor": "eyJpZCI6InNyc19hYmMifQ==",
+  "has_more": true
+}</code></pre>
+
+    <h3 class="subhead">에러 응답 형식</h3>
+    <p>모든 4xx / 5xx 응답 본문:</p>
+<pre><code>{
+  "error": {
+    "code": "invalid_credentials",
+    "message": "이메일 또는 비밀번호가 올바르지 않습니다.",
+    "details": { "field": "password" }   // 선택
+  }
+}</code></pre>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>HTTP</th><th>대표 코드</th><th>의미</th></tr></thead>
+      <tbody>
+        <tr><td>400</td><td><code>invalid_request</code></td><td>요청 본문·파라미터 유효성 실패</td></tr>
+        <tr><td>401</td><td><code>unauthorized</code></td><td>토큰 없음/만료</td></tr>
+        <tr><td>403</td><td><code>forbidden</code></td><td>권한 없음(구독 안 함, 관리자 아님 등)</td></tr>
+        <tr><td>404</td><td><code>not_found</code></td><td>리소스 없음</td></tr>
+        <tr><td>409</td><td><code>conflict</code></td><td>중복(이메일 사용 중, 이미 팔로우 등)</td></tr>
+        <tr><td>422</td><td><code>validation_failed</code></td><td>비즈니스 룰 위반</td></tr>
+        <tr><td>429</td><td><code>rate_limited</code></td><td>레이트 리밋 초과</td></tr>
+        <tr><td>500</td><td><code>internal_error</code></td><td>서버 오류</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3 class="subhead">인증 계층 (Auth 태그)</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>태그</th><th>의미</th></tr></thead>
+      <tbody>
+        <tr><td><span class="auth-tag auth-public">PUBLIC</span></td><td>로그인 없이 접근 가능</td></tr>
+        <tr><td><span class="auth-tag auth-user">USER</span></td><td>로그인 필수(모든 로그인 유저)</td></tr>
+        <tr><td><span class="auth-tag auth-author">AUTHOR</span></td><td>본인 자원(내 시리즈·정산 등)만 접근 가능</td></tr>
+        <tr><td><span class="auth-tag auth-admin">ADMIN</span></td><td>관리자 role 필수</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3 class="subhead">레이트 리밋 (초안)</h3>
+    <ul>
+      <li>미인증: IP당 60 req/min</li>
+      <li>인증: 유저당 300 req/min</li>
+      <li>업로드: 유저당 10 req/min</li>
+      <li>초과 시 429 반환 + <code>Retry-After</code> 헤더</li>
+    </ul>
+
+    <!-- 2 -->
+    <h2 class="section" id="s2"><span class="num">02</span>공통 스키마</h2>
+
+    <h3 class="subhead">User (public view)</h3>
+<pre><code>{
+  "id": "usr_2fN1a",
+  "handle": "kimdalbit",
+  "display_name": "김달빛",
+  "avatar_url": "https://cdn.jitda.com/avatars/usr_2fN1a.webp",
+  "bio": "달빛 그리는 사람.",
+  "is_author": true,
+  "created_at": "2026-01-05T10:00:00Z"
+}</code></pre>
+
+    <h3 class="subhead">AuthorPublic (작가 프로필 상세)</h3>
+<pre><code>{
+  "id": "usr_2fN1a",
+  "handle": "kimdalbit",
+  "display_name": "김달빛",
+  "avatar_url": "https://cdn.jitda.com/avatars/usr_2fN1a.webp",
+  "banner_url": "https://cdn.jitda.com/banners/usr_2fN1a.webp",
+  "bio": "달빛 그리는 사람.",
+  "external_links": [
+    { "label": "Twitter", "url": "https://twitter.com/kimdalbit" }
+  ],
+  "subscription": {
+    "enabled": true,
+    "price": 4900,
+    "currency": "KRW"
+  },
+  "stats": {
+    "followers": 12480,
+    "subscribers": 842,
+    "series_count": 3,
+    "post_count": 47
+  },
+  "created_at": "2026-01-05T10:00:00Z"
+}</code></pre>
+
+    <h3 class="subhead">Series</h3>
+<pre><code>{
+  "id": "srs_v7QeK",
+  "author": { /* User */ },
+  "title": "달빛 아래 우리",
+  "description": "고요한 마을에 온 낯선 소년, 그리고 나.",
+  "cover_image": {
+    "url": "https://cdn.jitda.com/covers/srs_v7QeK.webp",
+    "width": 800, "height": 1067
+  },
+  "viewer_mode_default": "scroll",         // "scroll" | "page"
+  "status": "ongoing",                     // "ongoing" | "completed" | "hiatus"
+  "genres": ["romance"],
+  "tags": ["#첫사랑", "#시골"],
+  "episode_count": 42,
+  "stats": {
+    "views_total": 1_234_567,
+    "likes_total": 84_230,
+    "subscribers_only_count": 3
+  },
+  "is_adult": false,
+  "created_at": "2026-01-10T09:00:00Z",
+  "updated_at": "2026-07-14T22:00:00Z"
+}</code></pre>
+
+    <h3 class="subhead">Episode</h3>
+<pre><code>{
+  "id": "epi_8mBnc",
+  "series_id": "srs_v7QeK",
+  "title": "42화 · 여름의 시작",
+  "order": 42,
+  "viewer_mode": "scroll",
+  "is_subscriber_only": false,
+  "is_adult": false,
+  "images": [
+    { "id": "img_...", "url": "https://cdn.jitda.com/...", "order": 1,
+      "width": 1080, "height": 4320, "file_size": 842123 }
+  ],
+  "stats": { "views": 24581, "likes": 1420, "comments": 89 },
+  "prev_episode_id": "epi_...",
+  "next_episode_id": null,
+  "published_at": "2026-07-15T00:00:00Z",
+  "created_at": "2026-07-14T22:00:00Z"
+}</code></pre>
+
+    <h3 class="subhead">Post (개별 포스트)</h3>
+<pre><code>{
+  "id": "pst_9kAtb",
+  "author": { /* User */ },
+  "title": "오늘의 낙서 #47",
+  "description": "지하철에서 그린 것.",
+  "viewer_mode": "scroll",
+  "is_subscriber_only": false,
+  "is_adult": false,
+  "images": [ /* Image[] */ ],
+  "genres": ["daily"],
+  "tags": ["#낙서"],
+  "stats": { "views": 218_400, "likes": 12_400, "comments": 214 },
+  "published_at": "2026-07-12T14:00:00Z",
+  "created_at": "2026-07-12T13:58:00Z"
+}</code></pre>
+
+    <h3 class="subhead">Comment</h3>
+<pre><code>{
+  "id": "cmt_x1z2y",
+  "target_type": "episode",                // "episode" | "post" | "salon"
+  "target_id": "epi_8mBnc",
+  "parent_id": null,                       // 대댓글 시 부모 comment id
+  "author": { /* User */ },
+  "body": "이번 화 미쳤어요...",
+  "is_pinned": false,
+  "reactions": { "like": 34, "heart": 12 },
+  "replies_count": 3,
+  "created_at": "2026-07-15T02:14:00Z",
+  "deleted_at": null
+}</code></pre>
+
+    <h3 class="subhead">Subscription</h3>
+<pre><code>{
+  "id": "sub_p3Q4r",
+  "subscriber_id": "usr_...",
+  "author": { /* User */ },
+  "price": 4900,
+  "currency": "KRW",
+  "status": "active",                      // active | canceled | past_due | failed
+  "started_at": "2026-05-01T09:12:00Z",
+  "current_period_start": "2026-07-01T09:12:00Z",
+  "current_period_end": "2026-08-01T09:12:00Z",
+  "canceled_at": null,
+  "stripe_subscription_id": "sub_xxxxxx"   // 서버 내부 참조용, 클라 노출 금지
+}</code></pre>
+
+    <h3 class="subhead">Tip</h3>
+<pre><code>{
+  "id": "tip_a4z9k",
+  "sender": { /* User */ },
+  "author_id": "usr_2fN1a",
+  "amount": 5000,
+  "currency": "KRW",
+  "message": "잘 보고 있어요!",
+  "message_public": true,
+  "created_at": "2026-07-15T04:00:00Z"
+}</code></pre>
+
+    <h3 class="subhead">Notification</h3>
+<pre><code>{
+  "id": "ntf_h8n2m",
+  "type": "new_episode",                   // 아래 표 참고
+  "payload": {
+    "series_id": "srs_v7QeK",
+    "episode_id": "epi_8mBnc",
+    "author": { "handle": "kimdalbit", "display_name": "김달빛" }
+  },
+  "read_at": null,
+  "created_at": "2026-07-15T00:00:05Z"
+}</code></pre>
+    <div class="table-wrap"><table>
+      <thead><tr><th>type</th><th>발생 조건</th></tr></thead>
+      <tbody>
+        <tr><td><code>new_episode</code></td><td>팔로우한 작가의 새 회차·포스트</td></tr>
+        <tr><td><code>new_comment</code></td><td>내 회차·포스트에 새 댓글</td></tr>
+        <tr><td><code>comment_reply</code></td><td>내 댓글에 대댓글</td></tr>
+        <tr><td><code>new_follower</code></td><td>내가 팔로우 대상이 됨</td></tr>
+        <tr><td><code>new_subscriber</code></td><td>내 유료 구독자 증가</td></tr>
+        <tr><td><code>tip_received</code></td><td>내가 팁 수신</td></tr>
+        <tr><td><code>payment_failed</code></td><td>내 구독 결제 실패</td></tr>
+        <tr><td><code>payout_completed</code></td><td>월 정산 지급 완료</td></tr>
+        <tr><td><code>report_resolved</code></td><td>내가 신고한 건 처리 완료</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3 class="subhead">Report</h3>
+<pre><code>{
+  "id": "rep_r5t6y",
+  "reporter_id": "usr_...",
+  "target_type": "episode",                // "episode" | "post" | "comment" | "user"
+  "target_id": "epi_8mBnc",
+  "category": "copyright",                 // copyright | adult | violence | spam | other
+  "description": "이 이미지는 제 작품입니다. 원본 링크: ...",
+  "status": "pending",                     // pending | investigating | resolved | rejected
+  "handled_by": null,
+  "handled_at": null,
+  "created_at": "2026-07-15T05:20:00Z"
+}</code></pre>
+
+    <h3 class="subhead">Payout</h3>
+<pre><code>{
+  "id": "pyt_x1y2z",
+  "author_id": "usr_2fN1a",
+  "period": "2026-06",                     // YYYY-MM (전월)
+  "gross": 4_200_000,
+  "platform_fee": 336_000,                 // 8%
+  "stripe_fee": 145_600,
+  "refund_reserve": 60_000,
+  "net": 3_658_400,
+  "currency": "KRW",
+  "status": "paid",                        // pending | processing | paid | failed
+  "paid_at": "2026-07-15T09:00:00Z",
+  "created_at": "2026-07-01T00:00:00Z"
+}</code></pre>
+
+    <h3 class="subhead">PaginatedList&lt;T&gt;</h3>
+<pre><code>{
+  "items": [ /* T[] */ ],
+  "next_cursor": "eyJpZCI6InNyc19hYmMifQ==",
+  "has_more": true
+}</code></pre>
+
+    <!-- 3 AUTH -->
+    <h2 class="section" id="s3"><span class="num">03</span>인증 (Auth)</h2>
+
+    <div class="endpoint" id="ep-signup">
+      <div class="endpoint-head">
+        <span class="method method-post">POST</span>
+        <code class="endpoint-path">/api/v1/auth/signup</code>
+        <span class="auth-tag auth-public">PUBLIC</span>
+      </div>
+      <p class="endpoint-desc">이메일로 계정 생성. 이메일 인증 링크 발송.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "email": "user@example.com",
+  "password": "Str0ng!Pass",
+  "display_name": "김달빛",
+  "handle": "kimdalbit"
+}</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-201">201 Created</span></div>
+<pre><code>{
+  "user": { /* User */ },
+  "email_verification_sent": true
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-login">
+      <div class="endpoint-head">
+        <span class="method method-post">POST</span>
+        <code class="endpoint-path">/api/v1/auth/login</code>
+        <span class="auth-tag auth-public">PUBLIC</span>
+      </div>
+      <p class="endpoint-desc">이메일·비밀번호 로그인.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "email": "user@example.com",
+  "password": "Str0ng!Pass"
+}</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "access_token": "eyJhbGciOi...",
+  "refresh_token": "eyJhbGciOi...",
+  "expires_in": 3600,
+  "token_type": "Bearer",
+  "user": { /* User */ }
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-refresh">
+      <div class="endpoint-head">
+        <span class="method method-post">POST</span>
+        <code class="endpoint-path">/api/v1/auth/refresh</code>
+        <span class="auth-tag auth-public">PUBLIC</span>
+      </div>
+      <p class="endpoint-desc">Refresh token으로 새 access token 발급.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "refresh_token": "eyJhbGciOi..."
+}</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "access_token": "eyJhbGciOi...",
+  "expires_in": 3600,
+  "token_type": "Bearer"
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-logout">
+      <div class="endpoint-head">
+        <span class="method method-post">POST</span>
+        <code class="endpoint-path">/api/v1/auth/logout</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">현재 refresh token 폐기. Access token은 자연 만료(1시간).</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "refresh_token": "eyJhbGciOi..."
+}</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-204">204 No Content</span></div>
+<pre><code>(no body)</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-oauth">
+      <div class="endpoint-head">
+        <span class="method method-post">POST</span>
+        <code class="endpoint-path">/api/v1/auth/oauth/{provider}/callback</code>
+        <span class="auth-tag auth-public">PUBLIC</span>
+      </div>
+      <p class="endpoint-desc"><code>{provider}</code> = <code>google</code> | <code>apple</code>. OAuth 인가 코드를 서버에 넘겨 로그인·최초 로그인이면 자동 회원가입.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "code": "4/0AY0e-g4...",
+  "redirect_uri": "https://jitda.com/auth/callback",
+  "handle_suggestion": "kimdalbit"       // 신규 유저용, 선택
+}</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "access_token": "...",
+  "refresh_token": "...",
+  "expires_in": 3600,
+  "token_type": "Bearer",
+  "user": { /* User */ },
+  "is_new_user": false
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-pwd-reset-request">
+      <div class="endpoint-head">
+        <span class="method method-post">POST</span>
+        <code class="endpoint-path">/api/v1/auth/password/reset-request</code>
+        <span class="auth-tag auth-public">PUBLIC</span>
+      </div>
+      <p class="endpoint-desc">비밀번호 재설정 이메일 발송.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{ "email": "user@example.com" }</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-204">204 No Content</span></div>
+<pre><code>(항상 204 반환 — 이메일 존재 여부 노출 방지)</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-pwd-reset-confirm">
+      <div class="endpoint-head">
+        <span class="method method-post">POST</span>
+        <code class="endpoint-path">/api/v1/auth/password/reset-confirm</code>
+        <span class="auth-tag auth-public">PUBLIC</span>
+      </div>
+      <p class="endpoint-desc">이메일로 받은 토큰과 새 비밀번호로 재설정.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "reset_token": "abc123...",
+  "new_password": "N3wStr0ng!Pass"
+}</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-204">204 No Content</span></div>
+<pre><code>(no body)</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-me">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/auth/me</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">현재 로그인한 유저 정보 (권한·설정 포함).</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request</div>
+<pre><code>(no body)
+Header: Authorization: Bearer &lt;token&gt;</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "user": { /* User */ },
+  "email": "user@example.com",
+  "email_verified": true,
+  "is_adult_verified": false,
+  "role": "user",                        // "user" | "admin"
+  "author_profile": {                    // 작가 활성화 시
+    "subscription": { "enabled": true, "price": 4900, "currency": "KRW" },
+    "stripe_connect_ready": true
+  }
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-delete-me">
+      <div class="endpoint-head">
+        <span class="method method-delete">DELETE</span>
+        <code class="endpoint-path">/api/v1/auth/me</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">계정 삭제 요청. 30일 유예 기간 후 영구 삭제, 활성 구독 자동 해지.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "password": "current-password",        // 소셜 로그인 유저는 생략
+  "reason": "not_using"                  // 선택
+}</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "scheduled_deletion_at": "2026-08-14T05:20:00Z"
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 USERS -->
+    <h2 class="section" id="s4"><span class="num">04</span>사용자 (Users)</h2>
+
+    <div class="endpoint" id="ep-user-get">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/users/{id}</code>
+        <span class="auth-tag auth-public">PUBLIC</span>
+      </div>
+      <p class="endpoint-desc">유저 공개 프로필. <code>id</code>는 <code>usr_...</code> 또는 handle(<code>@kimdalbit</code>) 둘 다 허용.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Path Params</div>
+<pre><code>id: string   // usr_2fN1a | @kimdalbit</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{ /* User */ }</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-patch-me">
+      <div class="endpoint-head">
+        <span class="method method-patch">PATCH</span>
+        <code class="endpoint-path">/api/v1/users/me</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">프로필 필드 수정. 모든 필드 선택.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "display_name": "김달빛",
+  "handle": "kimdalbit",
+  "bio": "달빛 그리는 사람.",
+  "avatar_image_id": "img_...",          // 사전 업로드된 이미지 id
+  "banner_image_id": "img_...",
+  "external_links": [
+    { "label": "Twitter", "url": "https://twitter.com/kimdalbit" }
+  ]
+}</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{ /* User */ }</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-me-settings-get">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/users/me/settings</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">알림·언어·성인 콘텐츠 등 개인 설정 조회.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request</div>
+<pre><code>(no body)</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "language": "ko",                      // ko | en
+  "adult_content_visible": false,
+  "notifications": {
+    "new_episode":    { "in_app": true, "email": "instant" },
+    "new_comment":    { "in_app": true, "email": "daily" },
+    "new_follower":   { "in_app": true, "email": "off" },
+    "tip_received":   { "in_app": true, "email": "instant" },
+    "payment_failed": { "in_app": true, "email": "instant" }
+  }
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-me-settings-patch">
+      <div class="endpoint-head">
+        <span class="method method-patch">PATCH</span>
+        <code class="endpoint-path">/api/v1/users/me/settings</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">개인 설정 부분 수정. 요청 본문에 포함된 필드만 갱신.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "language": "en",
+  "notifications": {
+    "new_comment": { "email": "off" }
+  }
+}</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{ /* Settings 전체 */ }</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5 AUTHORS -->
+    <h2 class="section" id="s5"><span class="num">05</span>작가 (Authors)</h2>
+
+    <div class="endpoint" id="ep-author-get">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/authors/{handle}</code>
+        <span class="auth-tag auth-public">PUBLIC</span>
+      </div>
+      <p class="endpoint-desc">작가 페이지. handle 또는 <code>usr_...</code> 허용. 로그인 유저면 팔로우·구독 여부 포함.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Path Params</div>
+<pre><code>handle: string   // @kimdalbit</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "author": { /* AuthorPublic */ },
+  "viewer": {
+    "is_following": true,
+    "is_subscribed": false,
+    "subscription_id": null
+  }
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-author-patch">
+      <div class="endpoint-head">
+        <span class="method method-patch">PATCH</span>
+        <code class="endpoint-path">/api/v1/authors/me</code>
+        <span class="auth-tag auth-author">AUTHOR</span>
+      </div>
+      <p class="endpoint-desc">작가 전용 설정 — 구독료·외부 링크 등.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "subscription": {
+    "enabled": true,
+    "price": 4900,
+    "currency": "KRW"
+  }
+}</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{ /* AuthorPublic */ }</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-author-dashboard">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/authors/me/dashboard</code>
+        <span class="auth-tag auth-author">AUTHOR</span>
+      </div>
+      <p class="endpoint-desc">작가 대시보드 — 이번 달 누적 지표와 최근 활동 요약.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Query</div>
+<pre><code>?period=this_month   // this_month | last_7d | last_30d</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "period": "this_month",
+  "views": 124_800,
+  "views_delta_pct": 12.4,
+  "new_followers": 342,
+  "new_subscribers": 18,
+  "cancellations": 3,
+  "tips_count": 47,
+  "tips_amount": 235_000,
+  "estimated_payout": 512_400,
+  "currency": "KRW",
+  "top_episodes": [
+    { "id": "epi_...", "title": "42화 · 여름의 시작", "views": 24_581 }
+  ]
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-author-subscribers">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/authors/me/subscribers</code>
+        <span class="auth-tag auth-author">AUTHOR</span>
+      </div>
+      <p class="endpoint-desc">내 구독자 목록.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Query</div>
+<pre><code>?limit=20&amp;cursor=...&amp;status=active</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "items": [
+    {
+      "subscription_id": "sub_...",
+      "subscriber": { /* User */ },
+      "status": "active",
+      "started_at": "2026-05-01T09:12:00Z",
+      "months_active": 3
+    }
+  ],
+  "next_cursor": null,
+  "has_more": false
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6 SERIES -->
+    <h2 class="section" id="s6"><span class="num">06</span>시리즈 · 회차</h2>
+
+    <div class="endpoint" id="ep-series-list">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/series</code>
+        <span class="auth-tag auth-public">PUBLIC</span>
+      </div>
+      <p class="endpoint-desc">시리즈 목록. 필터 조합 가능.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Query</div>
+<pre><code>?author_id=usr_...
+&amp;genre=romance
+&amp;sort=popular            // popular | latest | updated
+&amp;status=ongoing          // ongoing | completed | hiatus
+&amp;limit=20&amp;cursor=...</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "items": [ /* Series[] */ ],
+  "next_cursor": "...",
+  "has_more": true
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-series-create">
+      <div class="endpoint-head">
+        <span class="method method-post">POST</span>
+        <code class="endpoint-path">/api/v1/series</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">새 시리즈 생성.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "title": "달빛 아래 우리",
+  "description": "고요한 마을에 온 낯선 소년, 그리고 나.",
+  "cover_image_id": "img_...",
+  "viewer_mode_default": "scroll",
+  "genres": ["romance"],
+  "tags": ["#첫사랑", "#시골"],
+  "is_adult": false
+}</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-201">201 Created</span></div>
+<pre><code>{ /* Series */ }</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-series-get">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/series/{id}</code>
+        <span class="auth-tag auth-public">PUBLIC</span>
+      </div>
+      <p class="endpoint-desc">시리즈 상세.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Path</div>
+<pre><code>id: string   // srs_v7QeK</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "series": { /* Series */ },
+  "viewer": {
+    "is_subscribed_to_author": false
+  }
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-series-patch">
+      <div class="endpoint-head">
+        <span class="method method-patch">PATCH</span>
+        <code class="endpoint-path">/api/v1/series/{id}</code>
+        <span class="auth-tag auth-author">AUTHOR</span>
+      </div>
+      <p class="endpoint-desc">시리즈 수정. 본인 시리즈만.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "title": "달빛 아래 우리 : 서장",
+  "description": "...",
+  "status": "completed"
+}</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{ /* Series */ }</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-series-delete">
+      <div class="endpoint-head">
+        <span class="method method-delete">DELETE</span>
+        <code class="endpoint-path">/api/v1/series/{id}</code>
+        <span class="auth-tag auth-author">AUTHOR</span>
+      </div>
+      <p class="endpoint-desc">시리즈 삭제. 모든 회차 함께 소프트 삭제.</p>
+      <div class="req-res">
+        <div><div class="block-label">Request</div><pre><code>(no body)</code></pre></div>
+        <div><div class="block-label"><span class="status-pill status-204">204 No Content</span></div><pre><code>(no body)</code></pre></div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-series-episodes">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/series/{id}/episodes</code>
+        <span class="auth-tag auth-public">PUBLIC</span>
+      </div>
+      <p class="endpoint-desc">시리즈의 회차 목록 (이미지는 미포함). 뷰어 진입 전 목록용.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Query</div>
+<pre><code>?sort=order_asc   // order_asc | order_desc | latest
+&amp;limit=50&amp;cursor=...</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "items": [
+    {
+      "id": "epi_...",
+      "title": "1화 · 그날의 달",
+      "order": 1,
+      "is_subscriber_only": false,
+      "published_at": "2026-01-10T00:00:00Z",
+      "stats": { "views": 15_400, "likes": 890 }
+    }
+  ],
+  "next_cursor": null,
+  "has_more": false
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-episode-create">
+      <div class="endpoint-head">
+        <span class="method method-post">POST</span>
+        <code class="endpoint-path">/api/v1/series/{id}/episodes</code>
+        <span class="auth-tag auth-author">AUTHOR</span>
+      </div>
+      <p class="endpoint-desc">시리즈에 회차 추가. <code>published_at</code>이 미래면 예약 발행.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "title": "42화 · 여름의 시작",
+  "order": 42,
+  "viewer_mode": "scroll",
+  "is_subscriber_only": false,
+  "is_adult": false,
+  "image_ids": ["img_...", "img_..."],
+  "published_at": "2026-07-15T00:00:00Z"
+}</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-201">201 Created</span></div>
+<pre><code>{ /* Episode */ }</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-episode-get">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/episodes/{id}</code>
+        <span class="auth-tag auth-public">PUBLIC</span>
+      </div>
+      <p class="endpoint-desc">회차 뷰어 데이터. 구독자 전용 회차인데 미구독이면 <code>403 forbidden</code> (payload에 <code>required_subscription: true</code> 힌트 포함).</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Path</div>
+<pre><code>id: string   // epi_8mBnc</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{ /* Episode (이미지 포함) */ }</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-episode-patch">
+      <div class="endpoint-head">
+        <span class="method method-patch">PATCH</span>
+        <code class="endpoint-path">/api/v1/episodes/{id}</code>
+        <span class="auth-tag auth-author">AUTHOR</span>
+      </div>
+      <p class="endpoint-desc">회차 수정.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "title": "42화 · 여름의 시작 (수정)",
+  "is_subscriber_only": true,
+  "image_ids": ["img_...", "img_..."]
+}</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{ /* Episode */ }</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-episode-delete">
+      <div class="endpoint-head">
+        <span class="method method-delete">DELETE</span>
+        <code class="endpoint-path">/api/v1/episodes/{id}</code>
+        <span class="auth-tag auth-author">AUTHOR</span>
+      </div>
+      <p class="endpoint-desc">회차 삭제(소프트).</p>
+      <div class="req-res">
+        <div><div class="block-label">Request</div><pre><code>(no body)</code></pre></div>
+        <div><div class="block-label"><span class="status-pill status-204">204 No Content</span></div><pre><code>(no body)</code></pre></div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-episode-view">
+      <div class="endpoint-head">
+        <span class="method method-post">POST</span>
+        <code class="endpoint-path">/api/v1/episodes/{id}/view</code>
+        <span class="auth-tag auth-public">PUBLIC</span>
+      </div>
+      <p class="endpoint-desc">조회수 카운트. 클라이언트가 뷰어 진입 후 3초 이상 체류 시 호출. 서버는 어뷰징 필터 후 집계.</p>
+      <div class="req-res">
+        <div><div class="block-label">Request Body</div><pre><code>{ "session_id": "anon_abc123" }   // 익명 유저 트래킹용, 선택</code></pre></div>
+        <div><div class="block-label"><span class="status-pill status-204">204 No Content</span></div><pre><code>(no body)</code></pre></div>
+      </div>
+    </div>
+
+    <!-- 7 POSTS -->
+    <h2 class="section" id="s7"><span class="num">07</span>포스트 (개별 포스트)</h2>
+
+    <div class="endpoint" id="ep-posts-list">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/posts</code>
+        <span class="auth-tag auth-public">PUBLIC</span>
+      </div>
+      <p class="endpoint-desc">개별 포스트 목록.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Query</div>
+<pre><code>?author_id=usr_...
+&amp;genre=daily
+&amp;sort=latest       // latest | popular
+&amp;limit=20&amp;cursor=...</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "items": [ /* Post[] */ ],
+  "next_cursor": "...",
+  "has_more": true
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-post-create">
+      <div class="endpoint-head">
+        <span class="method method-post">POST</span>
+        <code class="endpoint-path">/api/v1/posts</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">개별 포스트 작성.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "title": "오늘의 낙서 #47",
+  "description": "지하철에서 그린 것.",
+  "viewer_mode": "scroll",
+  "is_subscriber_only": false,
+  "is_adult": false,
+  "image_ids": ["img_...", "img_..."],
+  "genres": ["daily"],
+  "tags": ["#낙서"],
+  "published_at": "2026-07-15T04:00:00Z"
+}</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-201">201 Created</span></div>
+<pre><code>{ /* Post */ }</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-post-get">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/posts/{id}</code>
+        <span class="auth-tag auth-public">PUBLIC</span>
+      </div>
+      <p class="endpoint-desc">포스트 상세 (이미지 포함).</p>
+      <div class="req-res">
+        <div><div class="block-label">Path</div><pre><code>id: string   // pst_9kAtb</code></pre></div>
+        <div><div class="block-label"><span class="status-pill status-200">200 OK</span></div><pre><code>{ /* Post */ }</code></pre></div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-post-patch">
+      <div class="endpoint-head">
+        <span class="method method-patch">PATCH</span>
+        <code class="endpoint-path">/api/v1/posts/{id}</code>
+        <span class="auth-tag auth-author">AUTHOR</span>
+      </div>
+      <p class="endpoint-desc">포스트 수정.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{ "title": "...", "description": "...", "tags": ["#낙서", "#일기"] }</code></pre>
+        </div>
+        <div><div class="block-label"><span class="status-pill status-200">200 OK</span></div><pre><code>{ /* Post */ }</code></pre></div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-post-delete">
+      <div class="endpoint-head">
+        <span class="method method-delete">DELETE</span>
+        <code class="endpoint-path">/api/v1/posts/{id}</code>
+        <span class="auth-tag auth-author">AUTHOR</span>
+      </div>
+      <p class="endpoint-desc">포스트 삭제.</p>
+      <div class="req-res">
+        <div><div class="block-label">Request</div><pre><code>(no body)</code></pre></div>
+        <div><div class="block-label"><span class="status-pill status-204">204 No Content</span></div><pre><code>(no body)</code></pre></div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-post-view">
+      <div class="endpoint-head">
+        <span class="method method-post">POST</span>
+        <code class="endpoint-path">/api/v1/posts/{id}/view</code>
+        <span class="auth-tag auth-public">PUBLIC</span>
+      </div>
+      <p class="endpoint-desc">포스트 조회수 카운트.</p>
+      <div class="req-res">
+        <div><div class="block-label">Request Body</div><pre><code>{ "session_id": "anon_abc123" }</code></pre></div>
+        <div><div class="block-label"><span class="status-pill status-204">204 No Content</span></div><pre><code>(no body)</code></pre></div>
+      </div>
+    </div>
+
+    <!-- 8 UPLOADS -->
+    <h2 class="section" id="s8"><span class="num">08</span>업로드 (Uploads)</h2>
+
+    <div class="callout">
+      <strong>업로드 전략</strong> — 직접 서버에 multipart를 보내지 않는다. 서버가 <strong>Presigned URL</strong>을 발급 → 클라이언트가 오브젝트 스토리지(R2/S3)에 직접 <code>PUT</code> → 완료 후 <code>image_id</code>를 서버에 알림. 서버는 백그라운드로 리사이즈·WebP 변환을 수행하고 이 <code>image_id</code>를 시리즈·회차·포스트 생성 시 재사용.
+    </div>
+
+    <div class="endpoint" id="ep-upload-init">
+      <div class="endpoint-head">
+        <span class="method method-post">POST</span>
+        <code class="endpoint-path">/api/v1/uploads/images</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">이미지 업로드를 위한 presigned URL 발급.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "filename": "cover.png",
+  "content_type": "image/png",           // image/png | image/jpeg | image/webp
+  "size": 842123,                        // bytes, max 100MB
+  "purpose": "series_cover"              // series_cover | episode_page | post_page | avatar | banner
+}</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "image_id": "img_xyz789",
+  "upload_url": "https://r2.jitda.com/...?X-Amz-Signature=...",
+  "upload_method": "PUT",
+  "upload_headers": {
+    "Content-Type": "image/png"
+  },
+  "expires_at": "2026-07-15T05:00:00Z"
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-upload-complete">
+      <div class="endpoint-head">
+        <span class="method method-post">POST</span>
+        <code class="endpoint-path">/api/v1/uploads/images/{image_id}/complete</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">클라이언트의 업로드 완료 알림. 서버가 파일 검증 후 리사이즈 잡을 큐잉.</p>
+      <div class="req-res">
+        <div><div class="block-label">Request</div><pre><code>(no body)</code></pre></div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "image_id": "img_xyz789",
+  "status": "processing",                // processing | ready | failed
+  "url": null                            // ready 되면 URL 채워짐
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-image-get">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/uploads/images/{image_id}</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">업로드된 이미지 처리 상태 조회(폴링용).</p>
+      <div class="req-res">
+        <div><div class="block-label">Request</div><pre><code>(no body)</code></pre></div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "image_id": "img_xyz789",
+  "status": "ready",
+  "url": "https://cdn.jitda.com/i/img_xyz789.webp",
+  "width": 1080, "height": 4320,
+  "file_size": 651208
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9 DISCOVERY -->
+    <h2 class="section" id="s9"><span class="num">09</span>탐색 · 랭킹</h2>
+
+    <div class="endpoint" id="ep-rankings-series">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/rankings/series</code>
+        <span class="auth-tag auth-public">PUBLIC</span>
+      </div>
+      <p class="endpoint-desc">인기 시리즈 랭킹. 메인 페이지 TOP 10.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Query</div>
+<pre><code>?period=weekly       // weekly (기본) | daily | monthly
+&amp;genre=romance      // 선택
+&amp;limit=10           // 기본 10, 최대 50</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "period": "weekly",
+  "computed_at": "2026-07-15T05:00:00Z",
+  "items": [
+    {
+      "rank": 1,
+      "rank_delta": 3,                   // 지난 집계 대비 순위 변동
+      "score": 9821.4,
+      "series": { /* Series */ }
+    }
+  ]
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-rankings-posts">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/rankings/posts</code>
+        <span class="auth-tag auth-public">PUBLIC</span>
+      </div>
+      <p class="endpoint-desc">인기 포스트 랭킹.</p>
+      <div class="req-res">
+        <div><div class="block-label">Query</div><pre><code>?period=weekly&amp;genre=daily&amp;limit=10</code></pre></div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "period": "weekly",
+  "computed_at": "2026-07-15T05:00:00Z",
+  "items": [
+    { "rank": 1, "rank_delta": 0, "score": 4210.1, "post": { /* Post */ } }
+  ]
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-rankings-latest">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/rankings/latest</code>
+        <span class="auth-tag auth-public">PUBLIC</span>
+      </div>
+      <p class="endpoint-desc">최신 업로드 TOP 3. 시리즈·포스트 혼합 (설정으로 조정 가능).</p>
+      <div class="req-res">
+        <div><div class="block-label">Query</div><pre><code>?type=mixed          // mixed (기본) | series | post
+&amp;limit=3</code></pre></div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "items": [
+    {
+      "type": "episode",                 // episode | post
+      "id": "epi_...",
+      "series": { /* Series (type=episode인 경우) */ },
+      "episode": { /* Episode */ },
+      "post": null,
+      "published_at": "2026-07-15T02:00:00Z"
+    }
+  ]
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-genres">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/genres</code>
+        <span class="auth-tag auth-public">PUBLIC</span>
+      </div>
+      <p class="endpoint-desc">장르 카테고리 목록.</p>
+      <div class="req-res">
+        <div><div class="block-label">Request</div><pre><code>(no body)</code></pre></div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "items": [
+    { "slug": "romance",  "name_ko": "로맨스",   "name_en": "Romance" },
+    { "slug": "fantasy",  "name_ko": "판타지",   "name_en": "Fantasy" },
+    { "slug": "thriller", "name_ko": "스릴러",   "name_en": "Thriller" },
+    { "slug": "daily",    "name_ko": "일상",     "name_en": "Slice of Life" },
+    { "slug": "bl_gl",    "name_ko": "BL/GL",   "name_en": "BL / GL" },
+    { "slug": "action",   "name_ko": "액션",     "name_en": "Action" },
+    { "slug": "comedy",   "name_ko": "개그",     "name_en": "Comedy" },
+    { "slug": "drama",    "name_ko": "드라마",   "name_en": "Drama" },
+    { "slug": "youth",    "name_ko": "청춘",     "name_en": "Youth" },
+    { "slug": "horror",   "name_ko": "공포",     "name_en": "Horror" }
+  ]
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-search">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/search</code>
+        <span class="auth-tag auth-public">PUBLIC</span>
+      </div>
+      <p class="endpoint-desc">통합 검색.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Query</div>
+<pre><code>?q=달빛
+&amp;type=all              // all | series | post | author
+&amp;limit=20&amp;cursor=...</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "query": "달빛",
+  "results": {
+    "series":  { "items": [ /* Series[] */ ], "has_more": true },
+    "posts":   { "items": [ /* Post[] */ ],   "has_more": false },
+    "authors": { "items": [ /* User[] */ ],   "has_more": false }
+  }
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10 SOCIAL / MONEY -->
+    <h2 class="section" id="s10"><span class="num">10</span>팔로우 · 구독 · 후원</h2>
+
+    <div class="endpoint" id="ep-follow">
+      <div class="endpoint-head">
+        <span class="method method-post">POST</span>
+        <code class="endpoint-path">/api/v1/follows/{author_id}</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">작가 팔로우(무료). 이미 팔로우 중이면 409.</p>
+      <div class="req-res">
+        <div><div class="block-label">Path</div><pre><code>author_id: string    // usr_2fN1a</code></pre></div>
+        <div>
+          <div class="block-label"><span class="status-pill status-201">201 Created</span></div>
+<pre><code>{
+  "author_id": "usr_2fN1a",
+  "followed_at": "2026-07-15T05:20:00Z"
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-unfollow">
+      <div class="endpoint-head">
+        <span class="method method-delete">DELETE</span>
+        <code class="endpoint-path">/api/v1/follows/{author_id}</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">언팔로우.</p>
+      <div class="req-res">
+        <div><div class="block-label">Request</div><pre><code>(no body)</code></pre></div>
+        <div><div class="block-label"><span class="status-pill status-204">204 No Content</span></div><pre><code>(no body)</code></pre></div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-my-follows">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/users/me/follows</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">내가 팔로우한 작가 목록.</p>
+      <div class="req-res">
+        <div><div class="block-label">Query</div><pre><code>?limit=20&amp;cursor=...</code></pre></div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "items": [
+    { "author": { /* User */ }, "followed_at": "2026-05-01T09:00:00Z" }
+  ],
+  "next_cursor": null,
+  "has_more": false
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-my-feed">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/users/me/feed</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">팔로우한 작가의 최근 회차·포스트 피드.</p>
+      <div class="req-res">
+        <div><div class="block-label">Query</div><pre><code>?limit=20&amp;cursor=...</code></pre></div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "items": [
+    {
+      "type": "episode",
+      "episode": { /* Episode (thumbnail 정도) */ },
+      "series": { /* Series */ },
+      "author": { /* User */ },
+      "published_at": "2026-07-15T00:00:00Z"
+    }
+  ],
+  "next_cursor": "...",
+  "has_more": true
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-sub-create">
+      <div class="endpoint-head">
+        <span class="method method-post">POST</span>
+        <code class="endpoint-path">/api/v1/subscriptions</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">유료 구독 시작. Stripe Payment Intent 클라이언트 시크릿 반환 → 클라이언트에서 Stripe Elements로 결제 완료 → Webhook으로 서버가 활성화.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "author_id": "usr_2fN1a"
+}</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-201">201 Created</span></div>
+<pre><code>{
+  "subscription": { /* Subscription (status: "pending") */ },
+  "stripe_client_secret": "pi_xxx_secret_yyy",
+  "publishable_key": "pk_live_..."       // 프론트가 Stripe.js 로드 시 사용
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-sub-get">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/subscriptions/{id}</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">특정 구독 상세. 본인 구독만 조회 가능.</p>
+      <div class="req-res">
+        <div><div class="block-label">Path</div><pre><code>id: string   // sub_p3Q4r</code></pre></div>
+        <div><div class="block-label"><span class="status-pill status-200">200 OK</span></div><pre><code>{ /* Subscription */ }</code></pre></div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-sub-cancel">
+      <div class="endpoint-head">
+        <span class="method method-delete">DELETE</span>
+        <code class="endpoint-path">/api/v1/subscriptions/{id}</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">구독 해지 예약. 현재 결제 주기 종료일까지는 접근 유지.</p>
+      <div class="req-res">
+        <div><div class="block-label">Request Body</div><pre><code>{ "reason": "too_expensive" }   // 선택</code></pre></div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "subscription_id": "sub_p3Q4r",
+  "status": "canceled",
+  "access_until": "2026-08-01T09:12:00Z"
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-my-subs">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/users/me/subscriptions</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">내가 결제 중인 구독 목록.</p>
+      <div class="req-res">
+        <div><div class="block-label">Query</div><pre><code>?status=active   // 선택</code></pre></div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{ "items": [ /* Subscription[] */ ] }</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-tip-create">
+      <div class="endpoint-head">
+        <span class="method method-post">POST</span>
+        <code class="endpoint-path">/api/v1/tips</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">일회성 후원 결제. Stripe Payment Intent 반환.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "author_id": "usr_2fN1a",
+  "amount": 5000,
+  "currency": "KRW",
+  "message": "잘 보고 있어요!",
+  "message_public": true,
+  "context": {                          // 팁 발생 위치, 선택
+    "type": "episode",                  // episode | post | author_page
+    "id": "epi_8mBnc"
+  }
+}</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-201">201 Created</span></div>
+<pre><code>{
+  "tip": { /* Tip (status: "pending") */ },
+  "stripe_client_secret": "pi_xxx_secret_yyy"
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-tips-sent">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/users/me/tips/sent</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">내가 보낸 팁 이력.</p>
+      <div class="req-res">
+        <div><div class="block-label">Query</div><pre><code>?limit=20&amp;cursor=...</code></pre></div>
+        <div><div class="block-label"><span class="status-pill status-200">200 OK</span></div><pre><code>{ "items": [ /* Tip[] */ ], "next_cursor": null, "has_more": false }</code></pre></div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-tips-received">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/authors/me/tips/received</code>
+        <span class="auth-tag auth-author">AUTHOR</span>
+      </div>
+      <p class="endpoint-desc">내가 받은 팁 이력.</p>
+      <div class="req-res">
+        <div><div class="block-label">Query</div><pre><code>?limit=20&amp;cursor=...&amp;period=this_month</code></pre></div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "items": [ /* Tip[] */ ],
+  "next_cursor": null,
+  "has_more": false,
+  "period_total": 235_000,
+  "currency": "KRW"
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- 11 COMMENTS -->
+    <h2 class="section" id="s11"><span class="num">11</span>댓글 · 반응</h2>
+
+    <div class="endpoint" id="ep-comments-list">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/comments</code>
+        <span class="auth-tag auth-public">PUBLIC</span>
+      </div>
+      <p class="endpoint-desc">특정 대상의 댓글 목록.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Query</div>
+<pre><code>?target_type=episode         // episode | post | salon
+&amp;target_id=epi_8mBnc
+&amp;sort=latest                // latest | popular
+&amp;limit=20&amp;cursor=...</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "items": [ /* Comment[] (parent_id === null 만) */ ],
+  "next_cursor": "...",
+  "has_more": true
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-comment-replies">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/comments/{id}/replies</code>
+        <span class="auth-tag auth-public">PUBLIC</span>
+      </div>
+      <p class="endpoint-desc">특정 댓글의 대댓글 목록.</p>
+      <div class="req-res">
+        <div><div class="block-label">Query</div><pre><code>?limit=20&amp;cursor=...</code></pre></div>
+        <div><div class="block-label"><span class="status-pill status-200">200 OK</span></div><pre><code>{ "items": [ /* Comment[] */ ], "next_cursor": null, "has_more": false }</code></pre></div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-comment-create">
+      <div class="endpoint-head">
+        <span class="method method-post">POST</span>
+        <code class="endpoint-path">/api/v1/comments</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">댓글·대댓글 작성. <code>parent_id</code>가 있으면 대댓글. 사랑방(구독자 전용)은 구독자만 작성 가능.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "target_type": "episode",
+  "target_id": "epi_8mBnc",
+  "parent_id": null,
+  "body": "이번 화 미쳤어요..."
+}</code></pre>
+        </div>
+        <div><div class="block-label"><span class="status-pill status-201">201 Created</span></div><pre><code>{ /* Comment */ }</code></pre></div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-comment-patch">
+      <div class="endpoint-head">
+        <span class="method method-patch">PATCH</span>
+        <code class="endpoint-path">/api/v1/comments/{id}</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">댓글 수정(본인).</p>
+      <div class="req-res">
+        <div><div class="block-label">Request Body</div><pre><code>{ "body": "수정된 댓글" }</code></pre></div>
+        <div><div class="block-label"><span class="status-pill status-200">200 OK</span></div><pre><code>{ /* Comment */ }</code></pre></div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-comment-delete">
+      <div class="endpoint-head">
+        <span class="method method-delete">DELETE</span>
+        <code class="endpoint-path">/api/v1/comments/{id}</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">댓글 삭제(본인 또는 콘텐츠 소유 작가).</p>
+      <div class="req-res">
+        <div><div class="block-label">Request</div><pre><code>(no body)</code></pre></div>
+        <div><div class="block-label"><span class="status-pill status-204">204 No Content</span></div><pre><code>(no body)</code></pre></div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-comment-pin">
+      <div class="endpoint-head">
+        <span class="method method-post">POST</span>
+        <code class="endpoint-path">/api/v1/comments/{id}/pin</code>
+        <span class="auth-tag auth-author">AUTHOR</span>
+      </div>
+      <p class="endpoint-desc">댓글 고정(본인 콘텐츠에 달린 댓글). 재호출 시 토글.</p>
+      <div class="req-res">
+        <div><div class="block-label">Request</div><pre><code>(no body)</code></pre></div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{ "comment_id": "cmt_x1z2y", "is_pinned": true }</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-reaction-add">
+      <div class="endpoint-head">
+        <span class="method method-post">POST</span>
+        <code class="endpoint-path">/api/v1/reactions</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">좋아요·이모지 반응 추가.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "target_type": "episode",              // episode | post | comment
+  "target_id": "epi_8mBnc",
+  "type": "like"                         // like | heart | fire | sad | wow
+}</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-201">201 Created</span></div>
+<pre><code>{
+  "target_id": "epi_8mBnc",
+  "type": "like",
+  "count_after": 1421
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-reaction-remove">
+      <div class="endpoint-head">
+        <span class="method method-delete">DELETE</span>
+        <code class="endpoint-path">/api/v1/reactions</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">반응 취소.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Query</div>
+<pre><code>?target_type=episode&amp;target_id=epi_8mBnc&amp;type=like</code></pre>
+        </div>
+        <div><div class="block-label"><span class="status-pill status-204">204 No Content</span></div><pre><code>(no body)</code></pre></div>
+      </div>
+    </div>
+
+    <!-- 12 NOTIFICATIONS -->
+    <h2 class="section" id="s12"><span class="num">12</span>알림 (Notifications)</h2>
+
+    <div class="endpoint" id="ep-notifications-list">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/notifications</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">내 알림 목록.</p>
+      <div class="req-res">
+        <div><div class="block-label">Query</div><pre><code>?limit=20&amp;cursor=...&amp;unread_only=false</code></pre></div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "items": [ /* Notification[] */ ],
+  "next_cursor": "...",
+  "has_more": true,
+  "unread_count": 12
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-notification-read">
+      <div class="endpoint-head">
+        <span class="method method-post">POST</span>
+        <code class="endpoint-path">/api/v1/notifications/read</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">알림 읽음 처리(단건·전체).</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "ids": ["ntf_...", "ntf_..."],         // 지정 시 해당 건만
+  "all": false                           // true면 전체 읽음
+}</code></pre>
+        </div>
+        <div><div class="block-label"><span class="status-pill status-200">200 OK</span></div><pre><code>{ "marked": 2, "unread_count": 10 }</code></pre></div>
+      </div>
+    </div>
+
+    <!-- 13 PAYOUTS -->
+    <h2 class="section" id="s13"><span class="num">13</span>정산 (Payouts)</h2>
+
+    <div class="endpoint" id="ep-payouts-list">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/authors/me/payouts</code>
+        <span class="auth-tag auth-author">AUTHOR</span>
+      </div>
+      <p class="endpoint-desc">과거 정산 이력.</p>
+      <div class="req-res">
+        <div><div class="block-label">Query</div><pre><code>?limit=12&amp;cursor=...</code></pre></div>
+        <div><div class="block-label"><span class="status-pill status-200">200 OK</span></div><pre><code>{ "items": [ /* Payout[] */ ], "next_cursor": null, "has_more": false }</code></pre></div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-payout-estimate">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/authors/me/payouts/estimate</code>
+        <span class="auth-tag auth-author">AUTHOR</span>
+      </div>
+      <p class="endpoint-desc">이번 달 예상 정산액 (실시간 집계).</p>
+      <div class="req-res">
+        <div><div class="block-label">Request</div><pre><code>(no body)</code></pre></div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "period": "2026-07",
+  "as_of": "2026-07-15T05:00:00Z",
+  "gross": 2_140_000,
+  "platform_fee": 171_200,
+  "stripe_fee": 74_900,
+  "refund_reserve": 30_000,
+  "estimated_net": 1_863_900,
+  "currency": "KRW",
+  "breakdown": {
+    "subscriptions": 1_680_000,
+    "tips": 460_000
+  }
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-payout-get">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/authors/me/payouts/{id}</code>
+        <span class="auth-tag auth-author">AUTHOR</span>
+      </div>
+      <p class="endpoint-desc">특정 정산 건 상세 (명세서용).</p>
+      <div class="req-res">
+        <div><div class="block-label">Path</div><pre><code>id: string   // pyt_x1y2z</code></pre></div>
+        <div><div class="block-label"><span class="status-pill status-200">200 OK</span></div><pre><code>{ /* Payout (라인 아이템 breakdown 포함) */ }</code></pre></div>
+      </div>
+    </div>
+
+    <!-- 14 REPORTS + ADMIN -->
+    <h2 class="section" id="s14"><span class="num">14</span>신고 · 관리자</h2>
+
+    <div class="endpoint" id="ep-report-create">
+      <div class="endpoint-head">
+        <span class="method method-post">POST</span>
+        <code class="endpoint-path">/api/v1/reports</code>
+        <span class="auth-tag auth-user">USER</span>
+      </div>
+      <p class="endpoint-desc">신고 제출. 저작권 신고는 <code>copyright</code>로 별도 워크플로.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "target_type": "episode",              // episode | post | comment | user
+  "target_id": "epi_8mBnc",
+  "category": "copyright",               // copyright | adult | violence | spam | other
+  "description": "이 이미지는 제 작품입니다. 원본: https://...",
+  "attachments": [                       // 선택, 저작권 신고 시 원본 증빙
+    { "image_id": "img_..." }
+  ]
+}</code></pre>
+        </div>
+        <div><div class="block-label"><span class="status-pill status-201">201 Created</span></div><pre><code>{ /* Report */ }</code></pre></div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-admin-reports">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/admin/reports</code>
+        <span class="auth-tag auth-admin">ADMIN</span>
+      </div>
+      <p class="endpoint-desc">신고 대기열.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Query</div>
+<pre><code>?status=pending      // pending | investigating | resolved | rejected
+&amp;category=copyright
+&amp;limit=50&amp;cursor=...</code></pre>
+        </div>
+        <div><div class="block-label"><span class="status-pill status-200">200 OK</span></div><pre><code>{ "items": [ /* Report[] */ ], "next_cursor": "...", "has_more": true }</code></pre></div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-admin-report-patch">
+      <div class="endpoint-head">
+        <span class="method method-patch">PATCH</span>
+        <code class="endpoint-path">/api/v1/admin/reports/{id}</code>
+        <span class="auth-tag auth-admin">ADMIN</span>
+      </div>
+      <p class="endpoint-desc">신고 처리. <code>action</code>이 <code>takedown</code>이면 콘텐츠 비공개, <code>strike</code>이면 작가 누적 위반 +1.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "status": "resolved",                  // resolved | rejected | investigating
+  "action": "takedown",                  // none | takedown | strike | account_suspend
+  "note_internal": "명백한 저작권 침해."
+}</code></pre>
+        </div>
+        <div><div class="block-label"><span class="status-pill status-200">200 OK</span></div><pre><code>{ /* Report */ }</code></pre></div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-admin-settings-get">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/admin/settings</code>
+        <span class="auth-tag auth-admin">ADMIN</span>
+      </div>
+      <p class="endpoint-desc">전역 튜닝 변수(랭킹 가중치·수수료·구독료 캡 등).</p>
+      <div class="req-res">
+        <div><div class="block-label">Request</div><pre><code>(no body)</code></pre></div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "platform_fee_pct": 8,
+  "subscription_price": { "min": 3000, "max": 30000, "currency": "KRW" },
+  "ranking_weights": {
+    "views": 1.0,
+    "likes": 2.0,
+    "comments": 3.0,
+    "new_followers": 5.0,
+    "new_subscribers": 10.0
+  },
+  "payout": {
+    "schedule": "monthly",
+    "day_of_month": 15,
+    "min_amount": 10000
+  },
+  "refund_window_days": 7
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-admin-settings-patch">
+      <div class="endpoint-head">
+        <span class="method method-patch">PATCH</span>
+        <code class="endpoint-path">/api/v1/admin/settings</code>
+        <span class="auth-tag auth-admin">ADMIN</span>
+      </div>
+      <p class="endpoint-desc">전역 설정 부분 수정. 감사 로그에 기록.</p>
+      <div class="req-res">
+        <div><div class="block-label">Request Body</div><pre><code>{ "platform_fee_pct": 7 }</code></pre></div>
+        <div><div class="block-label"><span class="status-pill status-200">200 OK</span></div><pre><code>{ /* Settings 전체 */ }</code></pre></div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-admin-users">
+      <div class="endpoint-head">
+        <span class="method method-get">GET</span>
+        <code class="endpoint-path">/api/v1/admin/users</code>
+        <span class="auth-tag auth-admin">ADMIN</span>
+      </div>
+      <p class="endpoint-desc">유저 검색·목록.</p>
+      <div class="req-res">
+        <div><div class="block-label">Query</div><pre><code>?q=kimdalbit&amp;status=active&amp;limit=50&amp;cursor=...</code></pre></div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "items": [
+    { "user": { /* User */ },
+      "email": "user@example.com",
+      "status": "active",              // active | suspended | deleted
+      "strikes": 0,
+      "role": "user" }
+  ],
+  "next_cursor": null,
+  "has_more": false
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-admin-user-patch">
+      <div class="endpoint-head">
+        <span class="method method-patch">PATCH</span>
+        <code class="endpoint-path">/api/v1/admin/users/{id}</code>
+        <span class="auth-tag auth-admin">ADMIN</span>
+      </div>
+      <p class="endpoint-desc">유저 상태·권한 변경.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "status": "suspended",                 // active | suspended
+  "role": "user",                        // user | admin
+  "suspension_reason": "저작권 3회 위반"
+}</code></pre>
+        </div>
+        <div><div class="block-label"><span class="status-pill status-200">200 OK</span></div><pre><code>{ /* User (내부 필드 포함) */ }</code></pre></div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="ep-admin-payouts-run">
+      <div class="endpoint-head">
+        <span class="method method-post">POST</span>
+        <code class="endpoint-path">/api/v1/admin/payouts/run</code>
+        <span class="auth-tag auth-admin">ADMIN</span>
+      </div>
+      <p class="endpoint-desc">월간 정산 배치 수동 트리거(기본은 크론). Idempotent — 같은 <code>period</code>로 두 번 호출해도 중복 지급 안 됨.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body</div>
+<pre><code>{
+  "period": "2026-06",
+  "dry_run": true                        // true면 계산만, 실제 이체 안 함
+}</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{
+  "period": "2026-06",
+  "authors_processed": 1240,
+  "total_net_amount": 132_400_000,
+  "currency": "KRW",
+  "dry_run": true
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- 15 WEBHOOKS -->
+    <h2 class="section" id="s15"><span class="num">15</span>Webhooks</h2>
+
+    <div class="callout">
+      Webhook은 클라이언트가 호출하는 API가 아니라 <strong>Stripe → 서버</strong>로 전달되는 이벤트다. 프론트는 이 엔드포인트를 절대 호출하지 않는다. 서버는 Stripe 서명 헤더 <code>Stripe-Signature</code>를 검증한 뒤 이벤트 타입별로 상태를 반영한다.
+    </div>
+
+    <div class="endpoint" id="ep-webhook-stripe">
+      <div class="endpoint-head">
+        <span class="method method-post">POST</span>
+        <code class="endpoint-path">/api/v1/webhooks/stripe</code>
+        <span class="auth-tag auth-public">PUBLIC</span>
+      </div>
+      <p class="endpoint-desc">Stripe 이벤트 수신. 서명 검증 실패 시 400.</p>
+      <div class="req-res">
+        <div>
+          <div class="block-label">Request Body (Stripe Event)</div>
+<pre><code>{
+  "id": "evt_...",
+  "type": "invoice.payment_succeeded",
+  "data": { "object": { /* Stripe Invoice */ } }
+}
+Header: Stripe-Signature: t=..., v1=...</code></pre>
+        </div>
+        <div>
+          <div class="block-label"><span class="status-pill status-200">200 OK</span></div>
+<pre><code>{ "received": true }</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="subhead">서버가 처리해야 할 Stripe 이벤트</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>이벤트</th><th>서버 액션</th></tr></thead>
+      <tbody>
+        <tr><td><code>payment_intent.succeeded</code></td><td>Tip → <code>Tip.status = paid</code>, 알림 발송</td></tr>
+        <tr><td><code>customer.subscription.created</code></td><td><code>Subscription.status = active</code>, 알림</td></tr>
+        <tr><td><code>invoice.payment_succeeded</code></td><td>구독 갱신 결제 성공 — <code>current_period_end</code> 갱신</td></tr>
+        <tr><td><code>invoice.payment_failed</code></td><td>재시도 카운트 +1. 3회 실패 시 <code>status = failed</code> → <code>canceled</code></td></tr>
+        <tr><td><code>customer.subscription.deleted</code></td><td>구독 종료. 접근 종료.</td></tr>
+        <tr><td><code>charge.refunded</code></td><td>환불 반영. 해당 구독·팁 <code>refunded</code> 상태</td></tr>
+        <tr><td><code>payout.paid</code></td><td>Connect 정산 완료 — <code>Payout.status = paid</code>, 알림</td></tr>
+        <tr><td><code>payout.failed</code></td><td>정산 실패 — 관리자 알림</td></tr>
+      </tbody>
+    </table></div>
+
+    <footer class="doc-footer">
+      <div>© 2026 짓다 · JITDA · API v1 · <span class="status-badge">DRAFT v0.1</span></div>
+      <div>PRD v0.1 준수</div>
+    </footer>
+  </article>
+</div>
+
+<script>
+  var toggle = document.getElementById('themeToggle');
+  toggle.addEventListener('click', function () {
+    var root = document.documentElement;
+    var curr = root.getAttribute('data-theme');
+    var systemDark = matchMedia('(prefers-color-scheme: dark)').matches;
+    var isDark = curr === 'dark' || (!curr && systemDark);
+    root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  });
+  document.querySelectorAll('.toc a').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      var id = a.getAttribute('href');
+      var el = document.querySelector(id);
+      if (el) {
+        e.preventDefault();
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.replaceState(null, '', id);
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

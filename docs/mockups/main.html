@@ -1,0 +1,1164 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>짓다 — 웹툰 오픈 플랫폼</title>
+<style>
+  :root {
+    --font-sans: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Segoe UI", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+
+    --paper: #f4f3f0;
+    --surface: #ffffff;
+    --ink: #17141a;
+    --ink-2: #3f3946;
+    --muted: #7a7480;
+    --line: #e6e2dd;
+    --accent: #ee2c56;
+    --accent-hover: #d61e46;
+    --gold: #c78e28;
+    --shadow-sm: 0 1px 2px rgba(30, 20, 40, 0.05);
+    --shadow-md: 0 2px 6px rgba(30, 20, 40, 0.06), 0 12px 32px rgba(30, 20, 40, 0.06);
+    --radius: 8px;
+    --radius-lg: 14px;
+
+    --skeleton-a: rgba(30, 20, 40, 0.06);
+    --skeleton-b: rgba(30, 20, 40, 0.10);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0d0c10;
+      --surface: #17151b;
+      --ink: #f0edf1;
+      --ink-2: #b8b2be;
+      --muted: #8b8492;
+      --line: #24222a;
+      --accent: #ff5573;
+      --accent-hover: #ff7a92;
+      --gold: #e8b13a;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.35);
+
+      --skeleton-a: rgba(255, 255, 255, 0.05);
+      --skeleton-b: rgba(255, 255, 255, 0.10);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0d0c10;
+    --surface: #17151b;
+    --ink: #f0edf1;
+    --ink-2: #b8b2be;
+    --muted: #8b8492;
+    --line: #24222a;
+    --accent: #ff5573;
+    --accent-hover: #ff7a92;
+    --gold: #e8b13a;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.35);
+    --skeleton-a: rgba(255, 255, 255, 0.05);
+    --skeleton-b: rgba(255, 255, 255, 0.10);
+  }
+  :root[data-theme="light"] {
+    --paper: #f4f3f0;
+    --surface: #ffffff;
+    --ink: #17141a;
+    --ink-2: #3f3946;
+    --muted: #7a7480;
+    --line: #e6e2dd;
+    --accent: #ee2c56;
+    --accent-hover: #d61e46;
+    --gold: #c78e28;
+    --shadow-sm: 0 1px 2px rgba(30, 20, 40, 0.05);
+    --shadow-md: 0 2px 6px rgba(30, 20, 40, 0.06), 0 12px 32px rgba(30, 20, 40, 0.06);
+    --skeleton-a: rgba(30, 20, 40, 0.06);
+    --skeleton-b: rgba(30, 20, 40, 0.10);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { min-height: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  button {
+    font-family: inherit; font-size: inherit; color: inherit;
+    background: none; border: 0; padding: 0; cursor: pointer;
+  }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  input { font-family: inherit; font-size: inherit; color: inherit; }
+  h1, h2, h3 { font-weight: 700; text-wrap: balance; margin: 0; }
+  a { color: inherit; text-decoration: none; }
+
+  .app { min-height: 100vh; display: flex; flex-direction: column; }
+  .container { width: min(100% - 40px, 1240px); margin: 0 auto; }
+
+  /* Header */
+  .site-header {
+    background: color-mix(in oklab, var(--paper) 88%, transparent);
+    backdrop-filter: saturate(140%) blur(10px);
+    -webkit-backdrop-filter: saturate(140%) blur(10px);
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  .site-header .container { display: flex; align-items: center; gap: 24px; height: 68px; }
+  .brand { display: flex; align-items: baseline; gap: 10px; flex-shrink: 0; }
+  .brand-mark { font-size: 26px; font-weight: 900; letter-spacing: -0.03em; color: var(--ink); }
+  .brand-mark::after {
+    content: ""; display: inline-block; width: 7px; height: 7px; background: var(--accent);
+    border-radius: 50%; margin-left: 3px; transform: translateY(-1px);
+  }
+  .brand-sub {
+    font-size: 11px; color: var(--muted); letter-spacing: 0.22em;
+    text-transform: uppercase; font-weight: 700;
+  }
+
+  .searchbox { flex: 1; max-width: 480px; position: relative; }
+  .searchbox input {
+    width: 100%; height: 40px; padding: 0 16px 0 42px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 999px; outline: none; transition: border-color 0.15s;
+  }
+  .searchbox input:focus { border-color: var(--ink-2); }
+  .search-icon {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    width: 18px; height: 18px; color: var(--muted); pointer-events: none;
+  }
+
+  .user-nav { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+  .btn {
+    height: 40px; padding: 0 18px; border-radius: 999px;
+    font-weight: 600; font-size: 14px;
+    transition: background 0.15s, color 0.15s, opacity 0.15s;
+    white-space: nowrap;
+  }
+  .btn-ghost { color: var(--ink-2); }
+  .btn-ghost:hover { background: var(--line); }
+  .btn-primary { background: var(--ink); color: var(--paper); }
+  .btn-primary:hover { opacity: 0.88; }
+  .theme-toggle {
+    height: 40px; width: 40px; border-radius: 999px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); border: 1px solid var(--line); background: var(--surface);
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .theme-toggle:hover { border-color: var(--ink-2); color: var(--ink); }
+  .theme-toggle svg { width: 16px; height: 16px; }
+
+  /* Genre strip */
+  .genre-strip {
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in oklab, var(--paper) 88%, transparent);
+    backdrop-filter: saturate(140%) blur(10px);
+    -webkit-backdrop-filter: saturate(140%) blur(10px);
+    position: sticky; top: 68px; z-index: 19;
+  }
+  .genre-strip .container {
+    display: flex; gap: 4px; overflow-x: auto; height: 52px; align-items: center;
+    scrollbar-width: none;
+  }
+  .genre-strip .container::-webkit-scrollbar { display: none; }
+  .chip {
+    padding: 6px 14px; border-radius: 999px; color: var(--muted);
+    font-size: 14px; font-weight: 500; white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+  }
+  .chip:hover { color: var(--ink); }
+  .chip.active { background: var(--ink); color: var(--paper); font-weight: 600; }
+
+  /* Main */
+  .main { padding: 48px 0 80px; flex: 1; }
+
+  .section-head { margin-bottom: 28px; }
+  .section-eyebrow {
+    font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--accent); font-weight: 700; font-variant-numeric: tabular-nums;
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-size: 34px; letter-spacing: -0.03em; font-weight: 800; line-height: 1.05;
+  }
+  @media (max-width: 640px) {
+    .section-title { font-size: 26px; }
+    .main { padding: 32px 0 60px; }
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex; gap: 28px; border-bottom: 1px solid var(--line);
+    margin-bottom: 36px; overflow-x: auto; scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    padding: 14px 0; color: var(--muted); font-weight: 600; font-size: 16px;
+    position: relative; transition: color 0.15s; white-space: nowrap;
+  }
+  .tab:hover { color: var(--ink-2); }
+  .tab.active { color: var(--ink); }
+  .tab.active::after {
+    content: ""; position: absolute; bottom: -1px; left: 0; right: 0;
+    height: 2px; background: var(--ink);
+  }
+  .tab-count {
+    display: inline-block; margin-left: 8px; font-size: 12px; color: var(--muted);
+    font-variant-numeric: tabular-nums; letter-spacing: 0.05em; font-weight: 500;
+  }
+
+  .panel { display: none; min-height: 400px; }
+  .panel.active { display: block; animation: fade 0.25s ease-out; }
+  @keyframes fade {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Rank grid */
+  .rank-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 32px 22px;
+  }
+  @media (max-width: 1000px) { .rank-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 640px)  { .rank-grid { grid-template-columns: repeat(2, 1fr); gap: 24px 14px; } }
+
+  .rank-card { display: flex; flex-direction: column; gap: 12px; cursor: pointer; }
+  .rank-card .thumb {
+    aspect-ratio: 3/4; border-radius: var(--radius); position: relative; overflow: hidden;
+    background: linear-gradient(135deg, var(--g1, #999) 0%, var(--g2, #555) 100%);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.25s;
+  }
+  .rank-card:hover .thumb { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+  .thumb::after {
+    content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 70% 30%, rgba(255,255,255,0.14), transparent 60%),
+      linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.35) 100%);
+    pointer-events: none;
+  }
+  .thumb-title {
+    position: absolute; bottom: 14px; left: 14px; right: 14px;
+    color: white; font-weight: 800; font-size: 17px;
+    letter-spacing: -0.015em; line-height: 1.15;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.25); z-index: 2;
+  }
+  .rank-num {
+    position: absolute; top: 8px; left: 12px; color: white; font-weight: 900;
+    font-size: 38px; line-height: 1; font-variant-numeric: tabular-nums;
+    letter-spacing: -0.05em; text-shadow: 0 2px 12px rgba(0,0,0,0.3); z-index: 2;
+  }
+  .rank-card:nth-child(1) .rank-num { font-size: 46px; }
+
+  .badge {
+    position: absolute; top: 12px; right: 12px; padding: 3px 9px;
+    border-radius: 4px; font-size: 10px; font-weight: 800; color: white;
+    background: rgba(0,0,0,0.45); backdrop-filter: blur(6px);
+    letter-spacing: 0.05em; z-index: 2;
+  }
+  .badge-hot { background: var(--accent); }
+  .badge-sub { background: rgba(199, 142, 40, 0.95); }
+  .badge-end { background: rgba(0,0,0,0.55); }
+
+  .rank-meta { padding: 0 2px; display: flex; flex-direction: column; gap: 4px; }
+  .rank-title {
+    font-size: 15px; font-weight: 700; color: var(--ink);
+    letter-spacing: -0.01em; line-height: 1.3;
+    display: -webkit-box; -webkit-line-clamp: 1; line-clamp: 1;
+    -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .rank-author { font-size: 13px; color: var(--muted); }
+  .rank-author strong { color: var(--ink-2); font-weight: 600; }
+  .rank-stats {
+    display: flex; gap: 10px; margin-top: 4px;
+    font-size: 12px; color: var(--muted);
+    font-variant-numeric: tabular-nums; align-items: center;
+  }
+  .rank-genre {
+    color: var(--ink-2); font-weight: 600; font-size: 11px;
+    letter-spacing: 0.02em; padding: 2px 6px;
+    background: var(--line); border-radius: 3px;
+  }
+
+  .post-card .thumb { aspect-ratio: 1/1; }
+  .post-card .thumb-title { font-size: 15px; }
+  .post-card .rank-num { font-size: 32px; }
+  .post-card:nth-child(1) .rank-num { font-size: 40px; }
+
+  /* Latest featured */
+  .latest-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  @media (max-width: 860px) { .latest-grid { grid-template-columns: 1fr; } }
+  .feature-card {
+    display: flex; flex-direction: column;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); overflow: hidden;
+    transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.25s, border-color 0.25s;
+    cursor: pointer;
+  }
+  .feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: transparent; }
+  .feature-card .thumb {
+    aspect-ratio: 4/3; position: relative; overflow: hidden;
+    background: linear-gradient(135deg, var(--g1, #999) 0%, var(--g2, #555) 100%);
+  }
+  .feature-card .thumb::after {
+    content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 70% 30%, rgba(255,255,255,0.14), transparent 60%),
+      linear-gradient(180deg, transparent 35%, rgba(0,0,0,0.45) 100%);
+  }
+  .feature-thumb-title {
+    position: absolute; bottom: 20px; left: 22px; right: 22px;
+    color: white; font-weight: 800; font-size: 28px;
+    letter-spacing: -0.025em; line-height: 1.05;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.3); z-index: 2;
+  }
+  .feature-tag {
+    position: absolute; top: 16px; left: 16px; padding: 4px 10px;
+    background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.3); color: white;
+    font-size: 10px; font-weight: 800; letter-spacing: 0.14em;
+    border-radius: 999px; text-transform: uppercase; z-index: 2;
+  }
+  .feature-time {
+    position: absolute; top: 16px; right: 16px;
+    color: rgba(255,255,255,0.85); font-size: 12px; font-weight: 600; z-index: 2;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+  .feature-body {
+    padding: 20px 22px 22px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .feature-title-line { display: flex; align-items: baseline; gap: 8px; }
+  .feature-title {
+    font-size: 19px; font-weight: 700; letter-spacing: -0.01em;
+    color: var(--ink); flex: 1;
+  }
+  .feature-episode {
+    font-size: 12px; color: var(--muted);
+    font-variant-numeric: tabular-nums; font-weight: 500;
+  }
+  .feature-meta {
+    display: flex; gap: 8px; align-items: center;
+    font-size: 13px; color: var(--muted);
+  }
+  .feature-meta .author { color: var(--ink-2); font-weight: 600; }
+  .feature-desc { color: var(--muted); font-size: 13px; line-height: 1.5; margin-top: 4px; }
+  .feature-actions {
+    display: flex; gap: 8px; margin-top: 14px;
+    padding-top: 16px; border-top: 1px solid var(--line);
+  }
+  .action-btn {
+    flex: 1; height: 36px; border-radius: 8px;
+    font-size: 13px; font-weight: 600; color: var(--ink-2);
+    background: var(--paper);
+    transition: background 0.15s, color 0.15s;
+  }
+  .action-btn:hover { background: var(--line); color: var(--ink); }
+  .action-btn.primary { background: var(--accent); color: white; }
+  .action-btn.primary:hover { background: var(--accent-hover); color: white; }
+
+  /* Skeleton */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--skeleton-a) 0%,
+      var(--skeleton-b) 50%,
+      var(--skeleton-a) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+    border-radius: var(--radius);
+  }
+  @keyframes shimmer {
+    0%   { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+  }
+  .skeleton-card { pointer-events: none; }
+  .skeleton-card .thumb {
+    background: none;
+    animation: shimmer 1.4s ease-in-out infinite;
+    background: linear-gradient(90deg, var(--skeleton-a) 0%, var(--skeleton-b) 50%, var(--skeleton-a) 100%);
+    background-size: 200% 100%;
+  }
+  .skeleton-card .thumb::after { display: none; }
+  .skeleton-line {
+    height: 12px; border-radius: 3px;
+  }
+  .skeleton-card .rank-meta { gap: 8px; padding-top: 4px; }
+  .skeleton-card.feature-card .feature-body { gap: 10px; padding-top: 18px; }
+
+  /* Error state */
+  .error-state {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 12px;
+    padding: 80px 24px; text-align: center;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+  }
+  .error-icon {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: color-mix(in oklab, var(--accent) 12%, transparent);
+    color: var(--accent);
+  }
+  .error-icon svg { width: 22px; height: 22px; }
+  .error-title { font-size: 16px; font-weight: 700; color: var(--ink); }
+  .error-message { font-size: 14px; color: var(--ink-2); max-width: 40ch; }
+  .error-code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px; color: var(--muted);
+    padding: 3px 8px; background: var(--paper); border-radius: 3px;
+    letter-spacing: 0.02em;
+  }
+  .btn-retry {
+    margin-top: 4px; height: 36px; padding: 0 16px;
+    border-radius: 999px; background: var(--ink); color: var(--paper);
+    font-weight: 600; font-size: 13px;
+    transition: opacity 0.15s;
+  }
+  .btn-retry:hover { opacity: 0.85; }
+
+  /* Empty state */
+  .empty-state {
+    padding: 60px 24px; text-align: center;
+    color: var(--muted); font-size: 14px;
+  }
+
+  /* Footer */
+  .site-footer {
+    border-top: 1px solid var(--line);
+    padding: 32px 0; background: var(--paper);
+  }
+  .site-footer .container {
+    display: flex; justify-content: space-between; align-items: center;
+    color: var(--muted); font-size: 13px;
+    flex-wrap: wrap; gap: 16px;
+  }
+  .footer-links { display: flex; gap: 20px; }
+  .footer-links a:hover { color: var(--ink); }
+
+  /* Dev panel (Mock mode) */
+  .dev-panel {
+    position: fixed; right: 20px; bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px 8px 10px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 999px; box-shadow: var(--shadow-md);
+    font-size: 12px; z-index: 30;
+  }
+  .dev-badge {
+    padding: 3px 8px; border-radius: 999px;
+    background: var(--accent); color: white;
+    font-weight: 800; font-size: 10px; letter-spacing: 0.12em;
+  }
+  .dev-panel button {
+    padding: 4px 10px; border-radius: 999px;
+    color: var(--ink-2); background: var(--paper);
+    font-weight: 600; font-size: 12px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .dev-panel button:hover { background: var(--line); color: var(--ink); }
+  .dev-panel label {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--muted); font-size: 12px; cursor: pointer;
+  }
+  .dev-panel input[type="checkbox"] { margin: 0; accent-color: var(--accent); }
+  @media (max-width: 500px) {
+    .dev-panel { bottom: 12px; right: 12px; font-size: 11px; padding: 6px 10px 6px 8px; }
+    .dev-panel label:last-child { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      transition-duration: 0ms !important;
+      animation-duration: 0ms !important;
+    }
+  }
+</style>
+
+<div class="app">
+  <header class="site-header">
+    <div class="container">
+      <div class="brand">
+        <span class="brand-mark">짓다</span>
+        <span class="brand-sub">JITDA</span>
+      </div>
+      <div class="searchbox">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input type="search" placeholder="작품 · 작가 · 태그 검색" aria-label="검색" />
+      </div>
+      <nav class="user-nav">
+        <button class="theme-toggle" id="themeToggle" aria-label="테마 전환" title="테마 전환">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        </button>
+        <button class="btn btn-ghost">로그인</button>
+        <button class="btn btn-primary">작가로 시작</button>
+      </nav>
+    </div>
+  </header>
+
+  <nav class="genre-strip" aria-label="장르">
+    <div class="container">
+      <button class="chip active" data-genre="">전체</button>
+      <button class="chip" data-genre="romance">로맨스</button>
+      <button class="chip" data-genre="fantasy">판타지</button>
+      <button class="chip" data-genre="thriller">스릴러</button>
+      <button class="chip" data-genre="daily">일상</button>
+      <button class="chip" data-genre="bl_gl">BL / GL</button>
+      <button class="chip" data-genre="action">액션</button>
+      <button class="chip" data-genre="comedy">개그</button>
+      <button class="chip" data-genre="drama">드라마</button>
+      <button class="chip" data-genre="youth">청춘</button>
+      <button class="chip" data-genre="horror">공포</button>
+    </div>
+  </nav>
+
+  <main class="main">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-eyebrow" id="periodLabel">이번 주</div>
+        <h1 class="section-title">지금 짓다에서 가장 뜨거운 것</h1>
+      </div>
+
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="series" role="tab">인기 작품<span class="tab-count">TOP 10</span></button>
+        <button class="tab" data-tab="posts" role="tab">인기 포스트<span class="tab-count">TOP 10</span></button>
+        <button class="tab" data-tab="latest" role="tab">최신작<span class="tab-count">TOP 3</span></button>
+      </div>
+
+      <div class="panel active" data-panel="series" role="tabpanel" id="panel-series"></div>
+      <div class="panel"        data-panel="posts"  role="tabpanel" id="panel-posts"></div>
+      <div class="panel"        data-panel="latest" role="tabpanel" id="panel-latest"></div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div>© 2026 짓다 · JITDA · 웹툰 오픈 플랫폼 <span style="color: var(--accent); font-weight: 600; margin-left: 8px;">MOCKUP</span></div>
+      <div class="footer-links">
+        <a href="#">이용약관</a>
+        <a href="#">개인정보처리방침</a>
+        <a href="#">저작권 신고</a>
+        <a href="#">작가 문의</a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<div class="dev-panel" id="devPanel" role="region" aria-label="개발자 도구 (Mock)">
+  <span class="dev-badge">MOCK</span>
+  <button id="devReload" title="현재 탭 재요청">↻ 재요청</button>
+  <label title="이후 모든 요청을 500으로 응답"><input type="checkbox" id="devError" /> 강제 에러</label>
+  <label title="지연을 1.5~3초로 늘림"><input type="checkbox" id="devSlow" /> 느린 응답</label>
+</div>
+
+<script>
+(() => {
+  // ============================================================
+  //  Config
+  // ============================================================
+  const API_BASE = '/api/v1';
+  const USE_MOCK = true;
+
+  // ============================================================
+  //  Mock data — API 명세와 동일 shape
+  // ============================================================
+  const AUTHORS = {
+    kimdalbit:   { id: 'usr_2fN1a', handle: 'kimdalbit',   display_name: '김달빛' },
+    ireid:       { id: 'usr_3gH2b', handle: 'ireid',       display_name: '이레이드' },
+    parksaebyuk: { id: 'usr_4jK3c', handle: 'parksaebyuk', display_name: '박새벽' },
+    choinyaong:  { id: 'usr_5mL4d', handle: 'choinyaong',  display_name: '최냐옹' },
+    jungusan:    { id: 'usr_6nM5e', handle: 'jungusan',    display_name: '정우산' },
+    ohshadow:    { id: 'usr_7pN6f', handle: 'ohshadow',    display_name: '오섀도우' },
+    kimchef:     { id: 'usr_8qP7g', handle: 'kimchef',     display_name: '김쉐프' },
+    isipsa:      { id: 'usr_9rQ8h', handle: 'isipsa',      display_name: '이십사' },
+    seogongbaek: { id: 'usr_aBcD1', handle: 'seogongbaek', display_name: '서공백' },
+    honghero:    { id: 'usr_bCdE2', handle: 'honghero',    display_name: '홍히어로' },
+    naksseojang: { id: 'usr_cDeF3', handle: 'naksseojang', display_name: '낙서장' },
+    kimbombom:   { id: 'usr_dEfG4', handle: 'kimbombom',   display_name: '김봄봄' },
+    caffeine:    { id: 'usr_eFgH5', handle: 'caffeine',    display_name: '카페인' },
+    geolem:      { id: 'usr_fGhI6', handle: 'geolem',      display_name: '게으름' },
+    nyangnyang:  { id: 'usr_gHiJ7', handle: 'nyangnyang',  display_name: '냥냥이' },
+    tonggeunja:  { id: 'usr_hIjK8', handle: 'tonggeunja',  display_name: '통근자' },
+    chobotoon:   { id: 'usr_iJkL9', handle: 'chobotoon',   display_name: '초보툰' },
+    soyo:        { id: 'usr_jKlM0', handle: 'soyo',        display_name: '소요' },
+    byeolbam:    { id: 'usr_kLmN1', handle: 'byeolbam',    display_name: '별밤' },
+    jjaksarang:  { id: 'usr_lMnO2', handle: 'jjaksarang',  display_name: '짝사랑' },
+    obamjung:    { id: 'usr_mNoP3', handle: 'obamjung',    display_name: '오밤중' },
+    yeoreumbada: { id: 'usr_nOpQ4', handle: 'yeoreumbada', display_name: '여름바다' },
+    ihue:        { id: 'usr_oPqR5', handle: 'ihue',        display_name: '이후에' }
+  };
+
+  const publicUser = (a) => ({
+    id: a.id, handle: a.handle, display_name: a.display_name,
+    avatar_url: null, bio: null, is_author: true,
+    created_at: '2026-01-05T10:00:00Z'
+  });
+
+  const nowMinus = (minutes) => new Date(Date.now() - minutes * 60_000).toISOString();
+
+  // 시리즈 마스터 데이터
+  const SERIES = [
+    { id: 'srs_v7QeK', title: '달빛 아래 우리',   author: 'kimdalbit',   genre: 'romance',  ep: 42,  views: 1234567, likes: 84230, status: 'ongoing',   subs_only: 0, desc: '고요한 마을에 온 낯선 소년, 그리고 나.',                     rank_delta: 5 },
+    { id: 'srs_p8RfL', title: '던전 배달부',       author: 'ireid',       genre: 'fantasy',  ep: 68,  views: 892140,  likes: 61240, status: 'ongoing',   subs_only: 0, desc: '오늘도 던전 20층으로 짜장면을 배달한다.',                     rank_delta: 1 },
+    { id: 'srs_q9SgM', title: '무거운 아침',       author: 'parksaebyuk', genre: 'drama',    ep: 21,  views: 724380,  likes: 49820, status: 'ongoing',   subs_only: 3, desc: '한 통의 전화가 우리 가족의 아침을 무겁게 만들었다.',           rank_delta: -1 },
+    { id: 'srs_r0ThN', title: '고양이 사무소',     author: 'choinyaong',  genre: 'daily',    ep: 89,  views: 691200,  likes: 52140, status: 'ongoing',   subs_only: 0, desc: '고양이가 사장인 사무소, 사람이 직원인 이야기.',                rank_delta: 2 },
+    { id: 'srs_s1UiO', title: '빨간 우산',         author: 'jungusan',    genre: 'thriller', ep: 33,  views: 542100,  likes: 38400, status: 'ongoing',   subs_only: 0, desc: '비 오는 밤, 빨간 우산을 든 여자를 세 번째 마주쳤다.',          rank_delta: 0 },
+    { id: 'srs_t2VjP', title: '그림자의 왕',       author: 'ohshadow',    genre: 'fantasy',  ep: 55,  views: 481920,  likes: 32180, status: 'ongoing',   subs_only: 2, desc: '그림자에 갇힌 왕이 다시 왕좌를 되찾는 이야기.',                rank_delta: -2 },
+    { id: 'srs_u3WkQ', title: '3분 요리',          author: 'kimchef',     genre: 'comedy',   ep: 127, views: 423600,  likes: 29140, status: 'ongoing',   subs_only: 0, desc: '3분 안에 못 만들면 지는 요리 대결.',                             rank_delta: 4 },
+    { id: 'srs_v4XlR', title: '학교 뒤편',         author: 'isipsa',      genre: 'youth',    ep: 24,  views: 384200,  likes: 24800, status: 'ongoing',   subs_only: 0, desc: '스물 넷의 우리는 여전히 학교 뒤편을 서성인다.',                rank_delta: 1 },
+    { id: 'srs_w5YmS', title: '커피 한 잔',        author: 'seogongbaek', genre: 'daily',    ep: 46,  views: 342800,  likes: 21400, status: 'ongoing',   subs_only: 0, desc: '커피 한 잔에 담긴 하루의 작은 이야기들.',                       rank_delta: 0 },
+    { id: 'srs_x6ZnT', title: '지구방위대',         author: 'honghero',    genre: 'action',   ep: 82,  views: 311420,  likes: 18600, status: 'completed', subs_only: 0, desc: '오늘도 우주에서 온 위협으로부터 지구를 지킨다. 총 82화 완결.', rank_delta: -3 }
+  ];
+
+  const POSTS = [
+    { id: 'pst_a1BcD', title: '오늘의 낙서 #47',                author: 'naksseojang', genre: 'daily',    views: 218400, likes: 12400, comments: 214, minutesAgo: 60*24*3, rank_delta: 6 },
+    { id: 'pst_b2CdE', title: '봄이 오면',                     author: 'kimbombom',   genre: 'romance',  views: 187200, likes: 10120, comments: 187, minutesAgo: 60*24*5, rank_delta: 2 },
+    { id: 'pst_c3DeF', title: '커피 리뷰 (feat. 우리집 냥이)', author: 'caffeine',    genre: 'daily',    views: 165300, likes: 9210,  comments: 156, minutesAgo: 60*24*6, rank_delta: 0 },
+    { id: 'pst_d4EfG', title: '일요일 오후',                   author: 'geolem',      genre: 'daily',    views: 143700, likes: 8620,  comments: 132, minutesAgo: 60*24*4, rank_delta: -1 },
+    { id: 'pst_e5FgH', title: '고양이 표정 모음',              author: 'nyangnyang',  genre: 'daily',    views: 128500, likes: 7890,  comments: 118, minutesAgo: 60*24*6, rank_delta: 3 },
+    { id: 'pst_f6GhI', title: '지하철에서 그린 것',            author: 'tonggeunja',  genre: 'daily',    views: 112000, likes: 6410,  comments: 94,  minutesAgo: 60*24*2, rank_delta: -2 },
+    { id: 'pst_g7HiJ', title: '첫 태블릿으로 그린 것',         author: 'chobotoon',   genre: 'daily',    views: 98200,  likes: 5820,  comments: 87,  minutesAgo: 60*24*5, rank_delta: 1 },
+    { id: 'pst_h8IjK', title: '5분 낙서',                      author: 'soyo',        genre: 'daily',    views: 87400,  likes: 5140,  comments: 71,  minutesAgo: 60*24*1, rank_delta: 4 },
+    { id: 'pst_i9JkL', title: '여름밤',                        author: 'byeolbam',    genre: 'drama',    views: 76300,  likes: 4720,  comments: 62,  minutesAgo: 60*24*6, rank_delta: 0 },
+    { id: 'pst_j0KlM', title: '그녀는 몰라',                   author: 'jjaksarang',  genre: 'romance',  views: 71100,  likes: 4310,  comments: 58,  minutesAgo: 60*24*3, rank_delta: -1 }
+  ];
+
+  const LATEST_SEED = [
+    { seriesId: 'srs_new1', title: '새벽 두 시',   author: 'obamjung',    genre: 'thriller', desc: '고요한 도시. 시계는 두 시를 가리키고, 창문 밖에는 한 사람이 서 있다. 그날 이후, 새벽 두 시가 되면 내 방의 문이 열린다.', episode: { id: 'epi_n1a', order: 1 },  minutesAgo: 120 },
+    { seriesId: 'srs_new2', title: '여름의 끝',   author: 'yeoreumbada', genre: 'drama',    desc: '졸업식 다음 날. 우리는 마지막이 될지도 모르는 여행을 떠났다. 부산으로 가는 KTX 안에서 나는 그 이야기를 처음 들었다.',       episode: { id: 'epi_n2a', order: 3 },  minutesAgo: 300 },
+    { seriesId: 'srs_new3', title: '폭풍우 이후', author: 'ihue',        genre: 'fantasy',  desc: '하늘이 갈라진 그 밤 이후, 마을에는 새로운 것들이 자라기 시작했다. 열두 번째 밤, 나는 처음으로 그것을 보았다.',                episode: { id: 'epi_n3a', order: 12 }, minutesAgo: 60*24 }
+  ];
+
+  // Response builders (명세 shape 그대로)
+  const buildSeries = (s) => ({
+    id: s.id,
+    author: publicUser(AUTHORS[s.author]),
+    title: s.title,
+    description: s.desc,
+    cover_image: null,
+    viewer_mode_default: 'scroll',
+    status: s.status,
+    genres: [s.genre],
+    tags: [],
+    episode_count: s.ep,
+    stats: { views_total: s.views, likes_total: s.likes, subscribers_only_count: s.subs_only },
+    is_adult: false,
+    created_at: '2026-01-10T09:00:00Z',
+    updated_at: '2026-07-14T22:00:00Z'
+  });
+
+  const buildPost = (p) => ({
+    id: p.id,
+    author: publicUser(AUTHORS[p.author]),
+    title: p.title,
+    description: null,
+    viewer_mode: 'scroll',
+    is_subscriber_only: false,
+    is_adult: false,
+    images: [],
+    genres: [p.genre],
+    tags: [],
+    stats: { views: p.views, likes: p.likes, comments: p.comments },
+    published_at: nowMinus(p.minutesAgo),
+    created_at: nowMinus(p.minutesAgo + 5)
+  });
+
+  const responses = {
+    'rankings/series': () => ({
+      period: 'weekly',
+      computed_at: new Date().toISOString(),
+      items: SERIES.map((s, i) => ({
+        rank: i + 1, rank_delta: s.rank_delta, score: Math.round((10000 - i * 800) * 10) / 10,
+        series: buildSeries(s)
+      }))
+    }),
+    'rankings/posts': () => ({
+      period: 'weekly',
+      computed_at: new Date().toISOString(),
+      items: POSTS.map((p, i) => ({
+        rank: i + 1, rank_delta: p.rank_delta, score: Math.round((5000 - i * 400) * 10) / 10,
+        post: buildPost(p)
+      }))
+    }),
+    'rankings/latest': () => ({
+      items: LATEST_SEED.map((L) => {
+        const series = buildSeries({
+          id: L.seriesId, title: L.title, author: L.author, genre: L.genre,
+          ep: L.episode.order, views: 5000, likes: 300, status: 'ongoing',
+          subs_only: 0, desc: L.desc, rank_delta: 0
+        });
+        return {
+          type: 'episode',
+          id: L.episode.id,
+          series,
+          episode: {
+            id: L.episode.id, series_id: L.seriesId,
+            title: `${L.episode.order}화`, order: L.episode.order,
+            viewer_mode: 'scroll', is_subscriber_only: false, is_adult: false,
+            images: [],
+            stats: { views: 800, likes: 42, comments: 5 },
+            prev_episode_id: null, next_episode_id: null,
+            published_at: nowMinus(L.minutesAgo),
+            created_at: nowMinus(L.minutesAgo + 10)
+          },
+          post: null,
+          published_at: nowMinus(L.minutesAgo)
+        };
+      })
+    })
+  };
+
+  // ============================================================
+  //  Mock fetch adapter
+  //   실제 코드의 fetch() 호출을 그대로 두고, 여기서 가로챈다.
+  //   백엔드가 준비되면 USE_MOCK = false 로 두면 그대로 실 API로 감.
+  // ============================================================
+  const DEV = { forceError: false, slow: false };
+
+  if (USE_MOCK) {
+    const jsonResp = (data, status = 200) =>
+      new Response(JSON.stringify(data), {
+        status,
+        headers: { 'Content-Type': 'application/json; charset=utf-8' }
+      });
+    const errResp = (status, code, message) =>
+      jsonResp({ error: { code, message } }, status);
+
+    const originalFetch = window.fetch.bind(window);
+
+    window.fetch = async (input, init) => {
+      const url = typeof input === 'string' ? input : input.url;
+      // 외부 URL은 원본 fetch로 보냄
+      if (!url.startsWith(API_BASE)) return originalFetch(input, init);
+
+      const delayMin = DEV.slow ? 1500 : 400;
+      const delayMax = DEV.slow ? 3000 : 1000;
+      await new Promise(r => setTimeout(r, delayMin + Math.random() * (delayMax - delayMin)));
+
+      if (DEV.forceError) {
+        return errResp(500, 'internal_error', '서버가 응답하지 않습니다. 잠시 후 다시 시도해 주세요.');
+      }
+
+      const path = url.slice(API_BASE.length).split('?')[0].replace(/^\//, '');
+      const handler = responses[path];
+      if (!handler) return errResp(404, 'not_found', `엔드포인트를 찾을 수 없습니다: ${path}`);
+
+      try {
+        return jsonResp(handler());
+      } catch (e) {
+        return errResp(500, 'mock_error', e.message || 'Mock 처리 실패');
+      }
+    };
+  }
+
+  // ============================================================
+  //  API client (명세 그대로. Mock 여부와 무관하게 동일한 코드)
+  // ============================================================
+  class APIError extends Error {
+    constructor(status, code, message) {
+      super(message);
+      this.name = 'APIError';
+      this.status = status;
+      this.code = code;
+    }
+  }
+
+  const parseError = async (res) => {
+    try {
+      const body = await res.json();
+      return new APIError(res.status, body?.error?.code || 'unknown', body?.error?.message || `HTTP ${res.status}`);
+    } catch {
+      return new APIError(res.status, 'unknown', `HTTP ${res.status}`);
+    }
+  };
+
+  const api = {
+    async getRankingsSeries({ period = 'weekly', genre = null, limit = 10 } = {}) {
+      const q = new URLSearchParams({ period, limit: String(limit) });
+      if (genre) q.set('genre', genre);
+      const res = await fetch(`${API_BASE}/rankings/series?${q}`);
+      if (!res.ok) throw await parseError(res);
+      return res.json();
+    },
+    async getRankingsPosts({ period = 'weekly', genre = null, limit = 10 } = {}) {
+      const q = new URLSearchParams({ period, limit: String(limit) });
+      if (genre) q.set('genre', genre);
+      const res = await fetch(`${API_BASE}/rankings/posts?${q}`);
+      if (!res.ok) throw await parseError(res);
+      return res.json();
+    },
+    async getRankingsLatest({ type = 'mixed', limit = 3 } = {}) {
+      const q = new URLSearchParams({ type, limit: String(limit) });
+      const res = await fetch(`${API_BASE}/rankings/latest?${q}`);
+      if (!res.ok) throw await parseError(res);
+      return res.json();
+    }
+  };
+
+  // ============================================================
+  //  Utilities
+  // ============================================================
+  const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+
+  const fmtNum = (n) => {
+    if (n == null) return '—';
+    if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (n >= 1_000)     return (n / 1_000).toFixed(1).replace(/\.0$/, '') + 'k';
+    return String(n);
+  };
+
+  const relTime = (iso) => {
+    const then = new Date(iso).getTime();
+    if (isNaN(then)) return '';
+    const diffMin = Math.max(0, (Date.now() - then) / 60_000);
+    if (diffMin < 1)    return '방금 전';
+    if (diffMin < 60)   return `${Math.floor(diffMin)}분 전`;
+    if (diffMin < 60*24)   return `${Math.floor(diffMin/60)}시간 전`;
+    if (diffMin < 60*24*7) return `${Math.floor(diffMin/60/24)}일 전`;
+    return `${Math.floor(diffMin/60/24/7)}주 전`;
+  };
+
+  const GENRE_BASE = {
+    romance:  ['#ff9db6', '#e83e5c'],
+    fantasy:  ['#9d7cff', '#4a3fa8'],
+    thriller: ['#ff6c5c', '#6b1e2a'],
+    daily:    ['#ffdc7a', '#f39a5a'],
+    bl_gl:    ['#d9a0ff', '#7846d3'],
+    action:   ['#ff8a3d', '#c93516'],
+    comedy:   ['#ffe266', '#ffa626'],
+    drama:    ['#6cb6d9', '#2a4e7a'],
+    youth:    ['#7fdcd6', '#2b8f8a'],
+    horror:   ['#6b5580', '#1a0e26']
+  };
+  const GENRE_NAME = {
+    romance: '로맨스', fantasy: '판타지', thriller: '스릴러', daily: '일상',
+    bl_gl: 'BL/GL', action: '액션', comedy: '개그', drama: '드라마',
+    youth: '청춘', horror: '공포'
+  };
+
+  // id 해시 기반으로 같은 장르 안에서도 색을 살짝 변주
+  const hashString = (s) => {
+    let h = 0; for (let i = 0; i < s.length; i++) { h = (h * 31 + s.charCodeAt(i)) | 0; }
+    return Math.abs(h);
+  };
+  const shift = (hex, dh) => {
+    // hex → HSL 회전 → hex
+    const n = parseInt(hex.slice(1), 16);
+    let r = (n >> 16) & 0xff, g = (n >> 8) & 0xff, b = n & 0xff;
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+    if (max === min) { h = s = 0; }
+    else {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        case b: h = (r - g) / d + 4; break;
+      }
+      h /= 6;
+    }
+    h = (h + dh / 360) % 1;
+    if (h < 0) h += 1;
+    const hue2rgb = (p, q, t) => {
+      if (t < 0) t += 1; if (t > 1) t -= 1;
+      if (t < 1/6) return p + (q - p) * 6 * t;
+      if (t < 1/2) return q;
+      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    };
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    const rr = Math.round(hue2rgb(p, q, h + 1/3) * 255);
+    const gg = Math.round(hue2rgb(p, q, h) * 255);
+    const bb = Math.round(hue2rgb(p, q, h - 1/3) * 255);
+    return '#' + [rr, gg, bb].map(x => x.toString(16).padStart(2, '0')).join('');
+  };
+  const gradientFor = (genre, seed) => {
+    const base = GENRE_BASE[genre] || GENRE_BASE.daily;
+    const dh = ((hashString(seed || '') % 24) - 12);
+    return [shift(base[0], dh), shift(base[1], dh)];
+  };
+
+  // ============================================================
+  //  Renderers
+  // ============================================================
+  const seriesBadges = (item) => {
+    const s = item.series;
+    const badges = [];
+    if (item.rank_delta >= 4)              badges.push('<span class="badge badge-hot">HOT</span>');
+    else if (s.stats.subscribers_only_count > 0) badges.push('<span class="badge badge-sub">구독자 전용</span>');
+    else if (s.status === 'completed')     badges.push('<span class="badge badge-end">완결</span>');
+    return badges.join('');
+  };
+
+  const renderSeriesCard = (item) => {
+    const s = item.series;
+    const [g1, g2] = gradientFor(s.genres[0], s.id);
+    return `
+      <article class="rank-card" data-series="${escapeHtml(s.id)}">
+        <div class="thumb" style="--g1:${g1};--g2:${g2}">
+          <span class="rank-num">${String(item.rank).padStart(2, '0')}</span>
+          ${seriesBadges(item)}
+          <span class="thumb-title">${escapeHtml(s.title)}</span>
+        </div>
+        <div class="rank-meta">
+          <div class="rank-title">${escapeHtml(s.title)}</div>
+          <div class="rank-author"><strong>${escapeHtml(s.author.display_name)}</strong> · ${s.episode_count}화 ${s.status === 'completed' ? '완결' : '연재중'}</div>
+          <div class="rank-stats">
+            <span class="rank-genre">${escapeHtml(GENRE_NAME[s.genres[0]] || s.genres[0])}</span>
+            <span>조회 ${fmtNum(s.stats.views_total)}</span>
+            <span>❤ ${fmtNum(s.stats.likes_total)}</span>
+          </div>
+        </div>
+      </article>
+    `;
+  };
+
+  const renderPostCard = (item) => {
+    const p = item.post;
+    const [g1, g2] = gradientFor(p.genres[0], p.id);
+    const badges = item.rank_delta >= 4 ? '<span class="badge badge-hot">HOT</span>' : '';
+    return `
+      <article class="rank-card post-card" data-post="${escapeHtml(p.id)}">
+        <div class="thumb" style="--g1:${g1};--g2:${g2}">
+          <span class="rank-num">${String(item.rank).padStart(2, '0')}</span>
+          ${badges}
+          <span class="thumb-title">${escapeHtml(p.title)}</span>
+        </div>
+        <div class="rank-meta">
+          <div class="rank-title">${escapeHtml(p.title)}</div>
+          <div class="rank-author"><strong>${escapeHtml(p.author.display_name)}</strong> · ${relTime(p.published_at)}</div>
+          <div class="rank-stats">
+            <span class="rank-genre">${escapeHtml(GENRE_NAME[p.genres[0]] || p.genres[0])}</span>
+            <span>조회 ${fmtNum(p.stats.views)}</span>
+            <span>❤ ${fmtNum(p.stats.likes)}</span>
+          </div>
+        </div>
+      </article>
+    `;
+  };
+
+  const renderLatestCard = (item) => {
+    if (item.type !== 'episode') return ''; // Phase 1은 episode 만
+    const s = item.series;
+    const e = item.episode;
+    const [g1, g2] = gradientFor(s.genres[0], s.id);
+    const isNew = e.order <= 3;
+    return `
+      <article class="feature-card" data-episode="${escapeHtml(e.id)}">
+        <div class="thumb" style="--g1:${g1};--g2:${g2}">
+          <span class="feature-tag">${isNew ? '신작' : '업데이트'}</span>
+          <span class="feature-time">${relTime(item.published_at)}</span>
+          <span class="feature-thumb-title">${escapeHtml(s.title)}</span>
+        </div>
+        <div class="feature-body">
+          <div class="feature-title-line">
+            <div class="feature-title">${escapeHtml(s.title)}</div>
+            <div class="feature-episode">${e.order}화</div>
+          </div>
+          <div class="feature-meta">
+            <span class="author">${escapeHtml(s.author.display_name)}</span>
+            <span>·</span>
+            <span>${escapeHtml(GENRE_NAME[s.genres[0]] || s.genres[0])}</span>
+          </div>
+          <div class="feature-desc">${escapeHtml(s.description)}</div>
+          <div class="feature-actions">
+            <button class="action-btn" data-follow="${escapeHtml(s.author.handle)}">팔로우</button>
+            <button class="action-btn primary" data-read="${escapeHtml(e.id)}">${e.order}화 감상</button>
+          </div>
+        </div>
+      </article>
+    `;
+  };
+
+  // Skeleton
+  const rankSkeleton = (n) => Array.from({ length: n }, () => `
+    <article class="rank-card skeleton-card">
+      <div class="thumb"></div>
+      <div class="rank-meta">
+        <div class="skeleton skeleton-line" style="width: 72%;"></div>
+        <div class="skeleton skeleton-line" style="width: 44%;"></div>
+        <div class="skeleton skeleton-line" style="width: 60%;"></div>
+      </div>
+    </article>
+  `).join('');
+
+  const featureSkeleton = (n) => Array.from({ length: n }, () => `
+    <article class="feature-card skeleton-card">
+      <div class="thumb"></div>
+      <div class="feature-body">
+        <div class="skeleton skeleton-line" style="width: 60%; height: 18px;"></div>
+        <div class="skeleton skeleton-line" style="width: 40%;"></div>
+        <div class="skeleton skeleton-line" style="width: 100%; height: 44px;"></div>
+      </div>
+    </article>
+  `).join('');
+
+  const renderLoading = (kind) => {
+    if (kind === 'latest') return `<div class="latest-grid">${featureSkeleton(3)}</div>`;
+    return `<div class="rank-grid">${rankSkeleton(10)}</div>`;
+  };
+
+  const renderError = (err) => `
+    <div class="error-state" role="alert">
+      <div class="error-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div class="error-title">불러오지 못했어요</div>
+      <div class="error-message">${escapeHtml(err.message || '알 수 없는 오류가 발생했습니다.')}</div>
+      <div class="error-code">code: ${escapeHtml(err.code || 'unknown')} · HTTP ${err.status ?? '—'}</div>
+      <button class="btn-retry" data-action="retry">다시 시도</button>
+    </div>
+  `;
+
+  const renderEmpty = (msg) => `<div class="empty-state">${escapeHtml(msg)}</div>`;
+
+  // ============================================================
+  //  State & tab controller
+  // ============================================================
+  const state = {
+    series: { status: 'idle', data: null, error: null, params: {} },
+    posts:  { status: 'idle', data: null, error: null, params: {} },
+    latest: { status: 'idle', data: null, error: null, params: {} },
+    activeTab: 'series',
+    activeGenre: ''
+  };
+
+  const el = {
+    series: document.getElementById('panel-series'),
+    posts:  document.getElementById('panel-posts'),
+    latest: document.getElementById('panel-latest'),
+    periodLabel: document.getElementById('periodLabel')
+  };
+
+  const renderPanel = (tab) => {
+    const st = state[tab];
+    const target = el[tab];
+    if (st.status === 'loading') { target.innerHTML = renderLoading(tab); return; }
+    if (st.status === 'error')   { target.innerHTML = renderError(st.error); return; }
+    if (st.status === 'success') {
+      const items = st.data?.items || [];
+      if (items.length === 0) { target.innerHTML = renderEmpty('결과가 없습니다.'); return; }
+      if (tab === 'series') target.innerHTML = `<div class="rank-grid">${items.map(renderSeriesCard).join('')}</div>`;
+      if (tab === 'posts')  target.innerHTML = `<div class="rank-grid">${items.map(renderPostCard).join('')}</div>`;
+      if (tab === 'latest') target.innerHTML = `<div class="latest-grid">${items.map(renderLatestCard).join('')}</div>`;
+      // period label 갱신 (series/posts만)
+      if (st.data?.computed_at) {
+        const d = new Date(st.data.computed_at);
+        const end = d.toISOString().slice(0, 10).replace(/-/g, '.');
+        const startD = new Date(d.getTime() - 6 * 24 * 60 * 60 * 1000);
+        const start = startD.toISOString().slice(0, 10).replace(/-/g, '.');
+        el.periodLabel.textContent = `이번 주 · ${start} – ${end}`;
+      }
+      return;
+    }
+    // idle
+    target.innerHTML = '';
+  };
+
+  const loadTab = async (tab, { force = false } = {}) => {
+    const st = state[tab];
+    if (!force && st.status === 'success') return;
+    st.status = 'loading';
+    st.error = null;
+    renderPanel(tab);
+    try {
+      const params = tab === 'latest'
+        ? { type: 'mixed', limit: 3 }
+        : { period: 'weekly', genre: state.activeGenre || null, limit: 10 };
+      const data =
+        tab === 'series' ? await api.getRankingsSeries(params) :
+        tab === 'posts'  ? await api.getRankingsPosts(params)  :
+                           await api.getRankingsLatest(params);
+      st.status = 'success';
+      st.data = data;
+      st.params = params;
+    } catch (err) {
+      st.status = 'error';
+      st.error = err instanceof APIError ? err : new APIError(0, 'network_error', err.message || '네트워크 오류');
+    }
+    renderPanel(tab);
+  };
+
+  const activateTab = (tab) => {
+    state.activeTab = tab;
+    document.querySelectorAll('.tab').forEach((t) => {
+      const on = t.dataset.tab === tab;
+      t.classList.toggle('active', on);
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('.panel').forEach((p) => {
+      p.classList.toggle('active', p.dataset.panel === tab);
+    });
+    loadTab(tab);
+  };
+
+  const invalidateAll = () => {
+    for (const k of ['series', 'posts', 'latest']) {
+      state[k].status = 'idle'; state[k].data = null; state[k].error = null;
+    }
+  };
+
+  // ============================================================
+  //  Event binding
+  // ============================================================
+  document.querySelectorAll('.tab').forEach((t) => {
+    t.addEventListener('click', () => activateTab(t.dataset.tab));
+  });
+
+  document.querySelectorAll('.chip').forEach((c) => {
+    c.addEventListener('click', () => {
+      document.querySelectorAll('.chip').forEach((x) => x.classList.toggle('active', x === c));
+      state.activeGenre = c.dataset.genre || '';
+      // 장르 변경 시 series/posts만 재요청 (latest 는 장르 무관)
+      state.series.status = 'idle';
+      state.posts.status = 'idle';
+      loadTab(state.activeTab);
+    });
+  });
+
+  // Retry 버튼 (delegation)
+  document.addEventListener('click', (e) => {
+    const t = e.target;
+    if (t.matches?.('[data-action="retry"]')) {
+      loadTab(state.activeTab, { force: true });
+    }
+  });
+
+  // Theme toggle
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const root = document.documentElement;
+    const curr = root.getAttribute('data-theme');
+    const systemDark = matchMedia('(prefers-color-scheme: dark)').matches;
+    const isDark = curr === 'dark' || (!curr && systemDark);
+    root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  });
+
+  // Dev panel
+  document.getElementById('devReload').addEventListener('click', () => {
+    loadTab(state.activeTab, { force: true });
+  });
+  document.getElementById('devError').addEventListener('change', (e) => {
+    DEV.forceError = e.target.checked;
+  });
+  document.getElementById('devSlow').addEventListener('change', (e) => {
+    DEV.slow = e.target.checked;
+  });
+
+  // 초기 로드
+  activateTab('series');
+})();
+</script>
+
+</body>
+</html>

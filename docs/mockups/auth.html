@@ -1,0 +1,1105 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>로그인 · 회원가입 — 짓다</title>
+<style>
+  :root {
+    --font-sans: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Segoe UI", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+    --paper: #f4f3f0; --surface: #ffffff; --surface-2: #ecebe6;
+    --ink: #17141a; --ink-2: #3f3946; --muted: #7a7480;
+    --line: #e6e2dd; --line-2: #d8d3cc;
+    --accent: #ee2c56; --accent-hover: #d61e46;
+    --gold: #c78e28;
+    --success: #2f8f5d; --warning: #d69a2a; --danger: #c94848;
+    --shadow-sm: 0 1px 2px rgba(30, 20, 40, 0.05);
+    --shadow-md: 0 2px 6px rgba(30, 20, 40, 0.06), 0 12px 32px rgba(30, 20, 40, 0.06);
+    --radius: 8px;
+    --radius-lg: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0d0c10; --surface: #17151b; --surface-2: #1f1c25;
+      --ink: #f0edf1; --ink-2: #cac4d0; --muted: #8b8492;
+      --line: #24222a; --line-2: #33303a;
+      --accent: #ff5573; --accent-hover: #ff7a92;
+      --gold: #e8b13a; --success: #4bb87a; --warning: #e8b13a; --danger: #e07070;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0d0c10; --surface: #17151b; --surface-2: #1f1c25;
+    --ink: #f0edf1; --ink-2: #cac4d0; --muted: #8b8492;
+    --line: #24222a; --line-2: #33303a;
+    --accent: #ff5573; --accent-hover: #ff7a92;
+    --gold: #e8b13a; --success: #4bb87a; --warning: #e8b13a; --danger: #e07070;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.35);
+  }
+  :root[data-theme="light"] {
+    --paper: #f4f3f0; --surface: #ffffff; --surface-2: #ecebe6;
+    --ink: #17141a; --ink-2: #3f3946; --muted: #7a7480;
+    --line: #e6e2dd; --line-2: #d8d3cc;
+    --accent: #ee2c56; --accent-hover: #d61e46;
+    --gold: #c78e28; --success: #2f8f5d; --warning: #d69a2a; --danger: #c94848;
+    --shadow-sm: 0 1px 2px rgba(30, 20, 40, 0.05);
+    --shadow-md: 0 2px 6px rgba(30, 20, 40, 0.06), 0 12px 32px rgba(30, 20, 40, 0.06);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { min-height: 100%; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: var(--font-sans); font-size: 14.5px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    display: flex; flex-direction: column;
+  }
+  button {
+    font-family: inherit; font-size: inherit; color: inherit;
+    background: none; border: 0; padding: 0; cursor: pointer;
+  }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  input { font-family: inherit; font-size: inherit; color: inherit; }
+  h1, h2, h3 { margin: 0; font-weight: 700; text-wrap: balance; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .site-header {
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--paper);
+  }
+  .brand { display: flex; align-items: baseline; gap: 10px; }
+  .brand-mark {
+    font-size: 22px; font-weight: 900; letter-spacing: -0.03em; color: var(--ink);
+  }
+  .brand-mark::after {
+    content: ""; display: inline-block; width: 6px; height: 6px;
+    background: var(--accent); border-radius: 50%; margin-left: 3px; transform: translateY(-1px);
+  }
+  .brand-sub {
+    font-size: 10px; color: var(--muted); letter-spacing: 0.24em;
+    text-transform: uppercase; font-weight: 700;
+  }
+  .theme-toggle {
+    height: 34px; width: 34px; border-radius: 999px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); border: 1px solid var(--line); background: var(--surface);
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .theme-toggle:hover { border-color: var(--ink-2); color: var(--ink); }
+  .theme-toggle svg { width: 14px; height: 14px; }
+
+  .wrap {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    padding: 40px 20px;
+  }
+  .card {
+    width: 100%; max-width: 420px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    box-shadow: var(--shadow-md);
+  }
+  @media (max-width: 480px) { .card { padding: 24px 20px; } }
+
+  .card-title {
+    font-size: 24px; letter-spacing: -0.03em;
+    margin-bottom: 8px; text-align: center;
+  }
+  .card-sub {
+    color: var(--muted); font-size: 13px;
+    text-align: center; margin-bottom: 24px;
+  }
+
+  .tabs {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+    padding: 4px; background: var(--surface-2);
+    border-radius: 999px; margin-bottom: 24px;
+  }
+  .tab {
+    padding: 8px 12px; border-radius: 999px;
+    font-weight: 700; font-size: 13px;
+    color: var(--muted);
+    transition: background 0.15s, color 0.15s;
+  }
+  .tab.active { background: var(--surface); color: var(--ink); box-shadow: var(--shadow-sm); }
+
+  .oauth-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; }
+  .oauth-btn {
+    height: 42px; border-radius: var(--radius);
+    border: 1px solid var(--line); background: var(--surface);
+    color: var(--ink); font-weight: 600; font-size: 13.5px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .oauth-btn:hover { border-color: var(--ink-2); }
+  .oauth-btn svg { width: 16px; height: 16px; }
+
+  .divider {
+    display: flex; align-items: center; gap: 10px;
+    color: var(--muted); font-size: 11px;
+    margin: 20px 0 16px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+  }
+  .divider::before, .divider::after {
+    content: ""; flex: 1; height: 1px; background: var(--line);
+  }
+
+  .field { margin-bottom: 14px; }
+  .field-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .label {
+    font-size: 12px; color: var(--ink-2); font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .label-hint {
+    font-size: 11px; color: var(--muted);
+  }
+  .input-wrap { position: relative; }
+  .input {
+    width: 100%; height: 42px; padding: 0 14px;
+    border-radius: var(--radius); border: 1px solid var(--line);
+    background: var(--surface); color: var(--ink);
+    font-size: 14px; outline: none;
+    transition: border-color 0.15s;
+  }
+  .input:focus { border-color: var(--ink-2); }
+  .input.error { border-color: var(--danger); }
+  .input.ok { border-color: var(--success); }
+  .input.prefix { padding-left: 28px; }
+  .input-prefix {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    color: var(--muted); font-family: var(--font-mono); font-size: 13px;
+    pointer-events: none;
+  }
+  .input-suffix {
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    color: var(--muted); font-size: 12px; font-weight: 600;
+    padding: 4px 8px; border-radius: 4px;
+    background: none;
+    transition: background 0.15s, color 0.15s;
+  }
+  .input-suffix.btn-like:hover { background: var(--line); color: var(--ink); }
+
+  .field-error {
+    margin-top: 5px; color: var(--danger);
+    font-size: 12px; line-height: 1.4;
+    display: flex; gap: 6px; align-items: flex-start;
+  }
+  .field-error svg { width: 12px; height: 12px; flex-shrink: 0; margin-top: 2px; }
+  .field-help {
+    margin-top: 5px; color: var(--muted);
+    font-size: 11.5px; line-height: 1.4;
+  }
+  .field-check {
+    margin-top: 5px; font-size: 11.5px; color: var(--success);
+    display: flex; align-items: center; gap: 5px;
+  }
+  .field-check svg { width: 11px; height: 11px; }
+
+  /* Password strength meter */
+  .pw-meter { margin-top: 8px; }
+  .pw-bar {
+    display: flex; gap: 3px; margin-bottom: 6px;
+  }
+  .pw-seg {
+    flex: 1; height: 3px; border-radius: 2px;
+    background: var(--line-2);
+    transition: background 0.2s;
+  }
+  .pw-seg.on-0 { background: var(--danger); }
+  .pw-seg.on-1 { background: var(--danger); }
+  .pw-seg.on-2 { background: var(--warning); }
+  .pw-seg.on-3 { background: var(--success); }
+  .pw-seg.on-4 { background: var(--success); }
+  .pw-label {
+    display: flex; justify-content: space-between; font-size: 11.5px;
+    color: var(--muted);
+  }
+  .pw-label .grade { font-weight: 700; }
+  .pw-label .grade.g0, .pw-label .grade.g1 { color: var(--danger); }
+  .pw-label .grade.g2 { color: var(--warning); }
+  .pw-label .grade.g3, .pw-label .grade.g4 { color: var(--success); }
+  .pw-checks {
+    margin-top: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px;
+    font-size: 11.5px; color: var(--muted);
+  }
+  .pw-check { display: flex; align-items: center; gap: 5px; }
+  .pw-check.ok { color: var(--success); }
+  .pw-check svg { width: 11px; height: 11px; }
+
+  .cta {
+    width: 100%; height: 44px; border-radius: 999px;
+    background: var(--ink); color: var(--paper);
+    font-weight: 700; font-size: 14px;
+    margin-top: 8px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: opacity 0.15s, background 0.15s;
+  }
+  .cta:hover:not(:disabled) { opacity: 0.9; }
+  .cta:disabled { opacity: 0.5; cursor: not-allowed; }
+  .cta.accent { background: var(--accent); color: white; }
+  .cta.accent:hover:not(:disabled) { background: var(--accent-hover); opacity: 1; }
+
+  .form-error {
+    margin-top: 12px; padding: 10px 12px;
+    background: color-mix(in oklab, var(--danger) 10%, transparent);
+    border: 1px solid color-mix(in oklab, var(--danger) 30%, transparent);
+    border-radius: var(--radius);
+    color: var(--danger);
+    font-size: 12.5px; line-height: 1.5;
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+  .form-error svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
+  .form-success {
+    margin-top: 12px; padding: 10px 12px;
+    background: color-mix(in oklab, var(--success) 10%, transparent);
+    border: 1px solid color-mix(in oklab, var(--success) 30%, transparent);
+    border-radius: var(--radius);
+    color: var(--success);
+    font-size: 12.5px; line-height: 1.5;
+  }
+  .form-warn {
+    margin-top: 12px; padding: 10px 12px;
+    background: color-mix(in oklab, var(--warning) 12%, transparent);
+    border: 1px solid color-mix(in oklab, var(--warning) 35%, transparent);
+    border-radius: var(--radius);
+    color: var(--warning);
+    font-size: 12.5px; line-height: 1.5;
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+  .form-warn svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .terms {
+    margin-top: 12px; font-size: 11.5px;
+    color: var(--muted); text-align: center; line-height: 1.5;
+  }
+  .foot-link {
+    text-align: center; margin-top: 18px;
+    font-size: 12.5px; color: var(--muted);
+  }
+  .foot-link a { color: var(--ink-2); font-weight: 600; }
+
+  .spinner {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.35);
+    border-top-color: white;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Security notes panel */
+  .sec-notes {
+    max-width: 420px; width: 100%; margin: 20px auto 0;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+    font-size: 12px; color: var(--muted); line-height: 1.55;
+  }
+  .sec-notes h3 {
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--accent); font-weight: 700; margin-bottom: 10px;
+  }
+  .sec-notes ul { padding-left: 18px; margin: 0; }
+  .sec-notes li { margin-bottom: 4px; }
+  .sec-notes code {
+    font-family: var(--font-mono); font-size: 10.5px;
+    padding: 1px 4px; background: var(--surface-2);
+    color: var(--ink-2); border-radius: 3px;
+  }
+
+  /* Dev panel */
+  .dev-panel {
+    position: fixed; right: 20px; bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px 8px 10px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 999px; box-shadow: var(--shadow-md);
+    font-size: 12px; z-index: 30;
+  }
+  .dev-badge {
+    padding: 3px 8px; border-radius: 999px; background: var(--accent);
+    color: white; font-weight: 800; font-size: 10px; letter-spacing: 0.12em;
+  }
+  .dev-panel button {
+    padding: 4px 10px; border-radius: 999px;
+    color: var(--ink-2); background: var(--paper);
+    font-weight: 600; font-size: 12px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .dev-panel button:hover { background: var(--line); color: var(--ink); }
+  .dev-panel label {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--muted); font-size: 12px; cursor: pointer;
+  }
+  .dev-panel input[type="checkbox"] { margin: 0; accent-color: var(--accent); }
+  @media (max-width: 640px) {
+    .dev-panel { bottom: 12px; right: 12px; padding: 6px 10px 6px 8px; }
+    .dev-panel label:last-of-type { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) { * { transition-duration: 0ms !important; animation-duration: 0ms !important; } }
+</style>
+
+<header class="site-header">
+  <div class="brand">
+    <span class="brand-mark">짓다</span>
+    <span class="brand-sub">JITDA</span>
+  </div>
+  <button class="theme-toggle" id="themeToggle" aria-label="테마 전환" title="테마 전환">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+  </button>
+</header>
+
+<main class="wrap">
+  <div>
+    <div class="card" id="authCard"></div>
+    <div class="sec-notes">
+      <h3>이 화면이 지키는 것</h3>
+      <ul>
+        <li>패스워드는 원문 저장 안 함 · 서버에서 <code>argon2id</code>로 해싱</li>
+        <li>모든 요청은 HTTPS 전용 (프로덕션 <code>Strict-Transport-Security</code>)</li>
+        <li>로그인 실패 5회 / 15분 → 계정 잠금 (동일 IP · 계정 기준)</li>
+        <li>패스워드 강도 <code>zxcvbn</code> 점수 <strong>3 이상</strong> 요구, 유출 사전 대조</li>
+        <li>사용자 존재 여부는 응답에서 노출하지 않음 (통일 에러)</li>
+        <li>토큰은 <code>HttpOnly · Secure · SameSite=Strict</code> 쿠키 (프론트 <code>localStorage</code> 미사용)</li>
+      </ul>
+    </div>
+  </div>
+</main>
+
+<div class="dev-panel">
+  <span class="dev-badge">MOCK</span>
+  <button id="devReset" title="가짜 유저 데이터 초기화">↻ 초기화</button>
+  <label><input type="checkbox" id="devError"/> 서버 에러</label>
+  <label><input type="checkbox" id="devSlow"/> 느리게</label>
+</div>
+
+<script>
+(() => {
+  // ============================================================
+  //  Config
+  // ============================================================
+  const API_BASE = '/api/v1';
+  const USE_MOCK = true;
+
+  // ============================================================
+  //  Mock "server-side" user DB
+  //   비밀번호 해시 시뮬레이션 (실제로는 argon2id).
+  //   여기서는 데모용으로 sha-256 을 사용하되, 실 서버 코드 아님을 명시.
+  // ============================================================
+  const users = {};  // handle -> { email, handle, display_name, password_hash, created_at }
+  const emailIndex = {};  // email -> handle
+  const loginFails = {};  // key(email+ip) -> { count, until }
+
+  const seedUser = async () => {
+    // 데모 계정 하나 (email: demo@jitda.com / pw: DalbitDemo!24)
+    const email = 'demo@jitda.com';
+    const password = 'DalbitDemo!24';
+    const hash = await mockHash(password);
+    users['demo'] = {
+      email, handle: 'demo', display_name: '데모유저',
+      password_hash: hash, created_at: new Date().toISOString()
+    };
+    emailIndex[email] = 'demo';
+  };
+
+  // ⚠️ 데모 전용. 실 서버는 argon2id + salt + memory/time cost 튜닝.
+  const mockHash = async (raw) => {
+    const enc = new TextEncoder();
+    const buf = await crypto.subtle.digest('SHA-256', enc.encode('jitda-demo-salt:' + raw));
+    return 'sha256$' + [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+  };
+  const mockVerify = async (raw, hash) => {
+    const expect = await mockHash(raw);
+    // constant-time-ish 비교 (데모용)
+    if (expect.length !== hash.length) return false;
+    let diff = 0;
+    for (let i = 0; i < expect.length; i++) diff |= expect.charCodeAt(i) ^ hash.charCodeAt(i);
+    return diff === 0;
+  };
+
+  // ============================================================
+  //  Mock fetch adapter (HTTPS 정책 · 통일 오류 · 잠금)
+  // ============================================================
+  const DEV = { forceError: false, slow: false };
+
+  if (USE_MOCK) {
+    const jsonResp = (data, status = 200) =>
+      new Response(JSON.stringify(data), {
+        status, headers: { 'Content-Type': 'application/json; charset=utf-8' }
+      });
+    const errResp = (status, code, message, details) =>
+      jsonResp({ error: { code, message, ...(details ? { details } : {}) } }, status);
+
+    const originalFetch = window.fetch.bind(window);
+
+    // 서버측 재검증 스키마 (Zod 대응)
+    const validateSignup = (b) => {
+      const errs = {};
+      if (!b.email || typeof b.email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(b.email) || b.email.length > 254)
+        errs.email = '올바른 이메일이 아닙니다.';
+      if (!b.password || typeof b.password !== 'string' || b.password.length < 10 || b.password.length > 128)
+        errs.password = '10~128자여야 합니다.';
+      else if (zxcvbnScore(b.password, [b.email, b.handle, b.display_name]) < 3)
+        errs.password = '더 강한 비밀번호가 필요합니다.';
+      if (!b.display_name || typeof b.display_name !== 'string' || b.display_name.trim().length < 1 || b.display_name.length > 30)
+        errs.display_name = '1~30자여야 합니다.';
+      else if (/[\p{Cc}\p{Cf}]/u.test(b.display_name))
+        errs.display_name = '제어 문자는 사용할 수 없습니다.';
+      if (!b.handle || typeof b.handle !== 'string' || !/^[a-z0-9_]{3,20}$/.test(b.handle))
+        errs.handle = '3~20자의 소문자·숫자·언더스코어만 가능합니다.';
+      return errs;
+    };
+
+    const handlers = [
+      // POST /auth/signup
+      { match: (m, p) => m === 'POST' && p === '/auth/signup',
+        handle: async (p, u, init) => {
+          const body = init?.body ? JSON.parse(init.body) : {};
+          const errs = validateSignup(body);
+          if (Object.keys(errs).length) return errResp(422, 'validation_failed', '요청 값이 올바르지 않습니다.', { fields: errs });
+          // 중복 검사 (통일 오류 — 어떤 필드가 중복인지는 명확히 알려도 됨: 이건 가입 흐름이라)
+          if (emailIndex[body.email]) return errResp(409, 'conflict', '이미 사용 중인 이메일입니다.', { fields: { email: '이미 사용 중입니다.' } });
+          if (users[body.handle]) return errResp(409, 'conflict', '이미 사용 중인 핸들입니다.', { fields: { handle: '이미 사용 중입니다.' } });
+          const password_hash = await mockHash(body.password);
+          users[body.handle] = {
+            email: body.email, handle: body.handle, display_name: body.display_name,
+            password_hash, created_at: new Date().toISOString()
+          };
+          emailIndex[body.email] = body.handle;
+          return jsonResp({
+            user: {
+              id: 'usr_' + Math.random().toString(36).slice(2, 8),
+              handle: body.handle, display_name: body.display_name,
+              avatar_url: null, bio: null, is_author: true,
+              created_at: users[body.handle].created_at
+            },
+            email_verification_sent: true
+          }, 201);
+        }
+      },
+      // POST /auth/login
+      { match: (m, p) => m === 'POST' && p === '/auth/login',
+        handle: async (p, u, init) => {
+          const body = init?.body ? JSON.parse(init.body) : {};
+          const ip = '203.0.113.1'; // mock
+          if (typeof body.email !== 'string' || typeof body.password !== 'string')
+            return errResp(400, 'invalid_request', '요청이 올바르지 않습니다.');
+          const key = body.email.toLowerCase() + '|' + ip;
+          const now = Date.now();
+          const rec = loginFails[key] || { count: 0, until: 0 };
+          if (rec.until > now) {
+            const wait = Math.ceil((rec.until - now) / 1000 / 60);
+            return errResp(429, 'too_many_attempts',
+              `로그인 시도가 너무 많습니다. ${wait}분 후 다시 시도해주세요.`);
+          }
+          const handle = emailIndex[body.email.toLowerCase()];
+          const user = handle ? users[handle] : null;
+          // 통일 오류: 이메일 존재 여부 노출 X
+          const invalidResp = () => errResp(401, 'invalid_credentials', '이메일 또는 비밀번호가 올바르지 않습니다.');
+          if (!user) {
+            rec.count += 1;
+            if (rec.count >= 5) { rec.until = now + 15 * 60_000; rec.count = 0; }
+            loginFails[key] = rec;
+            // 존재하지 않는 유저에도 실제 해싱 시간과 유사한 delay 를 주어 timing attack 방어
+            await mockHash(body.password);
+            return invalidResp();
+          }
+          const ok = await mockVerify(body.password, user.password_hash);
+          if (!ok) {
+            rec.count += 1;
+            if (rec.count >= 5) { rec.until = now + 15 * 60_000; rec.count = 0; }
+            loginFails[key] = rec;
+            return invalidResp();
+          }
+          // 성공 — 실패 카운트 초기화
+          delete loginFails[key];
+          // 실제로는 refresh token 을 HttpOnly Secure SameSite=Strict 쿠키로 세팅
+          // 데모에서는 응답 body 로만 표시 (클라이언트는 저장하지 않음)
+          return jsonResp({
+            access_token: 'eyJhbGci_mock_access',  // JWT (HS256) — 실서버
+            refresh_token: '(HttpOnly Cookie 로 세팅됨)',
+            expires_in: 3600, token_type: 'Bearer',
+            user: {
+              id: 'usr_' + user.handle,
+              handle: user.handle, display_name: user.display_name,
+              avatar_url: null, bio: null, is_author: true, created_at: user.created_at
+            }
+          });
+        }
+      },
+      // POST /auth/oauth/{provider}/callback
+      { match: (m, p) => m === 'POST' && /^\/auth\/oauth\/[^/]+\/callback$/.test(p),
+        handle: (p) => {
+          const provider = p.split('/')[3];
+          // Mock: 소셜 로그인은 실제 흐름을 시뮬레이션할 수 없어 안내만
+          return errResp(501, 'not_implemented',
+            `${provider} OAuth 는 서버 연동이 필요합니다. 프로덕션에서는 Authorization Code + PKCE 로 처리됩니다.`);
+        }
+      }
+    ];
+
+    window.fetch = async (input, init) => {
+      const url = typeof input === 'string' ? input : input.url;
+      if (!url.startsWith(API_BASE)) return originalFetch(input, init);
+      const dMin = DEV.slow ? 1200 : 350, dMax = DEV.slow ? 2400 : 900;
+      await new Promise(r => setTimeout(r, dMin + Math.random() * (dMax - dMin)));
+      if (DEV.forceError) return errResp(500, 'internal_error', '서버가 응답하지 않습니다.');
+      const method = (init?.method || 'GET').toUpperCase();
+      const u = new URL(url, 'http://mock.local');
+      const path = u.pathname.slice(API_BASE.length);
+      for (const h of handlers) {
+        if (h.match(method, path)) {
+          try { return await h.handle(path, u, init); }
+          catch (e) { return errResp(500, 'mock_error', e.message || 'Mock 처리 실패'); }
+        }
+      }
+      return errResp(404, 'not_found', `엔드포인트 없음: ${method} ${path}`);
+    };
+  }
+
+  // ============================================================
+  //  API client
+  // ============================================================
+  class APIError extends Error {
+    constructor(status, code, message, details) {
+      super(message); this.name = 'APIError';
+      this.status = status; this.code = code; this.details = details || null;
+    }
+  }
+  const parseError = async (res) => {
+    try {
+      const body = await res.json();
+      return new APIError(res.status, body?.error?.code || 'unknown', body?.error?.message || `HTTP ${res.status}`, body?.error?.details);
+    } catch {
+      return new APIError(res.status, 'unknown', `HTTP ${res.status}`);
+    }
+  };
+  const jsonFetch = async (path, init) => {
+    const opts = { ...init };
+    if (opts.body && typeof opts.body !== 'string') {
+      opts.body = JSON.stringify(opts.body);
+      opts.headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+    }
+    // 실서버에서는 여기서 CSRF token 헤더 첨부 (double-submit cookie 방식) 또는
+    // Authorization: Bearer <access_token> 첨부
+    const res = await fetch(`${API_BASE}${path}`, opts);
+    if (!res.ok) throw await parseError(res);
+    return res.json();
+  };
+  const api = {
+    signup: (body) => jsonFetch('/auth/signup', { method: 'POST', body }),
+    login: (body) => jsonFetch('/auth/login', { method: 'POST', body }),
+    oauthCallback: (provider, body) => jsonFetch(`/auth/oauth/${provider}/callback`, { method: 'POST', body })
+  };
+
+  // ============================================================
+  //  XSS-safe helpers
+  //   화면에 사용자 입력을 넣을 땐 반드시 escapeHtml.
+  //   또는 textContent 로 직접 세팅 (권장).
+  // ============================================================
+  const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  // ============================================================
+  //  Client-side validators (UX. 서버가 최종 검증)
+  // ============================================================
+  const validators = {
+    email: (v) => {
+      if (!v) return null; // 비었을 땐 에러 표시 안 함
+      if (v.length > 254) return '이메일이 너무 깁니다.';
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return '올바른 이메일 형식이 아닙니다.';
+      return null;
+    },
+    password: (v) => {
+      if (!v) return null;
+      if (v.length < 10) return `10자 이상 (현재 ${v.length}자)`;
+      if (v.length > 128) return '128자를 넘을 수 없습니다.';
+      return null;
+    },
+    handle: (v) => {
+      if (!v) return null;
+      if (v.length < 3) return `3자 이상 (현재 ${v.length}자)`;
+      if (v.length > 20) return '20자를 넘을 수 없습니다.';
+      if (!/^[a-z0-9_]+$/.test(v)) return '소문자·숫자·언더스코어만 가능합니다.';
+      return null;
+    },
+    display_name: (v) => {
+      if (!v) return null;
+      const t = v.trim();
+      if (t.length < 1) return '한 글자 이상 입력해주세요.';
+      if (v.length > 30) return '30자를 넘을 수 없습니다.';
+      if (/[\p{Cc}\p{Cf}]/u.test(v)) return '제어 문자는 사용할 수 없습니다.';
+      return null;
+    }
+  };
+
+  // ============================================================
+  //  Password strength — zxcvbn 대체 (경량)
+  //  실서비스는 zxcvbn-ts + haveibeenpwned k-anonymity API 사용.
+  // ============================================================
+  const COMMON_PW = new Set([
+    'password', '12345678', '123456789', 'qwerty', 'qwerty123',
+    'abc123', 'letmein', 'welcome', 'admin', 'password123',
+    'iloveyou', '111111', 'monkey', 'dragon', 'sunshine',
+    'football', 'baseball', 'passw0rd', 'p@ssword', 'p@ssw0rd',
+    'zaq12wsx', 'qazwsx', 'jitda', 'jitda123', 'kimdalbit'
+  ]);
+
+  const zxcvbnScore = (pw, userInputs = []) => {
+    if (!pw) return 0;
+    const lower = pw.toLowerCase();
+    // 사용자 입력 포함 시 0
+    for (const u of userInputs) {
+      if (!u) continue;
+      const s = String(u).toLowerCase().trim();
+      if (s.length >= 3 && lower.includes(s)) return 0;
+    }
+    // 흔한 패스워드 사전
+    if (COMMON_PW.has(lower)) return 0;
+    for (const c of COMMON_PW) if (lower.includes(c) && c.length >= 6) return 1;
+    // 반복·시퀀스 감지
+    if (/^(.)\1+$/.test(pw)) return 0;
+    if (/^(0123|1234|2345|3456|4567|5678|6789|abcd|qwer|asdf|zxcv)/i.test(pw)) return 0;
+
+    let score = 0;
+    if (pw.length >= 10) score += 1;
+    if (pw.length >= 14) score += 1;
+    if (pw.length >= 18) score += 1;
+    const cls = [/[a-z]/, /[A-Z]/, /\d/, /[^a-zA-Z0-9]/].filter(r => r.test(pw)).length;
+    if (cls >= 2) score += 1;
+    if (cls >= 3) score += 1;
+    // 엔트로피 대략치 (문자 클래스 x 길이)
+    const alphabet = (/[a-z]/.test(pw)?26:0) + (/[A-Z]/.test(pw)?26:0) + (/\d/.test(pw)?10:0) + (/[^a-zA-Z0-9]/.test(pw)?32:0);
+    const bits = Math.log2(Math.max(alphabet, 2)) * pw.length;
+    if (bits >= 70) score = Math.max(score, 4);
+    else if (bits >= 55) score = Math.max(score, 3);
+    else if (bits >= 40) score = Math.max(score, 2);
+    return Math.min(4, Math.max(0, score));
+  };
+
+  const scoreLabel = (s) => ['너무 약함', '약함', '보통', '강함', '아주 강함'][s];
+
+  // ============================================================
+  //  Render
+  // ============================================================
+  const cardRoot = document.getElementById('authCard');
+  const state = {
+    view: 'login',   // login | signup
+    login: { email: '', password: '', showPw: false, submitting: false, error: null, warn: null },
+    signup: {
+      email: '', password: '', handle: '', display_name: '',
+      touched: {}, submitting: false, error: null, fieldErrors: {}, agreed: false,
+      showPw: false
+    }
+  };
+
+  const iconAlert = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+  const iconCheck = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+  const iconEye   = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+  const iconEyeOff= `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a19.36 19.36 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a19.4 19.4 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+
+  const renderTabs = () => `
+    <div class="tabs" role="tablist">
+      <button class="tab ${state.view === 'login' ? 'active' : ''}" data-view="login">로그인</button>
+      <button class="tab ${state.view === 'signup' ? 'active' : ''}" data-view="signup">회원가입</button>
+    </div>
+  `;
+
+  const renderOAuth = () => `
+    <div class="oauth-row">
+      <button class="oauth-btn" data-oauth="google">
+        <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Google
+      </button>
+      <button class="oauth-btn" data-oauth="apple">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+        Apple
+      </button>
+    </div>
+    <div class="divider">or</div>
+  `;
+
+  const renderLogin = () => {
+    const s = state.login;
+    const emailErr = validators.email(s.email);
+    const canSubmit = s.email && s.password && !emailErr && !s.submitting;
+    return `
+      <h1 class="card-title">돌아오신 걸 환영해요</h1>
+      <div class="card-sub">계정에 로그인해 감상과 후원을 이어가세요.</div>
+      ${renderTabs()}
+      ${renderOAuth()}
+      <form id="loginForm" novalidate autocomplete="on">
+        <div class="field">
+          <div class="field-head"><label class="label" for="lEmail">이메일</label></div>
+          <div class="input-wrap">
+            <input class="input ${emailErr ? 'error' : ''}" id="lEmail" name="email" type="email"
+              autocomplete="username" spellcheck="false" autocapitalize="off"
+              inputmode="email" value="${escapeHtml(s.email)}" maxlength="254" required />
+          </div>
+          ${emailErr ? `<div class="field-error">${iconAlert}<span>${escapeHtml(emailErr)}</span></div>` : ''}
+        </div>
+        <div class="field">
+          <div class="field-head">
+            <label class="label" for="lPw">비밀번호</label>
+            <a class="label-hint" href="#" data-nav="forgot">비밀번호 찾기</a>
+          </div>
+          <div class="input-wrap">
+            <input class="input" id="lPw" name="password" type="${s.showPw ? 'text' : 'password'}"
+              autocomplete="current-password" value="${escapeHtml(s.password)}" maxlength="128" required />
+            <button type="button" class="input-suffix btn-like" data-toggle="login-pw" aria-label="비밀번호 보이기/숨기기">
+              ${s.showPw ? iconEyeOff : iconEye}
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="cta accent" ${canSubmit ? '' : 'disabled'}>
+          ${s.submitting ? '<span class="spinner"></span> 로그인 중...' : '로그인'}
+        </button>
+        ${s.warn ? `<div class="form-warn">${iconAlert}<span>${escapeHtml(s.warn)}</span></div>` : ''}
+        ${s.error ? `<div class="form-error">${iconAlert}<span>${escapeHtml(s.error)}</span></div>` : ''}
+      </form>
+      <div class="foot-link">
+        처음이신가요? <a href="#" data-view="signup">회원가입</a>
+      </div>
+    `;
+  };
+
+  const renderSignup = () => {
+    const s = state.signup;
+    const touched = s.touched;
+    const emailErr = touched.email ? (validators.email(s.email) || s.fieldErrors.email) : null;
+    const pwErr = touched.password ? (validators.password(s.password) || s.fieldErrors.password) : null;
+    const handleErr = touched.handle ? (validators.handle(s.handle) || s.fieldErrors.handle) : null;
+    const nameErr = touched.display_name ? (validators.display_name(s.display_name) || s.fieldErrors.display_name) : null;
+
+    const pwScore = zxcvbnScore(s.password, [s.email, s.handle, s.display_name]);
+    const pwHasEnough = s.password && s.password.length >= 10 && pwScore >= 3;
+
+    const checks = [
+      { ok: s.password.length >= 10,           text: '10자 이상' },
+      { ok: pwScore >= 3,                       text: '충분한 강도' },
+      { ok: !s.password || !s.email || !s.password.toLowerCase().includes(s.email.toLowerCase().split('@')[0] || 'zzz'),
+        text: '이메일과 다름' },
+      { ok: !COMMON_PW.has(s.password.toLowerCase()), text: '흔한 비밀번호 아님' }
+    ];
+
+    const emailOk = s.email && !emailErr;
+    const handleOk = s.handle && !handleErr;
+
+    const canSubmit = !emailErr && !pwErr && !handleErr && !nameErr &&
+      s.email && s.password && s.handle && s.display_name && s.agreed && !s.submitting;
+
+    return `
+      <h1 class="card-title">짓다에 가입하기</h1>
+      <div class="card-sub">누구나 그리고, 누구나 만나요.</div>
+      ${renderTabs()}
+      ${renderOAuth()}
+      <form id="signupForm" novalidate autocomplete="on">
+        <div class="field">
+          <div class="field-head"><label class="label" for="sEmail">이메일</label></div>
+          <div class="input-wrap">
+            <input class="input ${emailErr ? 'error' : emailOk ? 'ok' : ''}" id="sEmail" name="email" type="email"
+              autocomplete="email" spellcheck="false" autocapitalize="off" inputmode="email"
+              value="${escapeHtml(s.email)}" maxlength="254" required />
+          </div>
+          ${emailErr ? `<div class="field-error">${iconAlert}<span>${escapeHtml(emailErr)}</span></div>` : ''}
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <label class="label" for="sHandle">핸들</label>
+            <span class="label-hint">공개 URL: /@handle</span>
+          </div>
+          <div class="input-wrap">
+            <span class="input-prefix">@</span>
+            <input class="input prefix ${handleErr ? 'error' : handleOk ? 'ok' : ''}" id="sHandle" name="handle" type="text"
+              autocomplete="username" spellcheck="false" autocapitalize="off"
+              value="${escapeHtml(s.handle)}" maxlength="20" required />
+          </div>
+          ${handleErr ? `<div class="field-error">${iconAlert}<span>${escapeHtml(handleErr)}</span></div>` : `<div class="field-help">3~20자, 소문자·숫자·언더스코어(_)만 가능</div>`}
+        </div>
+
+        <div class="field">
+          <div class="field-head"><label class="label" for="sName">필명</label></div>
+          <div class="input-wrap">
+            <input class="input ${nameErr ? 'error' : ''}" id="sName" name="display_name" type="text"
+              autocomplete="nickname" value="${escapeHtml(s.display_name)}" maxlength="30" required />
+          </div>
+          ${nameErr ? `<div class="field-error">${iconAlert}<span>${escapeHtml(nameErr)}</span></div>` : ''}
+        </div>
+
+        <div class="field">
+          <div class="field-head"><label class="label" for="sPw">비밀번호</label></div>
+          <div class="input-wrap">
+            <input class="input ${pwErr ? 'error' : pwHasEnough ? 'ok' : ''}" id="sPw" name="password" type="${s.showPw ? 'text' : 'password'}"
+              autocomplete="new-password" value="${escapeHtml(s.password)}" maxlength="128" required />
+            <button type="button" class="input-suffix btn-like" data-toggle="signup-pw" aria-label="비밀번호 보이기/숨기기">
+              ${s.showPw ? iconEyeOff : iconEye}
+            </button>
+          </div>
+          ${pwErr ? `<div class="field-error">${iconAlert}<span>${escapeHtml(pwErr)}</span></div>` : ''}
+          ${s.password ? `
+            <div class="pw-meter" aria-live="polite">
+              <div class="pw-bar">
+                ${Array.from({ length: 5 }, (_, i) => `<div class="pw-seg ${i <= pwScore ? 'on-' + pwScore : ''}"></div>`).join('')}
+              </div>
+              <div class="pw-label">
+                <span>비밀번호 강도</span>
+                <span class="grade g${pwScore}">${scoreLabel(pwScore)}</span>
+              </div>
+              <div class="pw-checks">
+                ${checks.map(c => `
+                  <div class="pw-check ${c.ok ? 'ok' : ''}">
+                    ${c.ok ? iconCheck : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/></svg>`}
+                    ${escapeHtml(c.text)}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : `<div class="field-help">10자 이상 · 흔하지 않은 조합 · 이메일과 다름</div>`}
+        </div>
+
+        <label class="terms" style="display: flex; align-items: flex-start; gap: 8px; text-align: left;">
+          <input type="checkbox" id="sAgree" ${s.agreed ? 'checked' : ''} style="margin-top: 2px; accent-color: var(--accent);"/>
+          <span>만 14세 이상이며 <a href="#">이용약관</a>과 <a href="#">개인정보처리방침</a>에 동의합니다.</span>
+        </label>
+
+        <button type="submit" class="cta accent" style="margin-top: 16px;" ${canSubmit ? '' : 'disabled'}>
+          ${s.submitting ? '<span class="spinner"></span> 가입 처리 중...' : '가입하고 시작하기'}
+        </button>
+        ${s.error ? `<div class="form-error">${iconAlert}<span>${escapeHtml(s.error)}</span></div>` : ''}
+      </form>
+      <div class="foot-link">
+        이미 계정이 있나요? <a href="#" data-view="login">로그인</a>
+      </div>
+    `;
+  };
+
+  const render = () => {
+    cardRoot.innerHTML = state.view === 'login' ? renderLogin() : renderSignup();
+    bindEvents();
+  };
+
+  // ============================================================
+  //  Events
+  // ============================================================
+  const bindEvents = () => {
+    document.querySelectorAll('[data-view]').forEach((b) => {
+      b.addEventListener('click', (e) => {
+        e.preventDefault();
+        state.view = b.dataset.view;
+        state.login.error = null; state.login.warn = null;
+        state.signup.error = null; state.signup.fieldErrors = {};
+        render();
+      });
+    });
+
+    document.querySelectorAll('[data-toggle]').forEach((b) => {
+      b.addEventListener('click', () => {
+        const t = b.dataset.toggle;
+        if (t === 'login-pw') state.login.showPw = !state.login.showPw;
+        if (t === 'signup-pw') state.signup.showPw = !state.signup.showPw;
+        render();
+      });
+    });
+
+    document.querySelectorAll('[data-oauth]').forEach((b) => {
+      b.addEventListener('click', async () => {
+        try {
+          await api.oauthCallback(b.dataset.oauth, { code: 'mock', redirect_uri: window.location.origin });
+        } catch (err) {
+          if (state.view === 'login') state.login.warn = err.message;
+          else state.signup.error = err.message;
+          render();
+        }
+      });
+    });
+
+    // Login form
+    const lForm = document.getElementById('loginForm');
+    if (lForm) {
+      const lEmail = document.getElementById('lEmail');
+      const lPw = document.getElementById('lPw');
+      lEmail.addEventListener('input', (e) => { state.login.email = e.target.value.trim(); render(); });
+      lPw.addEventListener('input', (e) => { state.login.password = e.target.value; render(); });
+      lForm.addEventListener('submit', handleLogin);
+      // 첫 렌더 후 focus 유지
+      const active = document.activeElement;
+      // No-op: 별도 로직 없음
+    }
+
+    // Signup form
+    const sForm = document.getElementById('signupForm');
+    if (sForm) {
+      const bind = (id, key) => {
+        const el = document.getElementById(id);
+        el?.addEventListener('input', (e) => {
+          state.signup[key] = e.target.value;
+          // clear server error for this field
+          delete state.signup.fieldErrors[key];
+          render();
+        });
+        el?.addEventListener('blur', () => {
+          state.signup.touched[key] = true;
+          render();
+        });
+      };
+      bind('sEmail', 'email');
+      bind('sHandle', 'handle');
+      bind('sName', 'display_name');
+      bind('sPw', 'password');
+      // handle을 lowercase 로 자동 정규화
+      document.getElementById('sHandle')?.addEventListener('input', (e) => {
+        const v = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '');
+        state.signup.handle = v;
+        delete state.signup.fieldErrors.handle;
+        render();
+      });
+      document.getElementById('sAgree')?.addEventListener('change', (e) => {
+        state.signup.agreed = e.target.checked;
+        render();
+      });
+      sForm.addEventListener('submit', handleSignup);
+    }
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    const s = state.login;
+    s.error = null; s.warn = null;
+    // 클라이언트 최소 검증
+    const emailErr = validators.email(s.email);
+    if (emailErr || !s.password) {
+      s.error = emailErr || '이메일과 비밀번호를 입력해주세요.';
+      render();
+      return;
+    }
+    s.submitting = true;
+    render();
+    try {
+      const res = await api.login({ email: s.email, password: s.password });
+      // 성공 — 실제로는 여기서 라우팅. Access token 은 메모리 저장, refresh 는 쿠키.
+      cardRoot.innerHTML = `
+        <div style="text-align: center; padding: 40px 0;">
+          <div style="width:56px;height:56px;border-radius:50%;background:color-mix(in oklab,var(--success) 18%,transparent);color:var(--success);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div style="font-size:18px;font-weight:800;margin-bottom:6px;">로그인 성공</div>
+          <div style="color:var(--muted);font-size:13px;margin-bottom:16px;">환영해요, ${escapeHtml(res.user.display_name)}</div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--muted);background:var(--surface-2);padding:12px;border-radius:var(--radius);text-align:left;white-space:pre-wrap;word-break:break-all;">
+Access token (JWT, 1h)
+${escapeHtml(res.access_token)}
+
+Refresh token
+${escapeHtml(res.refresh_token)}
+          </div>
+          <button class="cta" style="margin-top:16px;" onclick="location.reload()">다른 계정으로</button>
+        </div>
+      `;
+    } catch (err) {
+      s.submitting = false;
+      if (err.status === 429) s.warn = err.message;
+      else s.error = err.message || '로그인 실패';
+      render();
+    }
+  };
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    const s = state.signup;
+    // 모두 touched 처리
+    ['email', 'password', 'handle', 'display_name'].forEach(k => s.touched[k] = true);
+    s.error = null; s.fieldErrors = {};
+    // 클라이언트 검증
+    const errs = {};
+    for (const k of ['email', 'password', 'handle', 'display_name']) {
+      const err = validators[k](s[k]);
+      if (err || !s[k]) errs[k] = err || '필수 항목입니다.';
+    }
+    if (zxcvbnScore(s.password, [s.email, s.handle, s.display_name]) < 3) {
+      errs.password = '더 강한 비밀번호가 필요합니다.';
+    }
+    if (Object.keys(errs).length) {
+      s.fieldErrors = errs;
+      render();
+      return;
+    }
+    s.submitting = true;
+    render();
+    try {
+      const res = await api.signup({
+        email: s.email,
+        password: s.password,
+        handle: s.handle,
+        display_name: s.display_name.trim()
+      });
+      cardRoot.innerHTML = `
+        <div style="text-align: center; padding: 40px 0;">
+          <div style="width:56px;height:56px;border-radius:50%;background:color-mix(in oklab,var(--success) 18%,transparent);color:var(--success);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div style="font-size:18px;font-weight:800;margin-bottom:6px;">가입이 완료됐어요</div>
+          <div style="color:var(--muted);font-size:13px;margin-bottom:6px;"><strong style="color:var(--ink);">@${escapeHtml(res.user.handle)}</strong> · ${escapeHtml(res.user.display_name)}</div>
+          <div style="color:var(--muted);font-size:12.5px;margin-bottom:20px;">
+            <strong style="color:var(--warning);">이메일 인증 링크를 보냈어요</strong><br/>
+            인증 후에 유료 구독·후원이 활성화됩니다.
+          </div>
+          <button class="cta" onclick="location.reload()">로그인 화면으로</button>
+        </div>
+      `;
+    } catch (err) {
+      s.submitting = false;
+      if (err.status === 422 || err.status === 409) {
+        s.fieldErrors = err.details?.fields || {};
+        s.error = err.message;
+      } else {
+        s.error = err.message || '가입 실패';
+      }
+      render();
+    }
+  };
+
+  // Theme
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const r = document.documentElement;
+    const curr = r.getAttribute('data-theme');
+    const sysDark = matchMedia('(prefers-color-scheme: dark)').matches;
+    const isDark = curr === 'dark' || (!curr && sysDark);
+    r.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  });
+
+  // Dev
+  document.getElementById('devReset').addEventListener('click', async () => {
+    for (const k of Object.keys(users)) delete users[k];
+    for (const k of Object.keys(emailIndex)) delete emailIndex[k];
+    for (const k of Object.keys(loginFails)) delete loginFails[k];
+    await seedUser();
+    state.view = 'login';
+    state.login = { email: '', password: '', showPw: false, submitting: false, error: null, warn: null };
+    state.signup = { email: '', password: '', handle: '', display_name: '', touched: {}, submitting: false, error: null, fieldErrors: {}, agreed: false, showPw: false };
+    render();
+  });
+  document.getElementById('devError').addEventListener('change', (e) => { DEV.forceError = e.target.checked; });
+  document.getElementById('devSlow').addEventListener('change', (e) => { DEV.slow = e.target.checked; });
+
+  // Init
+  (async () => {
+    await seedUser();
+    render();
+  })();
+})();
+</script>
+
+</body>
+</html>

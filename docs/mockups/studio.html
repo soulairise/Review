@@ -1,0 +1,2350 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>스튜디오 — 짓다</title>
+<style>
+  :root {
+    --font-sans: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Segoe UI", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+    --paper: #f4f3f0;
+    --paper-2: #ebe9e3;
+    --surface: #ffffff;
+    --surface-2: #faf9f6;
+    --ink: #17141a;
+    --ink-2: #3f3946;
+    --muted: #7a7480;
+    --line: #e6e2dd;
+    --line-2: #d8d3cc;
+    --accent: #ee2c56;
+    --accent-hover: #d61e46;
+    --gold: #c78e28;
+    --success: #2f8f5d;
+    --warning: #d69a2a;
+    --danger: #c94848;
+    --shadow-sm: 0 1px 2px rgba(30, 20, 40, 0.05);
+    --shadow-md: 0 2px 6px rgba(30, 20, 40, 0.06), 0 12px 32px rgba(30, 20, 40, 0.06);
+    --shadow-xl: 0 24px 80px rgba(30, 20, 40, 0.2);
+    --radius: 8px;
+    --radius-lg: 12px;
+    --skeleton-a: rgba(30, 20, 40, 0.06);
+    --skeleton-b: rgba(30, 20, 40, 0.10);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0d0c10; --paper-2: #08070b; --surface: #17151b; --surface-2: #1a181f;
+      --ink: #f0edf1; --ink-2: #cac4d0; --muted: #8b8492; --line: #24222a; --line-2: #33303a;
+      --accent: #ff5573; --accent-hover: #ff7a92;
+      --gold: #e8b13a; --success: #4bb87a; --warning: #e8b13a; --danger: #e07070;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.35);
+      --shadow-xl: 0 24px 80px rgba(0, 0, 0, 0.6);
+      --skeleton-a: rgba(255, 255, 255, 0.05); --skeleton-b: rgba(255, 255, 255, 0.10);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0d0c10; --paper-2: #08070b; --surface: #17151b; --surface-2: #1a181f;
+    --ink: #f0edf1; --ink-2: #cac4d0; --muted: #8b8492; --line: #24222a; --line-2: #33303a;
+    --accent: #ff5573; --accent-hover: #ff7a92;
+    --gold: #e8b13a; --success: #4bb87a; --warning: #e8b13a; --danger: #e07070;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.35);
+    --shadow-xl: 0 24px 80px rgba(0, 0, 0, 0.6);
+    --skeleton-a: rgba(255, 255, 255, 0.05); --skeleton-b: rgba(255, 255, 255, 0.10);
+  }
+  :root[data-theme="light"] {
+    --paper: #f4f3f0; --paper-2: #ebe9e3; --surface: #ffffff; --surface-2: #faf9f6;
+    --ink: #17141a; --ink-2: #3f3946; --muted: #7a7480; --line: #e6e2dd; --line-2: #d8d3cc;
+    --accent: #ee2c56; --accent-hover: #d61e46;
+    --gold: #c78e28; --success: #2f8f5d; --warning: #d69a2a; --danger: #c94848;
+    --shadow-sm: 0 1px 2px rgba(30, 20, 40, 0.05);
+    --shadow-md: 0 2px 6px rgba(30, 20, 40, 0.06), 0 12px 32px rgba(30, 20, 40, 0.06);
+    --shadow-xl: 0 24px 80px rgba(30, 20, 40, 0.2);
+    --skeleton-a: rgba(30, 20, 40, 0.06); --skeleton-b: rgba(30, 20, 40, 0.10);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { min-height: 100%; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: var(--font-sans); font-size: 14.5px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  button {
+    font-family: inherit; font-size: inherit; color: inherit;
+    background: none; border: 0; padding: 0; cursor: pointer;
+  }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  input, select, textarea { font-family: inherit; font-size: inherit; color: inherit; }
+  h1, h2, h3 { margin: 0; font-weight: 700; text-wrap: balance; }
+  a { color: inherit; text-decoration: none; }
+
+  /* Layout: sidebar + main */
+  .studio-app {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+  }
+  @media (max-width: 900px) {
+    .studio-app { grid-template-columns: 1fr; }
+  }
+
+  /* Sidebar */
+  .sidebar {
+    border-right: 1px solid var(--line);
+    background: var(--paper);
+    display: flex; flex-direction: column;
+    padding: 20px 16px;
+    position: sticky; top: 0; height: 100vh;
+    overflow-y: auto;
+  }
+  @media (max-width: 900px) {
+    .sidebar {
+      position: sticky; top: 0; height: auto;
+      flex-direction: row; align-items: center; gap: 4px;
+      padding: 10px 16px;
+      overflow-x: auto; overflow-y: hidden;
+      border-right: none; border-bottom: 1px solid var(--line);
+      background: color-mix(in oklab, var(--paper) 92%, transparent);
+      backdrop-filter: saturate(140%) blur(10px);
+      z-index: 20; scrollbar-width: none;
+    }
+    .sidebar::-webkit-scrollbar { display: none; }
+  }
+
+  .sidebar-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 24px; padding: 0 8px; flex-shrink: 0; }
+  @media (max-width: 900px) { .sidebar-head { margin-bottom: 0; margin-right: 8px; padding: 0; } }
+  .brand-mark { font-size: 22px; font-weight: 900; letter-spacing: -0.03em; color: var(--ink); }
+  .brand-mark::after {
+    content: ""; display: inline-block; width: 6px; height: 6px; background: var(--accent);
+    border-radius: 50%; margin-left: 3px; transform: translateY(-1px);
+  }
+  .brand-sub {
+    font-size: 10px; color: var(--muted); letter-spacing: 0.24em;
+    text-transform: uppercase; font-weight: 700;
+  }
+
+  .nav-section {
+    font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase;
+    font-weight: 700; color: var(--muted);
+    padding: 8px 12px; margin-top: 16px;
+  }
+  @media (max-width: 900px) { .nav-section { display: none; } }
+  .nav { display: flex; flex-direction: column; gap: 2px; }
+  @media (max-width: 900px) { .nav { flex-direction: row; gap: 4px; } }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: var(--radius);
+    color: var(--ink-2); font-weight: 500; font-size: 14px;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+  .nav-item:hover { background: var(--line); color: var(--ink); }
+  .nav-item.active { background: var(--ink); color: var(--paper); font-weight: 600; }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+  @media (max-width: 900px) {
+    .nav-item { padding: 8px 12px; }
+    .nav-item svg { display: none; }
+  }
+
+  .sidebar-foot { margin-top: auto; padding: 12px 4px 0; border-top: 1px solid var(--line); }
+  @media (max-width: 900px) { .sidebar-foot { display: none; } }
+  .me-card {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 8px;
+  }
+  .me-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, #ff9db6, #e83e5c);
+    color: white; font-weight: 900; font-size: 14px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .me-name { font-size: 13px; font-weight: 700; color: var(--ink); }
+  .me-handle { font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
+  .out-link {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px; border-radius: var(--radius);
+    color: var(--muted); font-size: 12.5px; font-weight: 500;
+    transition: color 0.15s, background 0.15s;
+  }
+  .out-link:hover { color: var(--ink); background: var(--line); }
+  .out-link svg { width: 12px; height: 12px; }
+
+  /* Main content */
+  .main { padding: 32px 40px 60px; min-width: 0; }
+  @media (max-width: 900px) { .main { padding: 24px 20px 60px; } }
+  @media (max-width: 500px) { .main { padding: 20px 16px 60px; } }
+
+  .page-head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 20px; flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+  .page-title {
+    font-size: 26px; font-weight: 800; letter-spacing: -0.025em;
+    line-height: 1.15;
+  }
+  .page-sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .page-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+  .btn {
+    height: 38px; padding: 0 16px; border-radius: 999px;
+    font-weight: 600; font-size: 13.5px;
+    transition: background 0.15s, color 0.15s, opacity 0.15s, border-color 0.15s;
+    display: inline-flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+    border: 1px solid transparent;
+  }
+  .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+  .btn svg { width: 14px; height: 14px; }
+  .btn-primary { background: var(--ink); color: var(--paper); }
+  .btn-primary:hover:not(:disabled) { opacity: 0.88; }
+  .btn-accent { background: var(--accent); color: white; }
+  .btn-accent:hover:not(:disabled) { background: var(--accent-hover); }
+  .btn-ghost { color: var(--ink-2); background: var(--surface); border-color: var(--line); }
+  .btn-ghost:hover:not(:disabled) { border-color: var(--ink-2); color: var(--ink); }
+  .btn-sm { height: 30px; padding: 0 12px; font-size: 12.5px; }
+
+  /* ==== DASHBOARD ==== */
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 520px) { .kpi-grid { grid-template-columns: 1fr; } }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    display: flex; flex-direction: column; gap: 6px;
+    position: relative; overflow: hidden;
+  }
+  .kpi.accent {
+    background: linear-gradient(135deg, color-mix(in oklab, var(--accent) 8%, transparent), transparent);
+    border-color: color-mix(in oklab, var(--accent) 25%, var(--line));
+  }
+  .kpi-label {
+    font-size: 11px; color: var(--muted);
+    letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .kpi-value {
+    font-size: 28px; font-weight: 800; letter-spacing: -0.03em;
+    color: var(--ink); font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+  .kpi-value.money::before { content: "₩"; font-size: 18px; color: var(--muted); margin-right: 2px; font-weight: 600; }
+  .kpi-delta {
+    font-size: 11.5px; font-weight: 700; padding: 2px 6px; border-radius: 3px;
+    font-variant-numeric: tabular-nums;
+  }
+  .kpi-delta.up { color: var(--success); background: color-mix(in oklab, var(--success) 15%, transparent); }
+  .kpi-delta.down { color: var(--danger); background: color-mix(in oklab, var(--danger) 15%, transparent); }
+  .kpi-delta.neutral { color: var(--muted); background: var(--line); }
+  .kpi-note { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+  .spark {
+    margin-top: 4px; width: 100%; height: 32px;
+    display: block; color: var(--accent);
+  }
+
+  .col-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+  @media (max-width: 900px) { .col-2 { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); padding: 20px;
+  }
+  .card-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 12px; margin-bottom: 14px;
+  }
+  .card-title { font-size: 15px; font-weight: 700; }
+  .card-title .count {
+    color: var(--muted); font-weight: 500; font-size: 12.5px; margin-left: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .card-link {
+    color: var(--muted); font-size: 12px; font-weight: 500;
+    transition: color 0.15s;
+  }
+  .card-link:hover { color: var(--accent); }
+
+  .top-list { display: flex; flex-direction: column; gap: 10px; }
+  .top-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 6px 0;
+  }
+  .top-rank {
+    width: 20px; text-align: center;
+    font-family: var(--font-mono); font-size: 13px; font-weight: 800;
+    color: var(--muted); font-variant-numeric: tabular-nums;
+  }
+  .top-thumb {
+    width: 40px; height: 54px; border-radius: 4px;
+    background: linear-gradient(135deg, var(--g1, #999), var(--g2, #555));
+    flex-shrink: 0;
+  }
+  .top-body { flex: 1; min-width: 0; }
+  .top-line1 {
+    font-size: 13px; font-weight: 700; color: var(--ink);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .top-line2 { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .tip-list { display: flex; flex-direction: column; gap: 12px; }
+  .tip-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .tip-item:last-child { border-bottom: 0; }
+  .tip-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, #9d7cff, #4a3fa8);
+    color: white; font-weight: 800; font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .tip-body { flex: 1; min-width: 0; }
+  .tip-hd { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .tip-name { font-size: 13px; font-weight: 700; color: var(--ink); }
+  .tip-amount {
+    font-size: 12.5px; font-weight: 800; color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .tip-time { font-size: 11px; color: var(--muted); margin-left: auto; }
+  .tip-msg { font-size: 12.5px; color: var(--ink-2); margin-top: 2px; line-height: 1.4; }
+
+  /* ==== TABLE ==== */
+  .table-wrap {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); overflow: hidden;
+  }
+  .table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .table th, .table td {
+    padding: 12px 14px; text-align: left;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+  }
+  .table th {
+    font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--muted); font-weight: 700;
+    background: var(--surface-2);
+  }
+  .table td.num, .table th.num {
+    text-align: right; font-variant-numeric: tabular-nums;
+  }
+  .table tbody tr:hover { background: color-mix(in oklab, var(--paper) 40%, transparent); }
+  .table tbody tr:last-child td { border-bottom: 0; }
+  .table-thumb {
+    width: 34px; height: 46px; border-radius: 3px;
+    background: linear-gradient(135deg, var(--g1, #999), var(--g2, #555));
+    flex-shrink: 0;
+  }
+  .table-title-cell { display: flex; align-items: center; gap: 12px; }
+  .table-title { font-weight: 700; color: var(--ink); }
+  .table-sub { font-size: 11.5px; color: var(--muted); }
+
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 2px 8px; border-radius: 999px;
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; font-family: var(--font-mono);
+  }
+  .status-pill.ongoing { background: color-mix(in oklab, var(--success) 15%, transparent); color: var(--success); }
+  .status-pill.completed { background: var(--line); color: var(--muted); }
+  .status-pill.hiatus { background: color-mix(in oklab, var(--warning) 15%, transparent); color: var(--warning); }
+  .status-pill.paid { background: color-mix(in oklab, var(--success) 15%, transparent); color: var(--success); }
+  .status-pill.pending { background: color-mix(in oklab, var(--warning) 15%, transparent); color: var(--warning); }
+  .status-pill.failed { background: color-mix(in oklab, var(--danger) 15%, transparent); color: var(--danger); }
+  .status-pill.processing { background: var(--line); color: var(--muted); }
+  .status-pill::before {
+    content: ""; width: 5px; height: 5px; border-radius: 50%;
+    background: currentColor;
+  }
+
+  .row-actions { display: flex; gap: 4px; justify-content: flex-end; }
+  .row-btn {
+    height: 28px; padding: 0 10px; border-radius: 999px;
+    background: var(--paper); color: var(--ink-2);
+    border: 1px solid var(--line);
+    font-size: 12px; font-weight: 600;
+    transition: all 0.15s;
+  }
+  .row-btn:hover { border-color: var(--ink-2); color: var(--ink); }
+
+  .tabs {
+    display: flex; gap: 24px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 22px;
+  }
+  .tab {
+    padding: 12px 0;
+    color: var(--muted); font-weight: 600; font-size: 14px;
+    position: relative; transition: color 0.15s;
+  }
+  .tab.active { color: var(--ink); }
+  .tab.active::after {
+    content: ""; position: absolute; bottom: -1px; left: 0; right: 0;
+    height: 2px; background: var(--ink);
+  }
+
+  /* Posts grid (같은 스튜디오 안에서) */
+  .my-post-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+  .my-post-cell {
+    position: relative; aspect-ratio: 1/1;
+    background: linear-gradient(135deg, var(--g1, #999), var(--g2, #555));
+    border-radius: var(--radius); overflow: hidden; cursor: pointer;
+  }
+  .my-post-cell::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 55%, rgba(0,0,0,0.4) 100%);
+    pointer-events: none;
+  }
+  .my-post-title {
+    position: absolute; bottom: 10px; left: 12px; right: 12px;
+    color: white; font-size: 12px; font-weight: 700; z-index: 1;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .my-post-stats {
+    position: absolute; top: 8px; right: 8px; z-index: 1;
+    padding: 2px 6px; border-radius: 3px;
+    background: rgba(0,0,0,0.5); color: white;
+    font-size: 10.5px; font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ==== UPLOAD ==== */
+  .upload-choice {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+    margin-top: 12px;
+  }
+  @media (max-width: 720px) { .upload-choice { grid-template-columns: 1fr; } }
+  .choice-card {
+    background: var(--surface); border: 2px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 24px 22px;
+    text-align: left; cursor: pointer;
+    transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .choice-card:hover { border-color: var(--ink-2); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .choice-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: color-mix(in oklab, var(--accent) 15%, transparent);
+    color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 4px;
+  }
+  .choice-icon svg { width: 20px; height: 20px; }
+  .choice-title { font-size: 15px; font-weight: 800; color: var(--ink); }
+  .choice-desc { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+
+  .form { max-width: 720px; }
+  .form-back {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--muted); font-size: 12.5px; font-weight: 500;
+    margin-bottom: 20px;
+    transition: color 0.15s;
+  }
+  .form-back:hover { color: var(--ink); }
+  .form-back svg { width: 12px; height: 12px; }
+  .form-row { margin-bottom: 18px; }
+  .form-row-inline { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+  @media (max-width: 560px) { .form-row-inline { grid-template-columns: 1fr; } }
+  .label {
+    display: block; font-size: 12px; letter-spacing: 0.02em;
+    color: var(--ink-2); font-weight: 700; margin-bottom: 6px;
+  }
+  .input, .textarea, .select {
+    width: 100%; height: 40px; padding: 0 14px;
+    border-radius: var(--radius); border: 1px solid var(--line);
+    background: var(--surface); color: var(--ink);
+    font-size: 14px; outline: none;
+    transition: border-color 0.15s;
+  }
+  .input:focus, .textarea:focus, .select:focus { border-color: var(--ink-2); }
+  .textarea { height: auto; min-height: 80px; padding: 10px 14px; resize: vertical; font-family: inherit; }
+  .radio-group {
+    display: flex; gap: 8px;
+  }
+  .radio-btn {
+    flex: 1;
+    padding: 10px 14px; border-radius: var(--radius);
+    border: 1px solid var(--line); background: var(--surface);
+    color: var(--ink-2); font-weight: 600; font-size: 13px;
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .radio-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .toggle-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 14px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+  .toggle-label { flex: 1; font-size: 13.5px; font-weight: 600; }
+  .toggle-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .toggle-sw {
+    width: 40px; height: 22px; border-radius: 999px;
+    background: var(--line); position: relative;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .toggle-sw::after {
+    content: ""; position: absolute; top: 2px; left: 2px;
+    width: 18px; height: 18px; border-radius: 50%; background: white;
+    transition: left 0.15s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .toggle-sw.on { background: var(--accent); }
+  .toggle-sw.on::after { left: 20px; }
+
+  /* Image drop */
+  .drop-zone {
+    border: 2px dashed var(--line-2);
+    border-radius: var(--radius-lg);
+    padding: 40px 24px; text-align: center;
+    background: var(--surface-2);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .drop-zone:hover { border-color: var(--ink-2); background: var(--surface); }
+  .drop-zone.dragging { border-color: var(--accent); background: color-mix(in oklab, var(--accent) 5%, transparent); }
+  .drop-icon {
+    width: 44px; height: 44px; border-radius: 999px;
+    background: var(--line); color: var(--ink-2);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 10px;
+  }
+  .drop-icon svg { width: 22px; height: 22px; }
+  .drop-hd { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .drop-sd { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  .thumb-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px; margin-top: 14px;
+  }
+  .thumb-item {
+    position: relative; aspect-ratio: 3/4;
+    border-radius: var(--radius); overflow: hidden;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .thumb-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.7) 100%);
+    pointer-events: none;
+  }
+  .thumb-order {
+    position: absolute; top: 6px; left: 6px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(0,0,0,0.6); color: white;
+    font-size: 11px; font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .thumb-status {
+    position: absolute; bottom: 6px; left: 6px; right: 6px;
+    color: white; font-size: 11px; font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    display: flex; justify-content: space-between; align-items: center;
+    z-index: 1;
+  }
+  .thumb-progress {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+    background: rgba(255,255,255,0.2);
+  }
+  .thumb-progress-fill {
+    height: 100%; background: var(--accent);
+    transition: width 0.2s;
+  }
+  .thumb-actions {
+    position: absolute; top: 6px; right: 6px;
+    display: flex; gap: 3px;
+    z-index: 2;
+  }
+  .thumb-btn {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: rgba(0,0,0,0.55); color: white;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .thumb-btn:hover { background: rgba(0,0,0,0.8); }
+  .thumb-btn svg { width: 11px; height: 11px; }
+  .thumb-status-ready { color: #7cf3a4; font-weight: 700; }
+  .thumb-status-error { color: #ff8080; font-weight: 700; }
+
+  /* ==== PAYOUTS ==== */
+  .payout-summary {
+    background: linear-gradient(135deg, color-mix(in oklab, var(--accent) 8%, transparent), transparent);
+    border: 1px solid color-mix(in oklab, var(--accent) 25%, var(--line));
+    border-radius: var(--radius-lg);
+    padding: 24px 26px;
+    margin-bottom: 24px;
+  }
+  .payout-sum-label {
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    font-weight: 700; color: var(--muted); margin-bottom: 8px;
+  }
+  .payout-sum-value {
+    font-size: 40px; font-weight: 800; letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+  .payout-sum-value::before { content: "₩"; font-size: 24px; color: var(--muted); margin-right: 4px; font-weight: 600; }
+  .payout-sum-sub { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+
+  .breakdown { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 22px; }
+  @media (max-width: 720px) { .breakdown { grid-template-columns: 1fr; } }
+  .bd-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+  }
+  .bd-row:last-child { border-bottom: 0; padding-top: 12px; font-weight: 700; }
+  .bd-row.plus .bd-val { color: var(--success); }
+  .bd-row.minus .bd-val { color: var(--danger); }
+  .bd-lbl { color: var(--ink-2); }
+  .bd-val {
+    font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+    font-size: 13px; font-weight: 700;
+  }
+
+  /* ==== SETTINGS ==== */
+  .settings-form { max-width: 560px; }
+  .price-input {
+    display: flex; align-items: center; gap: 8px;
+    position: relative;
+  }
+  .price-input::before {
+    content: "₩"; position: absolute; left: 14px; top: 50%;
+    transform: translateY(-50%); color: var(--muted); font-weight: 600;
+    pointer-events: none;
+  }
+  .price-input input { padding-left: 30px; font-variant-numeric: tabular-nums; }
+  .price-hint {
+    font-size: 12px; color: var(--muted); margin-top: 6px;
+  }
+
+  /* ==== SKELETONS ==== */
+  .skeleton {
+    background: linear-gradient(90deg, var(--skeleton-a) 0%, var(--skeleton-b) 50%, var(--skeleton-a) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+    border-radius: 4px;
+  }
+  @keyframes shimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+  }
+  .kpi-skel {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); padding: 18px 20px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .kpi-skel .skeleton { height: 12px; }
+
+  /* ==== ERROR ==== */
+  .error-state {
+    padding: 60px 24px; text-align: center;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+  }
+  .error-icon {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: color-mix(in oklab, var(--accent) 12%, transparent);
+    color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .error-icon svg { width: 22px; height: 22px; }
+  .error-title { font-size: 15px; font-weight: 700; color: var(--ink); }
+  .error-message { font-size: 13px; color: var(--ink-2); max-width: 40ch; }
+  .error-code {
+    font-family: var(--font-mono); font-size: 11px; color: var(--muted);
+    padding: 3px 8px; background: var(--paper); border-radius: 3px;
+    letter-spacing: 0.02em;
+  }
+  .empty { padding: 40px 24px; text-align: center; color: var(--muted); font-size: 13px; }
+
+  /* ==== TOAST ==== */
+  .toast-root {
+    position: fixed; bottom: 88px; left: 50%; transform: translateX(-50%);
+    z-index: 200;
+    display: flex; flex-direction: column; gap: 8px; align-items: center;
+    pointer-events: none;
+  }
+  .toast {
+    padding: 11px 20px; border-radius: 999px;
+    background: var(--ink); color: var(--paper);
+    font-size: 14px; font-weight: 600;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+    animation: toast-in 0.2s cubic-bezier(0.2, 0, 0, 1);
+    max-width: 90vw;
+  }
+  .toast.error { background: var(--danger); color: white; }
+  .toast.success { background: var(--success); color: white; }
+  @keyframes toast-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+
+  /* Dev panel */
+  .dev-panel {
+    position: fixed; right: 20px; bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px 8px 10px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 999px; box-shadow: var(--shadow-md);
+    font-size: 12px; z-index: 30;
+  }
+  .dev-badge {
+    padding: 3px 8px; border-radius: 999px; background: var(--accent);
+    color: white; font-weight: 800; font-size: 10px; letter-spacing: 0.12em;
+  }
+  .dev-panel button {
+    padding: 4px 10px; border-radius: 999px;
+    color: var(--ink-2); background: var(--paper);
+    font-weight: 600; font-size: 12px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .dev-panel button:hover { background: var(--line); color: var(--ink); }
+  .dev-panel label {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--muted); font-size: 12px; cursor: pointer;
+  }
+  .dev-panel input[type="checkbox"] { margin: 0; accent-color: var(--accent); }
+  @media (max-width: 640px) {
+    .dev-panel { bottom: 12px; right: 12px; padding: 6px 10px 6px 8px; }
+    .dev-panel label:last-of-type { display: none; }
+  }
+
+  .theme-toggle {
+    height: 32px; width: 32px; border-radius: 999px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); border: 1px solid var(--line); background: var(--surface);
+    transition: border-color 0.15s, color 0.15s;
+    margin-left: auto;
+  }
+  .theme-toggle:hover { border-color: var(--ink-2); color: var(--ink); }
+  .theme-toggle svg { width: 14px; height: 14px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; }
+  }
+</style>
+
+<div class="studio-app">
+  <aside class="sidebar">
+    <div class="sidebar-head">
+      <span class="brand-mark">짓다</span>
+      <span class="brand-sub">Studio</span>
+    </div>
+    <div class="nav-section">Author</div>
+    <nav class="nav" id="nav">
+      <button class="nav-item active" data-section="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        대시보드
+      </button>
+      <button class="nav-item" data-section="works">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        작품 관리
+      </button>
+      <button class="nav-item" data-section="upload">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        업로드
+      </button>
+      <button class="nav-item" data-section="payouts">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        정산
+      </button>
+      <button class="nav-item" data-section="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        설정
+      </button>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="me-card" id="meCard">
+        <div class="me-avatar" id="meAvatar">?</div>
+        <div style="min-width: 0;">
+          <div class="me-name" id="meName">—</div>
+          <div class="me-handle" id="meHandle">—</div>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="테마 전환" title="테마 전환">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        </button>
+      </div>
+      <a class="out-link" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+        짓다 사이트로
+      </a>
+    </div>
+  </aside>
+
+  <main class="main" id="mainRoot"></main>
+</div>
+
+<div class="dev-panel" id="devPanel">
+  <span class="dev-badge">MOCK</span>
+  <button id="devReload" title="현재 섹션 재요청">↻</button>
+  <label><input type="checkbox" id="devError"/> 에러</label>
+  <label><input type="checkbox" id="devSlow"/> 느리게</label>
+</div>
+
+<div class="toast-root" id="toastRoot" aria-live="polite"></div>
+
+<script>
+(() => {
+  // ============================================================
+  //  Config
+  // ============================================================
+  const API_BASE = '/api/v1';
+  const USE_MOCK = true;
+  const ME = { id: 'usr_2fN1a', handle: 'kimdalbit', display_name: '김달빛' };
+
+  // ============================================================
+  //  Mock DB
+  // ============================================================
+  const nowMinus = (min) => new Date(Date.now() - min * 60_000).toISOString();
+
+  const publicUser = (id, handle, name) => ({
+    id, handle, display_name: name, avatar_url: null, bio: null, is_author: true,
+    created_at: '2026-01-01T00:00:00Z'
+  });
+
+  const meProfile = {
+    ...publicUser(ME.id, ME.handle, ME.display_name),
+    banner_url: null,
+    external_links: [
+      { label: 'Twitter', url: 'https://twitter.com/kimdalbit' }
+    ],
+    subscription: { enabled: true, price: 4900, currency: 'KRW' },
+    stats: { followers: 12480, subscribers: 842, series_count: 3, post_count: 12 }
+  };
+
+  const MY_SERIES = [
+    { id: 'srs_v7QeK', title: '달빛 아래 우리', genre: 'romance', ep: 42, views: 1234567, likes: 84230, status: 'ongoing',   subs_only: 0, desc: '고요한 마을에 온 낯선 소년, 그리고 나.',   updated_min: 60*8 },
+    { id: 'srs_kd2',   title: '세 번째 여름',   genre: 'romance', ep: 15, views: 342100,  likes: 21400, status: 'ongoing',   subs_only: 2, desc: '세 번째 여름, 우리는 다시 그곳으로 돌아갔다.', updated_min: 60*72 },
+    { id: 'srs_kd3',   title: '우리의 겨울',   genre: 'drama',   ep: 24, views: 890200,  likes: 52100, status: 'completed', subs_only: 0, desc: '전 24화 완결', updated_min: 60*24*40 }
+  ];
+
+  const MY_POSTS = [
+    { id: 'pst_kd1',  title: '오늘의 그림',              genre: 'daily',    views: 8420, likes: 621, comments: 34, minAgo: 60*3 },
+    { id: 'pst_kd2',  title: '캐릭터 시안 공개',         genre: 'daily',    views: 6210, likes: 512, comments: 42, minAgo: 60*24 },
+    { id: 'pst_kd3',  title: '팬아트 정말 감사합니다',   genre: 'daily',    views: 5890, likes: 720, comments: 89, minAgo: 60*24*2 },
+    { id: 'pst_kd4',  title: '잠깐만요...',              genre: 'daily',    views: 4120, likes: 340, comments: 28, minAgo: 60*24*3 },
+    { id: 'pst_kd5',  title: '겨울 준비',                genre: 'daily',    views: 3820, likes: 298, comments: 21, minAgo: 60*24*5 },
+    { id: 'pst_kd6',  title: '여름 스케치',              genre: 'daily',    views: 3410, likes: 261, comments: 18, minAgo: 60*24*6 },
+    { id: 'pst_kd7',  title: '다음 화 예고 컷',          genre: 'romance',  views: 12400,likes: 1420,comments: 214,minAgo: 60*24*7 },
+    { id: 'pst_kd8',  title: '커피 브레이크',            genre: 'daily',    views: 2890, likes: 198, comments: 14, minAgo: 60*24*9 }
+  ];
+
+  const TIPS = [
+    { id: 'tip_1', sender_name: '여름팬',    amount: 5000,  message: '이번 화 진짜 좋았어요! 다음 화도 기대할게요.', minAgo: 60*4 },
+    { id: 'tip_2', sender_name: 'moonlight', amount: 10000, message: '작가님 늘 응원합니다 💖', minAgo: 60*12 },
+    { id: 'tip_3', sender_name: '조용한 독자', amount: 3000, message: null, minAgo: 60*20 },
+    { id: 'tip_4', sender_name: '야밤독자',   amount: 5000,  message: '새벽에 보다가 팁 결제까지 😅', minAgo: 60*24*2 },
+    { id: 'tip_5', sender_name: '입덕1일차', amount: 1000,  message: '정주행 완료 기념!', minAgo: 60*24*3 }
+  ];
+
+  const PAYOUTS = [
+    { id: 'pyt_2606', period: '2026-06', gross: 4_200_000, platform_fee: 336_000, stripe_fee: 145_600, refund_reserve: 60_000, net: 3_658_400, status: 'paid',       paid_at: '2026-07-15T09:00:00Z' },
+    { id: 'pyt_2605', period: '2026-05', gross: 3_820_000, platform_fee: 305_600, stripe_fee: 132_240, refund_reserve: 54_000, net: 3_328_160, status: 'paid',       paid_at: '2026-06-15T09:00:00Z' },
+    { id: 'pyt_2604', period: '2026-04', gross: 3_140_000, platform_fee: 251_200, stripe_fee: 108_760, refund_reserve: 44_000, net: 2_736_040, status: 'paid',       paid_at: '2026-05-15T09:00:00Z' },
+    { id: 'pyt_2603', period: '2026-03', gross: 2_180_000, platform_fee: 174_400, stripe_fee:  75_680, refund_reserve: 30_000, net: 1_899_920, status: 'paid',       paid_at: '2026-04-15T09:00:00Z' },
+    { id: 'pyt_2602', period: '2026-02', gross: 1_420_000, platform_fee: 113_600, stripe_fee:  49_240, refund_reserve: 20_000, net: 1_237_160, status: 'paid',       paid_at: '2026-03-15T09:00:00Z' }
+  ];
+
+  // 업로드된 이미지들 (client -> mock 등록 → 발행 시 참조)
+  const UPLOADED_IMAGES = {};
+
+  // ============================================================
+  //  Mock fetch adapter
+  // ============================================================
+  const DEV = { forceError: false, slow: false };
+  if (USE_MOCK) {
+    const jsonResp = (data, status = 200) =>
+      new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json; charset=utf-8' } });
+    const errResp = (status, code, message) => jsonResp({ error: { code, message } }, status);
+    const originalFetch = window.fetch.bind(window);
+
+    const handlers = [
+      // GET /auth/me
+      { match: (m, p) => m === 'GET' && p === '/auth/me',
+        handle: () => jsonResp({
+          user: publicUser(ME.id, ME.handle, ME.display_name),
+          email: 'kimdalbit@example.com',
+          email_verified: true,
+          is_adult_verified: false,
+          role: 'user',
+          author_profile: {
+            subscription: meProfile.subscription,
+            stripe_connect_ready: true
+          }
+        })
+      },
+      // GET /authors/me/dashboard
+      { match: (m, p) => m === 'GET' && p === '/authors/me/dashboard',
+        handle: (p, u) => jsonResp({
+          period: u.searchParams.get('period') || 'this_month',
+          views: 124_800, views_delta_pct: 12.4,
+          new_followers: 342, followers_total: meProfile.stats.followers,
+          new_subscribers: 18, cancellations: 3, subscribers_total: meProfile.stats.subscribers,
+          tips_count: 47, tips_amount: 235_000,
+          estimated_payout: 1_863_900,
+          currency: 'KRW',
+          top_episodes: [
+            { id: 'epi_v7QeK_042', series_id: 'srs_v7QeK', title: '42화 · 여름의 시작', order: 42, views: 24_581, genre: 'romance', series_title: '달빛 아래 우리' },
+            { id: 'epi_v7QeK_041', series_id: 'srs_v7QeK', title: '41화 · 마지막 편지', order: 41, views: 21_040, genre: 'romance', series_title: '달빛 아래 우리' },
+            { id: 'epi_kd2_015',   series_id: 'srs_kd2',   title: '15화 · 파도',       order: 15, views: 12_820, genre: 'romance', series_title: '세 번째 여름' }
+          ],
+          spark: {
+            views:    [40,42,38,45,50,48,55,52,58,60,65,62,68,70,74,72,78,82,80,88,85,92,90,95,102,98,108,112,120,124],
+            followers:[8,10,12,9,14,15,18,20,17,22,25,23,28,30,32,29,34,36,38,40,45,42,48,52,55,58,62,60,65,70],
+            subs:     [1,2,1,3,2,4,3,5,4,6,5,7,6,8,7,9,10,8,11,12,11,13,14,15,16,14,18,17,20,22],
+            payout:   [60,64,68,70,75,78,82,80,88,90,95,92,102,105,112,115,120,125,130,138,142,150,158,162,170,175,180,185,190,195]
+          }
+        })
+      },
+      // GET /series?author_id=me
+      { match: (m, p) => m === 'GET' && p === '/series',
+        handle: (p, u) => jsonResp({
+          items: MY_SERIES.map((s) => ({
+            id: s.id, author: publicUser(ME.id, ME.handle, ME.display_name),
+            title: s.title, description: s.desc, cover_image: null,
+            viewer_mode_default: 'scroll', status: s.status,
+            genres: [s.genre], tags: [],
+            episode_count: s.ep,
+            stats: { views_total: s.views, likes_total: s.likes, subscribers_only_count: s.subs_only },
+            is_adult: false,
+            created_at: '2026-01-10T09:00:00Z', updated_at: nowMinus(s.updated_min)
+          })),
+          next_cursor: null, has_more: false
+        })
+      },
+      // GET /posts?author_id=me
+      { match: (m, p) => m === 'GET' && p === '/posts',
+        handle: () => jsonResp({
+          items: MY_POSTS.map((p) => ({
+            id: p.id, author: publicUser(ME.id, ME.handle, ME.display_name),
+            title: p.title, description: null,
+            viewer_mode: 'scroll', is_subscriber_only: false, is_adult: false,
+            images: [], genres: [p.genre], tags: [],
+            stats: { views: p.views, likes: p.likes, comments: p.comments },
+            published_at: nowMinus(p.minAgo), created_at: nowMinus(p.minAgo + 5)
+          })),
+          next_cursor: null, has_more: false
+        })
+      },
+      // GET /authors/me/tips/received
+      { match: (m, p) => m === 'GET' && p === '/authors/me/tips/received',
+        handle: () => jsonResp({
+          items: TIPS.map((t) => ({
+            id: t.id,
+            sender: publicUser('usr_x_' + t.id, 'sender_' + t.id, t.sender_name),
+            author_id: ME.id, amount: t.amount, currency: 'KRW',
+            message: t.message, message_public: true,
+            created_at: nowMinus(t.minAgo)
+          })),
+          next_cursor: null, has_more: false,
+          period_total: TIPS.reduce((s, t) => s + t.amount, 0),
+          currency: 'KRW'
+        })
+      },
+      // GET /authors/me/payouts/estimate
+      { match: (m, p) => m === 'GET' && p === '/authors/me/payouts/estimate',
+        handle: () => jsonResp({
+          period: '2026-07', as_of: new Date().toISOString(),
+          gross: 2_140_000, platform_fee: 171_200, stripe_fee: 74_900,
+          refund_reserve: 30_000, estimated_net: 1_863_900,
+          currency: 'KRW',
+          breakdown: { subscriptions: 1_680_000, tips: 460_000 }
+        })
+      },
+      // GET /authors/me/payouts
+      { match: (m, p) => m === 'GET' && p === '/authors/me/payouts',
+        handle: () => jsonResp({
+          items: PAYOUTS.map((p) => ({ ...p, author_id: ME.id, currency: 'KRW', created_at: p.paid_at })),
+          next_cursor: null, has_more: false
+        })
+      },
+      // POST /uploads/images  (initiate)
+      { match: (m, p) => m === 'POST' && p === '/uploads/images',
+        handle: (p, u, init) => {
+          const body = init?.body ? JSON.parse(init.body) : {};
+          const id = 'img_' + Math.random().toString(36).slice(2, 8);
+          UPLOADED_IMAGES[id] = { id, status: 'awaiting_upload', url: null, ...body };
+          return jsonResp({
+            image_id: id,
+            upload_url: `https://r2.jitda.com/uploads/${id}?X-Amz-Signature=mock`,
+            upload_method: 'PUT',
+            upload_headers: { 'Content-Type': body.content_type || 'image/png' },
+            expires_at: new Date(Date.now() + 30 * 60_000).toISOString()
+          });
+        }
+      },
+      // POST /uploads/images/{id}/complete
+      { match: (m, p) => m === 'POST' && /^\/uploads\/images\/[^/]+\/complete$/.test(p),
+        handle: (p) => {
+          const id = p.split('/')[3];
+          if (!UPLOADED_IMAGES[id]) return errResp(404, 'not_found', 'image not found');
+          UPLOADED_IMAGES[id].status = 'processing';
+          return jsonResp({ image_id: id, status: 'processing', url: null });
+        }
+      },
+      // GET /uploads/images/{id}
+      { match: (m, p) => m === 'GET' && /^\/uploads\/images\/[^/]+$/.test(p),
+        handle: (p) => {
+          const id = p.split('/')[3];
+          const img = UPLOADED_IMAGES[id];
+          if (!img) return errResp(404, 'not_found', 'image not found');
+          // 1회 이상 poll 되면 ready
+          if (img.status === 'processing') img.status = 'ready';
+          return jsonResp({
+            image_id: id, status: img.status,
+            url: img.status === 'ready' ? (img.local_url || `https://cdn.jitda.com/i/${id}.webp`) : null,
+            width: 1080, height: 1440, file_size: img.size || 0
+          });
+        }
+      },
+      // POST /series/{id}/episodes
+      { match: (m, p) => m === 'POST' && /^\/series\/[^/]+\/episodes$/.test(p),
+        handle: (p, u, init) => {
+          const seriesId = p.split('/')[2];
+          const body = init?.body ? JSON.parse(init.body) : {};
+          const series = MY_SERIES.find((s) => s.id === seriesId);
+          if (!series) return errResp(404, 'not_found', '시리즈를 찾을 수 없습니다.');
+          if (!body.image_ids?.length) return errResp(422, 'validation_failed', '이미지를 최소 1개 이상 업로드해야 합니다.');
+          series.ep = Math.max(series.ep, body.order || series.ep + 1);
+          const id = 'epi_' + Math.random().toString(36).slice(2, 8);
+          return jsonResp({
+            id, series_id: seriesId, title: body.title, order: body.order,
+            viewer_mode: body.viewer_mode, is_subscriber_only: !!body.is_subscriber_only,
+            is_adult: !!body.is_adult,
+            images: body.image_ids.map((iid, i) => ({
+              id: iid, url: UPLOADED_IMAGES[iid]?.local_url || null,
+              order: i + 1, width: 1080, height: 1440, file_size: 0
+            })),
+            stats: { views: 0, likes: 0, comments: 0 },
+            prev_episode_id: null, next_episode_id: null,
+            published_at: body.published_at || new Date().toISOString(),
+            created_at: new Date().toISOString()
+          }, 201);
+        }
+      },
+      // POST /series
+      { match: (m, p) => m === 'POST' && p === '/series',
+        handle: (p, u, init) => {
+          const body = init?.body ? JSON.parse(init.body) : {};
+          if (!body.title) return errResp(422, 'validation_failed', '제목을 입력해주세요.');
+          const id = 'srs_' + Math.random().toString(36).slice(2, 8);
+          MY_SERIES.push({
+            id, title: body.title, genre: body.genres?.[0] || 'daily',
+            ep: 0, views: 0, likes: 0, status: 'ongoing', subs_only: 0,
+            desc: body.description || '', updated_min: 0
+          });
+          meProfile.stats.series_count += 1;
+          return jsonResp({
+            id, author: publicUser(ME.id, ME.handle, ME.display_name),
+            title: body.title, description: body.description,
+            cover_image: null, viewer_mode_default: body.viewer_mode_default || 'scroll',
+            status: 'ongoing', genres: body.genres || [], tags: body.tags || [],
+            episode_count: 0,
+            stats: { views_total: 0, likes_total: 0, subscribers_only_count: 0 },
+            is_adult: !!body.is_adult,
+            created_at: new Date().toISOString(), updated_at: new Date().toISOString()
+          }, 201);
+        }
+      },
+      // POST /posts
+      { match: (m, p) => m === 'POST' && p === '/posts',
+        handle: (p, u, init) => {
+          const body = init?.body ? JSON.parse(init.body) : {};
+          if (!body.title) return errResp(422, 'validation_failed', '제목을 입력해주세요.');
+          if (!body.image_ids?.length) return errResp(422, 'validation_failed', '이미지를 최소 1개 이상 업로드해야 합니다.');
+          const id = 'pst_' + Math.random().toString(36).slice(2, 8);
+          MY_POSTS.unshift({
+            id, title: body.title, genre: body.genres?.[0] || 'daily',
+            views: 0, likes: 0, comments: 0, minAgo: 0
+          });
+          meProfile.stats.post_count += 1;
+          return jsonResp({
+            id, author: publicUser(ME.id, ME.handle, ME.display_name),
+            title: body.title, description: body.description,
+            viewer_mode: body.viewer_mode || 'scroll',
+            is_subscriber_only: !!body.is_subscriber_only, is_adult: !!body.is_adult,
+            images: body.image_ids.map((iid, i) => ({
+              id: iid, url: UPLOADED_IMAGES[iid]?.local_url || null,
+              order: i + 1, width: 1080, height: 1440, file_size: 0
+            })),
+            genres: body.genres || [], tags: body.tags || [],
+            stats: { views: 0, likes: 0, comments: 0 },
+            published_at: body.published_at || new Date().toISOString(),
+            created_at: new Date().toISOString()
+          }, 201);
+        }
+      },
+      // PATCH /authors/me
+      { match: (m, p) => m === 'PATCH' && p === '/authors/me',
+        handle: (p, u, init) => {
+          const body = init?.body ? JSON.parse(init.body) : {};
+          if (body.subscription) {
+            const s = body.subscription;
+            if (s.price != null && (s.price < 1000 || s.price > 30000)) {
+              return errResp(422, 'validation_failed', '구독료는 ₩1,000~₩30,000 사이여야 합니다.');
+            }
+            Object.assign(meProfile.subscription, s);
+          }
+          return jsonResp({
+            ...publicUser(ME.id, ME.handle, ME.display_name),
+            banner_url: null, external_links: meProfile.external_links,
+            subscription: meProfile.subscription, stats: meProfile.stats
+          });
+        }
+      }
+    ];
+
+    window.fetch = async (input, init) => {
+      const url = typeof input === 'string' ? input : input.url;
+      if (!url.startsWith(API_BASE)) return originalFetch(input, init);
+      const dMin = DEV.slow ? 1200 : 250, dMax = DEV.slow ? 2400 : 700;
+      await new Promise((r) => setTimeout(r, dMin + Math.random() * (dMax - dMin)));
+      if (DEV.forceError) return errResp(500, 'internal_error', '서버가 응답하지 않습니다.');
+      const method = (init?.method || 'GET').toUpperCase();
+      const u = new URL(url, 'http://mock.local');
+      const path = u.pathname.slice(API_BASE.length);
+      for (const h of handlers) {
+        if (h.match(method, path)) {
+          try { return await h.handle(path, u, init); }
+          catch (e) { return errResp(500, 'mock_error', e.message || 'Mock 처리 실패'); }
+        }
+      }
+      return errResp(404, 'not_found', `엔드포인트 없음: ${method} ${path}`);
+    };
+  }
+
+  // ============================================================
+  //  API client
+  // ============================================================
+  class APIError extends Error {
+    constructor(status, code, message, details) {
+      super(message); this.name = 'APIError';
+      this.status = status; this.code = code; this.details = details || null;
+    }
+  }
+  const parseError = async (res) => {
+    try {
+      const body = await res.json();
+      return new APIError(res.status, body?.error?.code || 'unknown', body?.error?.message || `HTTP ${res.status}`, body?.error?.details);
+    } catch {
+      return new APIError(res.status, 'unknown', `HTTP ${res.status}`);
+    }
+  };
+  const jsonFetch = async (path, init) => {
+    const opts = { ...init };
+    if (opts.body && typeof opts.body !== 'string') {
+      opts.body = JSON.stringify(opts.body);
+      opts.headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+    }
+    const res = await fetch(`${API_BASE}${path}`, opts);
+    if (!res.ok) throw await parseError(res);
+    if (res.status === 204) return null;
+    return res.json();
+  };
+  const api = {
+    getMe: () => jsonFetch('/auth/me'),
+    getDashboard: (period = 'this_month') => jsonFetch(`/authors/me/dashboard?period=${period}`),
+    getMySeries: () => jsonFetch(`/series?author_id=${encodeURIComponent(ME.id)}&sort=latest&limit=50`),
+    getMyPosts: () => jsonFetch(`/posts?author_id=${encodeURIComponent(ME.id)}&sort=latest&limit=50`),
+    getTipsReceived: () => jsonFetch('/authors/me/tips/received?limit=5&period=this_month'),
+    getPayoutEstimate: () => jsonFetch('/authors/me/payouts/estimate'),
+    getPayouts: () => jsonFetch('/authors/me/payouts?limit=12'),
+    uploadInit: (body) => jsonFetch('/uploads/images', { method: 'POST', body }),
+    uploadComplete: (id) => jsonFetch(`/uploads/images/${id}/complete`, { method: 'POST' }),
+    uploadStatus: (id) => jsonFetch(`/uploads/images/${id}`),
+    createEpisode: (seriesId, body) => jsonFetch(`/series/${seriesId}/episodes`, { method: 'POST', body }),
+    createSeries: (body) => jsonFetch('/series', { method: 'POST', body }),
+    createPost: (body) => jsonFetch('/posts', { method: 'POST', body }),
+    patchAuthor: (body) => jsonFetch('/authors/me', { method: 'PATCH', body })
+  };
+
+  // ============================================================
+  //  Utils
+  // ============================================================
+  const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const fmtNum = (n) => {
+    if (n == null) return '—';
+    if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (n >= 1_000)     return (n / 1_000).toFixed(1).replace(/\.0$/, '') + 'k';
+    return String(n);
+  };
+  const fmtKRW = (n) => n.toLocaleString('ko-KR');
+  const relTime = (iso) => {
+    const then = new Date(iso).getTime();
+    if (isNaN(then)) return '';
+    const diffMin = Math.max(0, (Date.now() - then) / 60_000);
+    if (diffMin < 1)       return '방금 전';
+    if (diffMin < 60)      return `${Math.floor(diffMin)}분 전`;
+    if (diffMin < 60*24)   return `${Math.floor(diffMin/60)}시간 전`;
+    if (diffMin < 60*24*7) return `${Math.floor(diffMin/60/24)}일 전`;
+    return `${Math.floor(diffMin/60/24/7)}주 전`;
+  };
+  const GENRE_BASE = {
+    romance: ['#ff9db6', '#e83e5c'], fantasy: ['#9d7cff', '#4a3fa8'],
+    thriller: ['#ff6c5c', '#6b1e2a'], daily: ['#ffdc7a', '#f39a5a'],
+    bl_gl: ['#d9a0ff', '#7846d3'], action: ['#ff8a3d', '#c93516'],
+    comedy: ['#ffe266', '#ffa626'], drama: ['#6cb6d9', '#2a4e7a'],
+    youth: ['#7fdcd6', '#2b8f8a'], horror: ['#6b5580', '#1a0e26']
+  };
+  const GENRE_NAME = {
+    romance: '로맨스', fantasy: '판타지', thriller: '스릴러', daily: '일상',
+    bl_gl: 'BL/GL', action: '액션', comedy: '개그', drama: '드라마',
+    youth: '청춘', horror: '공포'
+  };
+  const hashString = (s) => {
+    let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+    return Math.abs(h);
+  };
+  const shift = (hex, dh) => {
+    const n = parseInt(hex.slice(1), 16);
+    let r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+    let h, s, l = (mx + mn) / 2;
+    if (mx === mn) h = s = 0;
+    else {
+      const d = mx - mn;
+      s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+      switch (mx) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        case b: h = (r - g) / d + 4; break;
+      }
+      h /= 6;
+    }
+    h = (h + dh / 360 + 1) % 1;
+    const hue2rgb = (p, q, t) => {
+      t = (t + 1) % 1;
+      if (t < 1/6) return p + (q - p) * 6 * t;
+      if (t < 1/2) return q;
+      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    };
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    const rr = Math.round(hue2rgb(p, q, h + 1/3) * 255);
+    const gg = Math.round(hue2rgb(p, q, h) * 255);
+    const bb = Math.round(hue2rgb(p, q, h - 1/3) * 255);
+    return '#' + [rr, gg, bb].map(x => x.toString(16).padStart(2, '0')).join('');
+  };
+  const gradientFor = (genre, seed) => {
+    const base = GENRE_BASE[genre] || GENRE_BASE.daily;
+    const dh = ((hashString(seed || '') % 24) - 12);
+    return [shift(base[0], dh), shift(base[1], dh)];
+  };
+  const initials = (name) => (name || '?')[0];
+
+  const sparkSVG = (data, opts = {}) => {
+    const w = opts.w || 120, h = opts.h || 32, pad = 2;
+    const max = Math.max(...data), min = Math.min(...data);
+    const span = max - min || 1;
+    const step = (w - pad * 2) / (data.length - 1);
+    const pts = data.map((v, i) => {
+      const x = pad + step * i;
+      const y = h - pad - ((v - min) / span) * (h - pad * 2);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+    const area = `M${pad},${h} L${pts.replace(/ /g, ' L')} L${(w - pad).toFixed(1)},${h} Z`;
+    return `
+      <svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+        <path d="${area}" fill="currentColor" opacity="0.12"/>
+        <polyline points="${pts}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    `;
+  };
+
+  // ============================================================
+  //  Toast
+  // ============================================================
+  const toast = (msg, type = 'success') => {
+    const el = document.createElement('div');
+    el.className = 'toast ' + (type === 'error' ? 'error' : type === 'success' ? 'success' : '');
+    el.textContent = msg;
+    document.getElementById('toastRoot').appendChild(el);
+    setTimeout(() => {
+      el.style.opacity = '0'; el.style.transform = 'translateY(-8px)';
+      el.style.transition = 'opacity 0.25s, transform 0.25s';
+      setTimeout(() => el.remove(), 300);
+    }, 2600);
+  };
+
+  // ============================================================
+  //  State
+  // ============================================================
+  const state = {
+    section: 'dashboard',
+    me: { status: 'idle', data: null, error: null },
+    dashboard: { status: 'idle', data: null, error: null },
+    tipsRecent: { status: 'idle', data: null, error: null },
+    works: { status: 'idle', series: null, posts: null, error: null, activeTab: 'series' },
+    upload: {
+      step: 'select', type: null,
+      seriesId: null, seriesList: [],
+      title: '', description: '', order: null,
+      viewer_mode: 'scroll', is_subscriber_only: false,
+      genre: 'daily',
+      images: [], // { key, file, dataUrl, image_id, status, progress, error }
+      submitting: false, error: null
+    },
+    payouts: { est: { status: 'idle', data: null, error: null }, hist: { status: 'idle', data: null, error: null } },
+    settings: {
+      status: 'idle', data: null, error: null,
+      draft: { subscription_enabled: true, subscription_price: 4900 },
+      saving: false
+    }
+  };
+  const root = document.getElementById('mainRoot');
+
+  // ============================================================
+  //  Renderers
+  // ============================================================
+  const errBlock = (err, retryAction) => `
+    <div class="error-state" role="alert">
+      <div class="error-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div class="error-title">불러오지 못했어요</div>
+      <div class="error-message">${escapeHtml(err.message)}</div>
+      <div class="error-code">code: ${escapeHtml(err.code)} · HTTP ${err.status ?? '—'}</div>
+      <button class="btn btn-primary btn-sm" data-action="${retryAction}">다시 시도</button>
+    </div>
+  `;
+
+  // ---- Dashboard
+  const renderDashboardSkeleton = () => `
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">대시보드</h1>
+        <div class="page-sub">이번 달 활동을 한눈에</div>
+      </div>
+    </div>
+    <div class="kpi-grid">
+      ${Array.from({ length: 4 }, () => `
+        <div class="kpi-skel">
+          <div class="skeleton" style="width: 40%; height: 10px;"></div>
+          <div class="skeleton" style="width: 60%; height: 24px;"></div>
+          <div class="skeleton" style="width: 100%; height: 32px;"></div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="col-2">
+      <div class="card"><div class="skeleton" style="width: 100%; height: 200px;"></div></div>
+      <div class="card"><div class="skeleton" style="width: 100%; height: 200px;"></div></div>
+    </div>
+  `;
+
+  const renderDashboard = () => {
+    const d = state.dashboard.data;
+    const t = state.tipsRecent.data;
+    const upPct = d.views_delta_pct;
+    const netFollowers = d.new_followers;
+    const netSubs = d.new_subscribers - d.cancellations;
+
+    const kpiSpark = (data) => sparkSVG(data);
+
+    return `
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">대시보드</h1>
+          <div class="page-sub">이번 달 활동을 한눈에</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-ghost" data-nav="works">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            작품 관리
+          </button>
+          <button class="btn btn-accent" data-nav="upload">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            새 회차 · 포스트
+          </button>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-label">
+            <span>이번 달 조회수</span>
+            <span class="kpi-delta ${upPct > 0 ? 'up' : upPct < 0 ? 'down' : 'neutral'}">
+              ${upPct > 0 ? '↑' : upPct < 0 ? '↓' : '·'} ${Math.abs(upPct).toFixed(1)}%
+            </span>
+          </div>
+          <div class="kpi-value">${d.views.toLocaleString('ko-KR')}</div>
+          ${kpiSpark(d.spark.views)}
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">
+            <span>팔로워</span>
+            <span class="kpi-delta ${netFollowers > 0 ? 'up' : 'neutral'}">+${netFollowers}</span>
+          </div>
+          <div class="kpi-value">${d.followers_total.toLocaleString('ko-KR')}</div>
+          <div class="kpi-note">이번 달 <strong>+${netFollowers}</strong> 신규</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">
+            <span>유료 구독자</span>
+            <span class="kpi-delta ${netSubs > 0 ? 'up' : netSubs < 0 ? 'down' : 'neutral'}">
+              ${netSubs > 0 ? '+' : ''}${netSubs}
+            </span>
+          </div>
+          <div class="kpi-value">${d.subscribers_total.toLocaleString('ko-KR')}</div>
+          <div class="kpi-note">신규 +${d.new_subscribers} · 해지 -${d.cancellations}</div>
+        </div>
+        <div class="kpi accent">
+          <div class="kpi-label">
+            <span>예상 정산액</span>
+            <span class="kpi-delta neutral">7월 · 진행중</span>
+          </div>
+          <div class="kpi-value money">${fmtKRW(d.estimated_payout)}</div>
+          <div class="kpi-note">8/15 지급 예정 · 팁 ${d.tips_count}건 포함</div>
+        </div>
+      </div>
+
+      <div class="col-2">
+        <div class="card">
+          <div class="card-head">
+            <h2 class="card-title">최근 후원<span class="count">${t?.items?.length ?? 0}건</span></h2>
+            <a class="card-link" href="#" data-nav="payouts">정산 보기 →</a>
+          </div>
+          ${(t?.items || []).length === 0 ? '<div class="empty">최근 후원이 없어요.</div>' : `
+            <div class="tip-list">
+              ${t.items.map((tip) => `
+                <div class="tip-item">
+                  <div class="tip-avatar" style="background: linear-gradient(135deg, ${gradientFor('fantasy', tip.sender.id).join(',')})">${escapeHtml(initials(tip.sender.display_name))}</div>
+                  <div class="tip-body">
+                    <div class="tip-hd">
+                      <span class="tip-name">${escapeHtml(tip.sender.display_name)}</span>
+                      <span class="tip-amount">₩${fmtKRW(tip.amount)}</span>
+                      <span class="tip-time">${relTime(tip.created_at)}</span>
+                    </div>
+                    ${tip.message ? `<div class="tip-msg">${escapeHtml(tip.message)}</div>` : ''}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          `}
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2 class="card-title">이번 주 상위 회차</h2>
+          </div>
+          <div class="top-list">
+            ${d.top_episodes.map((e, i) => {
+              const [g1, g2] = gradientFor(e.genre, e.id);
+              return `
+                <div class="top-item">
+                  <div class="top-rank">${i + 1}</div>
+                  <div class="top-thumb" style="--g1:${g1};--g2:${g2}"></div>
+                  <div class="top-body">
+                    <div class="top-line1">${escapeHtml(e.title)}</div>
+                    <div class="top-line2">${escapeHtml(e.series_title)} · ${e.views.toLocaleString('ko-KR')} 조회</div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  };
+
+  // ---- Works
+  const renderWorks = () => {
+    const st = state.works;
+    if (st.status === 'loading') {
+      return `
+        <div class="page-head">
+          <div><h1 class="page-title">작품 관리</h1><div class="page-sub">시리즈와 개별 포스트</div></div>
+        </div>
+        <div class="skeleton" style="width: 100%; height: 400px;"></div>
+      `;
+    }
+    if (st.status === 'error') {
+      return `
+        <div class="page-head"><h1 class="page-title">작품 관리</h1></div>
+        ${errBlock(st.error, 'retry-works')}
+      `;
+    }
+    const tab = st.activeTab;
+    return `
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">작품 관리</h1>
+          <div class="page-sub">시리즈 ${st.series?.items?.length || 0}개 · 포스트 ${st.posts?.items?.length || 0}개</div>
+        </div>
+        <div class="page-actions">
+          <button class="btn btn-accent" data-nav="upload">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            새로 만들기
+          </button>
+        </div>
+      </div>
+      <div class="tabs">
+        <button class="tab ${tab === 'series' ? 'active' : ''}" data-worktab="series">시리즈</button>
+        <button class="tab ${tab === 'posts' ? 'active' : ''}" data-worktab="posts">개별 포스트</button>
+      </div>
+      ${tab === 'series' ? renderMySeries() : renderMyPosts()}
+    `;
+  };
+
+  const renderMySeries = () => {
+    const items = state.works.series?.items || [];
+    if (items.length === 0) return '<div class="empty">아직 시리즈가 없어요. 업로드에서 시작해보세요.</div>';
+    return `
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>작품</th>
+              <th>상태</th>
+              <th class="num">회차</th>
+              <th class="num">총 조회수</th>
+              <th class="num">구독자 전용</th>
+              <th>업데이트</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${items.map((s) => {
+              const [g1, g2] = gradientFor(s.genres[0], s.id);
+              return `
+                <tr>
+                  <td>
+                    <div class="table-title-cell">
+                      <div class="table-thumb" style="--g1:${g1};--g2:${g2}"></div>
+                      <div>
+                        <div class="table-title">${escapeHtml(s.title)}</div>
+                        <div class="table-sub">${escapeHtml(GENRE_NAME[s.genres[0]] || s.genres[0])}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="status-pill ${s.status}">${s.status === 'ongoing' ? '연재중' : s.status === 'completed' ? '완결' : '휴재'}</span></td>
+                  <td class="num">${s.episode_count}</td>
+                  <td class="num">${s.stats.views_total.toLocaleString('ko-KR')}</td>
+                  <td class="num">${s.stats.subscribers_only_count}</td>
+                  <td>${relTime(s.updated_at)}</td>
+                  <td>
+                    <div class="row-actions">
+                      <button class="row-btn" data-series-edit="${escapeHtml(s.id)}">편집</button>
+                      <button class="row-btn" data-series-new-ep="${escapeHtml(s.id)}">＋ 새 회차</button>
+                    </div>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  };
+
+  const renderMyPosts = () => {
+    const items = state.works.posts?.items || [];
+    if (items.length === 0) return '<div class="empty">아직 포스트가 없어요.</div>';
+    return `
+      <div class="my-post-grid">
+        ${items.map((p) => {
+          const [g1, g2] = gradientFor(p.genres[0], p.id);
+          return `
+            <div class="my-post-cell" style="--g1:${g1};--g2:${g2}" data-post-edit="${escapeHtml(p.id)}">
+              <div class="my-post-stats">${fmtNum(p.stats.views)} 조회</div>
+              <span class="my-post-title">${escapeHtml(p.title)}</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  };
+
+  // ---- Upload
+  const renderUpload = () => {
+    const st = state.upload;
+    if (st.step === 'select') {
+      return `
+        <div class="page-head">
+          <div><h1 class="page-title">업로드</h1><div class="page-sub">무엇을 올릴까요?</div></div>
+        </div>
+        <div class="upload-choice">
+          <button class="choice-card" data-choose="episode">
+            <div class="choice-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+            </div>
+            <div class="choice-title">새 회차</div>
+            <div class="choice-desc">기존 시리즈에 새 회차를 추가합니다. 회차별로 뷰어 모드와 공개 범위를 지정할 수 있어요.</div>
+          </button>
+          <button class="choice-card" data-choose="series">
+            <div class="choice-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            </div>
+            <div class="choice-title">새 시리즈</div>
+            <div class="choice-desc">새 연재를 시작합니다. 시리즈 정보만 먼저 만들고 나중에 회차를 추가할 수도 있어요.</div>
+          </button>
+          <button class="choice-card" data-choose="post">
+            <div class="choice-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
+            </div>
+            <div class="choice-title">개별 포스트</div>
+            <div class="choice-desc">단독 게시물. 일상 그림·낙서·단편에 적합합니다.</div>
+          </button>
+        </div>
+      `;
+    }
+    return renderUploadForm();
+  };
+
+  const renderUploadForm = () => {
+    const st = state.upload;
+    const type = st.type;
+    const heading = { episode: '새 회차 업로드', series: '새 시리즈 시작', post: '새 포스트 업로드' }[type];
+    const sub = { episode: '기존 시리즈에 회차를 추가합니다', series: '연재할 시리즈의 정보를 입력합니다', post: '단독 게시물을 올립니다' }[type];
+    const canSubmit = state.upload.title.trim().length > 0 &&
+      (type === 'series' || state.upload.images.some((i) => i.status === 'ready')) &&
+      (type !== 'episode' || state.upload.seriesId) &&
+      !st.submitting;
+    return `
+      <div class="page-head">
+        <div>
+          <a class="form-back" data-form-back>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            선택으로 돌아가기
+          </a>
+          <h1 class="page-title">${heading}</h1>
+          <div class="page-sub">${sub}</div>
+        </div>
+      </div>
+      <div class="form">
+        ${type === 'episode' ? `
+          <div class="form-row-inline">
+            <div>
+              <label class="label">시리즈</label>
+              <select class="select" id="fSeries">
+                ${st.seriesList.map((s) => `<option value="${escapeHtml(s.id)}" ${s.id === st.seriesId ? 'selected' : ''}>${escapeHtml(s.title)} (${s.episode_count}화)</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <label class="label">회차 번호</label>
+              <input class="input" type="number" id="fOrder" min="1" value="${st.order ?? ''}" placeholder="자동" />
+            </div>
+          </div>
+        ` : ''}
+        <div class="form-row">
+          <label class="label">${type === 'series' ? '시리즈 제목' : '제목'}</label>
+          <input class="input" id="fTitle" placeholder="${type === 'series' ? '예: 달빛 아래 우리' : '예: 42화 · 여름의 시작'}" value="${escapeHtml(st.title)}" maxlength="100" />
+        </div>
+        <div class="form-row">
+          <label class="label">${type === 'series' ? '시리즈 소개' : '설명 (선택)'}</label>
+          <textarea class="textarea" id="fDesc" placeholder="${type === 'series' ? '독자에게 이 시리즈를 소개해 주세요.' : '이번 화 예고나 후기를 남겨보세요.'}" maxlength="500">${escapeHtml(st.description)}</textarea>
+        </div>
+        <div class="form-row-inline">
+          <div>
+            <label class="label">장르</label>
+            <select class="select" id="fGenre">
+              ${Object.entries(GENRE_NAME).map(([k, v]) => `<option value="${k}" ${k === st.genre ? 'selected' : ''}>${v}</option>`).join('')}
+            </select>
+          </div>
+          ${type !== 'series' ? `
+            <div>
+              <label class="label">뷰어 모드</label>
+              <div class="radio-group">
+                <button class="radio-btn ${st.viewer_mode === 'scroll' ? 'active' : ''}" data-mode="scroll">세로 스크롤</button>
+                <button class="radio-btn ${st.viewer_mode === 'page' ? 'active' : ''}" data-mode="page">페이지</button>
+              </div>
+            </div>
+          ` : ''}
+        </div>
+        ${type !== 'series' ? `
+          <div class="form-row">
+            <div class="toggle-row" id="fSubToggle">
+              <div>
+                <div class="toggle-label">구독자 전용 회차</div>
+                <div class="toggle-sub">유료 구독자만 열람할 수 있어요.</div>
+              </div>
+              <div class="toggle-sw ${st.is_subscriber_only ? 'on' : ''}"></div>
+            </div>
+          </div>
+          <div class="form-row">
+            <label class="label">이미지 (${st.images.filter((i) => i.status === 'ready').length}/${st.images.length} 준비 완료)</label>
+            <div class="drop-zone" id="dropZone">
+              <div class="drop-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              </div>
+              <div class="drop-hd">이미지를 드래그하거나 클릭해서 업로드</div>
+              <div class="drop-sd">PNG · JPG · WebP · 회당 최대 100MB · 여러 장 가능</div>
+              <input type="file" id="fileInput" accept="image/*" multiple hidden />
+            </div>
+            ${st.images.length > 0 ? `
+              <div class="thumb-grid">
+                ${st.images.map((img, i) => renderThumbItem(img, i)).join('')}
+              </div>
+            ` : ''}
+          </div>
+        ` : ''}
+        ${st.error ? `<div style="color: var(--danger); font-size: 13px; margin-bottom: 12px;">${escapeHtml(st.error)}</div>` : ''}
+        <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 24px;">
+          <button class="btn btn-ghost" data-form-back>취소</button>
+          <button class="btn btn-accent" id="btnPublish" ${canSubmit ? '' : 'disabled'}>
+            ${st.submitting ? '<span class="spinner"></span> 발행 중...' : (type === 'series' ? '시리즈 만들기' : '발행')}
+          </button>
+        </div>
+      </div>
+    `;
+  };
+
+  const renderThumbItem = (img, i) => {
+    const src = img.dataUrl;
+    const badgeText = {
+      queued: '대기중',
+      initing: '준비 중',
+      uploading: `업로드 ${img.progress}%`,
+      completing: '검증 중',
+      polling: '처리 중',
+      ready: '준비 완료',
+      error: '실패'
+    }[img.status] || img.status;
+    const badgeCls = img.status === 'ready' ? 'thumb-status-ready' : img.status === 'error' ? 'thumb-status-error' : '';
+    return `
+      <div class="thumb-item" draggable="true" data-thumb-key="${img.key}" data-idx="${i}">
+        ${src ? `<img src="${src}" alt="${i + 1}컷" />` : ''}
+        <div class="thumb-overlay"></div>
+        <div class="thumb-order">${i + 1}</div>
+        <div class="thumb-actions">
+          <button class="thumb-btn" data-thumb-up="${img.key}" title="위로">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m18 15-6-6-6 6"/></svg>
+          </button>
+          <button class="thumb-btn" data-thumb-down="${img.key}" title="아래로">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <button class="thumb-btn" data-thumb-remove="${img.key}" title="삭제">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="thumb-status">
+          <span class="${badgeCls}">${badgeText}</span>
+        </div>
+        ${img.status === 'uploading' ? `
+          <div class="thumb-progress"><div class="thumb-progress-fill" style="width: ${img.progress}%"></div></div>
+        ` : ''}
+      </div>
+    `;
+  };
+
+  // ---- Payouts
+  const renderPayoutsSkeleton = () => `
+    <div class="page-head"><h1 class="page-title">정산</h1><div class="page-sub">이번 달 예상액과 지난 정산 내역</div></div>
+    <div class="skeleton" style="width: 100%; height: 180px; margin-bottom: 24px; border-radius: var(--radius-lg);"></div>
+    <div class="skeleton" style="width: 100%; height: 400px; border-radius: var(--radius-lg);"></div>
+  `;
+  const renderPayouts = () => {
+    const est = state.payouts.est.data;
+    const hist = state.payouts.hist.data;
+    return `
+      <div class="page-head">
+        <div><h1 class="page-title">정산</h1><div class="page-sub">이번 달 예상액과 지난 정산 내역</div></div>
+      </div>
+      <div class="payout-summary">
+        <div class="payout-sum-label">${est.period} · 예상 실수령액</div>
+        <div class="payout-sum-value">${fmtKRW(est.estimated_net)}</div>
+        <div class="payout-sum-sub">
+          기준 시각 ${relTime(est.as_of)} · 8월 15일 지급 예정
+        </div>
+        <div class="breakdown">
+          <div>
+            <div class="bd-row plus"><span class="bd-lbl">구독료 합계</span><span class="bd-val">+₩${fmtKRW(est.breakdown.subscriptions)}</span></div>
+            <div class="bd-row plus"><span class="bd-lbl">팁 합계</span><span class="bd-val">+₩${fmtKRW(est.breakdown.tips)}</span></div>
+            <div class="bd-row"><span class="bd-lbl">총 매출 (gross)</span><span class="bd-val">₩${fmtKRW(est.gross)}</span></div>
+          </div>
+          <div>
+            <div class="bd-row minus"><span class="bd-lbl">플랫폼 수수료 (8%)</span><span class="bd-val">-₩${fmtKRW(est.platform_fee)}</span></div>
+            <div class="bd-row minus"><span class="bd-lbl">결제 수수료 (Stripe 실비)</span><span class="bd-val">-₩${fmtKRW(est.stripe_fee)}</span></div>
+            <div class="bd-row minus"><span class="bd-lbl">환불 준비금</span><span class="bd-val">-₩${fmtKRW(est.refund_reserve)}</span></div>
+            <div class="bd-row"><span class="bd-lbl">실수령액 (net)</span><span class="bd-val" style="color: var(--accent);">₩${fmtKRW(est.estimated_net)}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <h2 style="font-size: 15px; font-weight: 700; margin-bottom: 12px;">지난 정산</h2>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>기간</th>
+              <th class="num">매출</th>
+              <th class="num">플랫폼 수수료</th>
+              <th class="num">결제 수수료</th>
+              <th class="num">환불 준비금</th>
+              <th class="num">실수령액</th>
+              <th>상태</th>
+              <th>지급일</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${(hist.items || []).map((p) => `
+              <tr>
+                <td><strong>${p.period}</strong></td>
+                <td class="num">₩${fmtKRW(p.gross)}</td>
+                <td class="num">-₩${fmtKRW(p.platform_fee)}</td>
+                <td class="num">-₩${fmtKRW(p.stripe_fee)}</td>
+                <td class="num">-₩${fmtKRW(p.refund_reserve)}</td>
+                <td class="num" style="color: var(--accent); font-weight: 700;">₩${fmtKRW(p.net)}</td>
+                <td><span class="status-pill ${p.status}">${p.status === 'paid' ? '지급 완료' : p.status === 'pending' ? '대기' : p.status === 'processing' ? '진행 중' : '실패'}</span></td>
+                <td>${p.paid_at ? new Date(p.paid_at).toISOString().slice(0, 10).replace(/-/g, '.') : '—'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  };
+
+  // ---- Settings
+  const renderSettingsSkeleton = () => `
+    <div class="page-head"><h1 class="page-title">설정</h1><div class="page-sub">구독료·프로필</div></div>
+    <div class="skeleton" style="width: 100%; height: 300px; border-radius: var(--radius-lg);"></div>
+  `;
+  const renderSettings = () => {
+    const d = state.settings.draft;
+    const saving = state.settings.saving;
+    return `
+      <div class="page-head">
+        <div><h1 class="page-title">설정</h1><div class="page-sub">구독료·수익화</div></div>
+      </div>
+      <div class="card settings-form">
+        <div class="toggle-row" id="setEnabled" style="margin-bottom: 20px;">
+          <div>
+            <div class="toggle-label">구독 활성화</div>
+            <div class="toggle-sub">비활성화하면 새 구독을 받지 않고, 기존 구독자는 유지됩니다.</div>
+          </div>
+          <div class="toggle-sw ${d.subscription_enabled ? 'on' : ''}"></div>
+        </div>
+        <div class="form-row">
+          <label class="label">월 구독료</label>
+          <div class="price-input">
+            <input class="input" type="number" id="setPrice" min="1000" max="30000" step="100" value="${d.subscription_price}" ${d.subscription_enabled ? '' : 'disabled'} />
+          </div>
+          <div class="price-hint">₩1,000 ~ ₩30,000 사이에서 설정 가능해요. Stripe 결제 수수료 · 플랫폼 수수료 8%가 차감됩니다.</div>
+        </div>
+        <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px;">
+          <button class="btn btn-accent" id="btnSaveSettings" ${saving ? 'disabled' : ''}>
+            ${saving ? '<span class="spinner"></span> 저장 중...' : '변경사항 저장'}
+          </button>
+        </div>
+      </div>
+    `;
+  };
+
+  // ============================================================
+  //  Render dispatch
+  // ============================================================
+  const render = () => {
+    // Nav highlight
+    document.querySelectorAll('.nav-item').forEach((n) => {
+      n.classList.toggle('active', n.dataset.section === state.section);
+    });
+    const s = state.section;
+    if (s === 'dashboard') {
+      const st1 = state.dashboard.status;
+      if (st1 === 'loading') { root.innerHTML = renderDashboardSkeleton(); return; }
+      if (st1 === 'error')   { root.innerHTML = errBlock(state.dashboard.error, 'retry-dashboard'); return; }
+      if (st1 === 'success' && state.tipsRecent.status !== 'loading') {
+        root.innerHTML = renderDashboard();
+      }
+    } else if (s === 'works') {
+      root.innerHTML = renderWorks();
+      bindWorkTabEvents();
+    } else if (s === 'upload') {
+      root.innerHTML = renderUpload();
+      bindUploadEvents();
+    } else if (s === 'payouts') {
+      const est = state.payouts.est.status, hist = state.payouts.hist.status;
+      if (est === 'loading' || hist === 'loading') { root.innerHTML = renderPayoutsSkeleton(); return; }
+      if (est === 'error') { root.innerHTML = errBlock(state.payouts.est.error, 'retry-payouts'); return; }
+      if (hist === 'error') { root.innerHTML = errBlock(state.payouts.hist.error, 'retry-payouts'); return; }
+      root.innerHTML = renderPayouts();
+    } else if (s === 'settings') {
+      if (state.settings.status === 'loading') { root.innerHTML = renderSettingsSkeleton(); return; }
+      if (state.settings.status === 'error') { root.innerHTML = errBlock(state.settings.error, 'retry-settings'); return; }
+      root.innerHTML = renderSettings();
+      bindSettingsEvents();
+    }
+  };
+
+  // ============================================================
+  //  Loaders
+  // ============================================================
+  const loadMe = async () => {
+    state.me = { status: 'loading', data: null, error: null };
+    try {
+      const me = await api.getMe();
+      state.me = { status: 'success', data: me, error: null };
+      // header
+      document.getElementById('meName').textContent = me.user.display_name;
+      document.getElementById('meHandle').textContent = '@' + me.user.handle;
+      document.getElementById('meAvatar').textContent = initials(me.user.display_name);
+      // settings draft init
+      state.settings.draft = {
+        subscription_enabled: !!me.author_profile?.subscription?.enabled,
+        subscription_price: me.author_profile?.subscription?.price ?? 4900
+      };
+    } catch (err) {
+      state.me = { status: 'error', data: null, error: err instanceof APIError ? err : new APIError(0, 'network_error', err.message) };
+    }
+  };
+
+  const loadDashboard = async () => {
+    state.dashboard = { status: 'loading', data: null, error: null };
+    state.tipsRecent = { status: 'loading', data: null, error: null };
+    render();
+    try {
+      const [d, t] = await Promise.all([api.getDashboard('this_month'), api.getTipsReceived().catch(() => ({ items: [] }))]);
+      state.dashboard = { status: 'success', data: d, error: null };
+      state.tipsRecent = { status: 'success', data: t, error: null };
+    } catch (err) {
+      state.dashboard = { status: 'error', data: null, error: err instanceof APIError ? err : new APIError(0, 'network_error', err.message) };
+    }
+    render();
+  };
+
+  const loadWorks = async () => {
+    state.works = { ...state.works, status: 'loading', series: null, posts: null, error: null };
+    render();
+    try {
+      const [s, p] = await Promise.all([api.getMySeries(), api.getMyPosts()]);
+      state.works = { ...state.works, status: 'success', series: s, posts: p, error: null };
+    } catch (err) {
+      state.works = { ...state.works, status: 'error', error: err instanceof APIError ? err : new APIError(0, 'network_error', err.message) };
+    }
+    render();
+  };
+
+  const loadPayouts = async () => {
+    state.payouts.est = { status: 'loading', data: null, error: null };
+    state.payouts.hist = { status: 'loading', data: null, error: null };
+    render();
+    try {
+      const [e, h] = await Promise.all([api.getPayoutEstimate(), api.getPayouts()]);
+      state.payouts.est = { status: 'success', data: e, error: null };
+      state.payouts.hist = { status: 'success', data: h, error: null };
+    } catch (err) {
+      const e = err instanceof APIError ? err : new APIError(0, 'network_error', err.message);
+      if (state.payouts.est.status !== 'success') state.payouts.est = { status: 'error', data: null, error: e };
+      if (state.payouts.hist.status !== 'success') state.payouts.hist = { status: 'error', data: null, error: e };
+    }
+    render();
+  };
+
+  const loadSettingsIfNeeded = async () => {
+    if (state.me.status !== 'success') {
+      state.settings = { ...state.settings, status: 'loading' };
+      render();
+      await loadMe();
+    }
+    state.settings.status = 'success';
+    render();
+  };
+
+  // ============================================================
+  //  Upload flow
+  // ============================================================
+  const readFileAsDataURL = (file) => new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => res(fr.result);
+    fr.onerror = () => rej(new Error('파일 읽기 실패'));
+    fr.readAsDataURL(file);
+  });
+
+  const uploadOne = async (imgItem) => {
+    const rerender = () => {
+      const el = document.querySelector(`[data-thumb-key="${imgItem.key}"]`);
+      if (!el) return;
+      el.outerHTML = renderThumbItem(imgItem, state.upload.images.indexOf(imgItem));
+    };
+    try {
+      imgItem.status = 'initing';
+      rerender();
+      const init = await api.uploadInit({
+        filename: imgItem.file.name,
+        content_type: imgItem.file.type || 'image/png',
+        size: imgItem.file.size,
+        purpose: state.upload.type === 'post' ? 'post_page' : 'episode_page'
+      });
+      imgItem.image_id = init.image_id;
+      // 로컬 URL 을 mock DB 에 등록 → complete 후 poll 시 이 URL 반환
+      UPLOADED_IMAGES[imgItem.image_id] = { ...UPLOADED_IMAGES[imgItem.image_id], local_url: imgItem.dataUrl, size: imgItem.file.size };
+
+      // 시뮬레이션: presigned URL 로 PUT (실 프로덕션은 여기서 실제 PUT)
+      imgItem.status = 'uploading';
+      imgItem.progress = 0;
+      rerender();
+      for (let p = 0; p <= 100; p += 20) {
+        await new Promise((r) => setTimeout(r, 80 + Math.random() * 60));
+        imgItem.progress = p;
+        rerender();
+      }
+
+      // Complete
+      imgItem.status = 'completing';
+      rerender();
+      await api.uploadComplete(imgItem.image_id);
+
+      // Poll until ready
+      imgItem.status = 'polling';
+      rerender();
+      for (let i = 0; i < 5; i++) {
+        const s = await api.uploadStatus(imgItem.image_id);
+        if (s.status === 'ready') {
+          imgItem.status = 'ready';
+          imgItem.public_url = s.url;
+          rerender();
+          return;
+        }
+        if (s.status === 'failed') {
+          imgItem.status = 'error';
+          imgItem.error = '처리 실패';
+          rerender();
+          return;
+        }
+        await new Promise((r) => setTimeout(r, 400));
+      }
+      imgItem.status = 'error';
+      imgItem.error = '타임아웃';
+      rerender();
+    } catch (err) {
+      imgItem.status = 'error';
+      imgItem.error = err.message || '업로드 실패';
+      rerender();
+      toast(imgItem.file.name + ': ' + imgItem.error, 'error');
+    }
+  };
+
+  const handleFiles = async (files) => {
+    const arr = [...files].filter((f) => f.type.startsWith('image/'));
+    if (arr.length === 0) return;
+    for (const file of arr) {
+      const key = 'k_' + Math.random().toString(36).slice(2, 8);
+      const dataUrl = await readFileAsDataURL(file).catch(() => null);
+      const item = { key, file, dataUrl, image_id: null, status: 'queued', progress: 0 };
+      state.upload.images.push(item);
+    }
+    render();
+    // 순차 업로드 (병렬로 하면 UI 흔들리므로 순차)
+    for (const item of state.upload.images) {
+      if (item.status === 'queued') await uploadOne(item);
+    }
+    // Publish 버튼 갱신
+    const btn = document.getElementById('btnPublish');
+    if (btn) {
+      const canSubmit = state.upload.title.trim().length > 0 &&
+        state.upload.images.some((i) => i.status === 'ready') &&
+        (state.upload.type !== 'episode' || state.upload.seriesId);
+      btn.disabled = !canSubmit;
+    }
+  };
+
+  const publish = async () => {
+    const st = state.upload;
+    st.submitting = true;
+    st.error = null;
+    render();
+    try {
+      const readyImgs = st.images.filter((i) => i.status === 'ready');
+      const image_ids = readyImgs.map((i) => i.image_id);
+      const body = {
+        title: st.title,
+        description: st.description || undefined,
+        viewer_mode: st.viewer_mode,
+        is_subscriber_only: st.is_subscriber_only,
+        is_adult: false,
+        image_ids,
+        genres: [st.genre],
+        tags: [],
+        published_at: new Date().toISOString()
+      };
+      if (st.type === 'episode') {
+        body.order = st.order || undefined;
+        await api.createEpisode(st.seriesId, body);
+        toast('회차를 발행했어요');
+      } else if (st.type === 'series') {
+        await api.createSeries({
+          title: st.title, description: st.description,
+          viewer_mode_default: 'scroll',
+          genres: [st.genre], tags: [], is_adult: false
+        });
+        toast('시리즈를 만들었어요');
+      } else if (st.type === 'post') {
+        await api.createPost(body);
+        toast('포스트를 올렸어요');
+      }
+      // Reset upload state
+      state.upload = {
+        step: 'select', type: null,
+        seriesId: null, seriesList: [],
+        title: '', description: '', order: null,
+        viewer_mode: 'scroll', is_subscriber_only: false,
+        genre: 'daily', images: [],
+        submitting: false, error: null
+      };
+      // Refresh works
+      state.works = { ...state.works, status: 'idle', series: null, posts: null };
+      state.section = 'works';
+      loadWorks();
+    } catch (err) {
+      st.submitting = false;
+      st.error = err.message || '발행 실패';
+      render();
+      toast(err.message || '발행 실패', 'error');
+    }
+  };
+
+  // ============================================================
+  //  Event bindings
+  // ============================================================
+  const bindWorkTabEvents = () => {
+    document.querySelectorAll('[data-worktab]').forEach((b) => {
+      b.addEventListener('click', () => {
+        state.works.activeTab = b.dataset.worktab;
+        render();
+      });
+    });
+    document.querySelectorAll('[data-series-new-ep]').forEach((b) => {
+      b.addEventListener('click', () => {
+        const seriesId = b.dataset.seriesNewEp;
+        const series = state.works.series?.items.find((s) => s.id === seriesId);
+        if (!series) return;
+        state.upload = {
+          ...state.upload,
+          step: 'form', type: 'episode',
+          seriesId, seriesList: state.works.series?.items || [],
+          title: '', description: '', order: series.episode_count + 1,
+          viewer_mode: 'scroll', is_subscriber_only: false,
+          genre: series.genres[0] || 'daily',
+          images: [], submitting: false, error: null
+        };
+        state.section = 'upload';
+        render();
+      });
+    });
+    document.querySelectorAll('[data-series-edit]').forEach((b) => {
+      b.addEventListener('click', () => toast('편집 화면은 추후 구현 예정입니다.'));
+    });
+    document.querySelectorAll('[data-post-edit]').forEach((b) => {
+      b.addEventListener('click', () => toast('편집 화면은 추후 구현 예정입니다.'));
+    });
+  };
+
+  const bindUploadEvents = () => {
+    document.querySelectorAll('[data-choose]').forEach((b) => {
+      b.addEventListener('click', async () => {
+        const type = b.dataset.choose;
+        state.upload = {
+          ...state.upload,
+          step: 'form', type,
+          title: '', description: '', order: null,
+          viewer_mode: 'scroll', is_subscriber_only: false,
+          genre: 'daily', images: [], submitting: false, error: null
+        };
+        if (type === 'episode') {
+          // series 목록 필요
+          if (!state.works.series) {
+            try { state.works.series = await api.getMySeries(); }
+            catch (e) { toast('시리즈 목록을 불러오지 못했어요', 'error'); return; }
+          }
+          state.upload.seriesList = state.works.series.items || [];
+          if (state.upload.seriesList.length === 0) {
+            toast('먼저 시리즈를 만들어주세요', 'error');
+            state.upload.type = 'series';
+          } else {
+            state.upload.seriesId = state.upload.seriesList[0].id;
+            state.upload.order = state.upload.seriesList[0].episode_count + 1;
+            state.upload.genre = state.upload.seriesList[0].genres?.[0] || 'daily';
+          }
+        }
+        render();
+      });
+    });
+
+    document.querySelectorAll('[data-form-back]').forEach((b) => {
+      b.addEventListener('click', () => {
+        state.upload.step = 'select';
+        state.upload.type = null;
+        state.upload.images = [];
+        state.upload.title = ''; state.upload.description = '';
+        state.upload.error = null;
+        render();
+      });
+    });
+
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    if (dropZone && fileInput) {
+      dropZone.addEventListener('click', () => fileInput.click());
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault(); dropZone.classList.add('dragging');
+      });
+      dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragging'));
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault(); dropZone.classList.remove('dragging');
+        handleFiles(e.dataTransfer.files);
+      });
+      fileInput.addEventListener('change', (e) => {
+        handleFiles(e.target.files);
+        e.target.value = '';
+      });
+    }
+
+    // form fields
+    document.getElementById('fTitle')?.addEventListener('input', (e) => {
+      state.upload.title = e.target.value;
+      const btn = document.getElementById('btnPublish');
+      if (btn) {
+        const canSubmit = state.upload.title.trim().length > 0 &&
+          (state.upload.type === 'series' || state.upload.images.some((i) => i.status === 'ready')) &&
+          (state.upload.type !== 'episode' || state.upload.seriesId);
+        btn.disabled = !canSubmit;
+      }
+    });
+    document.getElementById('fDesc')?.addEventListener('input', (e) => { state.upload.description = e.target.value; });
+    document.getElementById('fOrder')?.addEventListener('input', (e) => { state.upload.order = e.target.value ? Number(e.target.value) : null; });
+    document.getElementById('fSeries')?.addEventListener('change', (e) => {
+      state.upload.seriesId = e.target.value;
+      const s = state.upload.seriesList.find((x) => x.id === e.target.value);
+      if (s) state.upload.order = s.episode_count + 1;
+      const orderInput = document.getElementById('fOrder');
+      if (orderInput) orderInput.value = state.upload.order;
+    });
+    document.getElementById('fGenre')?.addEventListener('change', (e) => { state.upload.genre = e.target.value; });
+    document.querySelectorAll('[data-mode]').forEach((b) => {
+      b.addEventListener('click', () => {
+        state.upload.viewer_mode = b.dataset.mode;
+        document.querySelectorAll('[data-mode]').forEach((x) => x.classList.toggle('active', x === b));
+      });
+    });
+    document.getElementById('fSubToggle')?.addEventListener('click', () => {
+      state.upload.is_subscriber_only = !state.upload.is_subscriber_only;
+      document.querySelector('#fSubToggle .toggle-sw')?.classList.toggle('on', state.upload.is_subscriber_only);
+    });
+
+    // thumb actions
+    document.querySelectorAll('[data-thumb-up]').forEach((b) => {
+      b.addEventListener('click', () => moveThumb(b.dataset.thumbUp, -1));
+    });
+    document.querySelectorAll('[data-thumb-down]').forEach((b) => {
+      b.addEventListener('click', () => moveThumb(b.dataset.thumbDown, +1));
+    });
+    document.querySelectorAll('[data-thumb-remove]').forEach((b) => {
+      b.addEventListener('click', () => {
+        const key = b.dataset.thumbRemove;
+        state.upload.images = state.upload.images.filter((i) => i.key !== key);
+        render();
+      });
+    });
+
+    document.getElementById('btnPublish')?.addEventListener('click', publish);
+  };
+
+  const moveThumb = (key, dir) => {
+    const arr = state.upload.images;
+    const i = arr.findIndex((x) => x.key === key);
+    const j = i + dir;
+    if (i < 0 || j < 0 || j >= arr.length) return;
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+    render();
+  };
+
+  const bindSettingsEvents = () => {
+    document.getElementById('setEnabled')?.addEventListener('click', () => {
+      state.settings.draft.subscription_enabled = !state.settings.draft.subscription_enabled;
+      render();
+    });
+    document.getElementById('setPrice')?.addEventListener('input', (e) => {
+      state.settings.draft.subscription_price = Number(e.target.value) || 0;
+    });
+    document.getElementById('btnSaveSettings')?.addEventListener('click', async () => {
+      state.settings.saving = true;
+      render();
+      try {
+        await api.patchAuthor({ subscription: state.settings.draft });
+        toast('설정을 저장했어요');
+      } catch (err) {
+        toast(err.message || '저장 실패', 'error');
+      } finally {
+        state.settings.saving = false;
+        render();
+      }
+    });
+  };
+
+  // Nav
+  document.getElementById('nav').addEventListener('click', (e) => {
+    const item = e.target.closest?.('[data-section]');
+    if (!item) return;
+    goSection(item.dataset.section);
+  });
+  const goSection = (section) => {
+    state.section = section;
+    if (section === 'dashboard') { if (state.dashboard.status !== 'success') loadDashboard(); else render(); }
+    else if (section === 'works') { if (state.works.status !== 'success') loadWorks(); else render(); }
+    else if (section === 'upload') { render(); }
+    else if (section === 'payouts') { if (state.payouts.est.status !== 'success') loadPayouts(); else render(); }
+    else if (section === 'settings') { loadSettingsIfNeeded(); }
+  };
+
+  // Delegated actions
+  document.addEventListener('click', (e) => {
+    const t = e.target;
+    const nav = t.closest?.('[data-nav]');
+    if (nav) { goSection(nav.dataset.nav); return; }
+    const action = t.closest?.('[data-action]')?.dataset.action;
+    if (action === 'retry-dashboard') { loadDashboard(); return; }
+    if (action === 'retry-works') { loadWorks(); return; }
+    if (action === 'retry-payouts') { loadPayouts(); return; }
+    if (action === 'retry-settings') { loadMe().then(render); return; }
+  });
+
+  // Theme
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const r = document.documentElement;
+    const curr = r.getAttribute('data-theme');
+    const sysDark = matchMedia('(prefers-color-scheme: dark)').matches;
+    const isDark = curr === 'dark' || (!curr && sysDark);
+    r.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  });
+
+  // Dev
+  document.getElementById('devReload').addEventListener('click', () => {
+    if (state.section === 'dashboard') loadDashboard();
+    else if (state.section === 'works') loadWorks();
+    else if (state.section === 'payouts') loadPayouts();
+    else if (state.section === 'settings') { loadMe().then(render); }
+    else render();
+  });
+  document.getElementById('devError').addEventListener('change', (e) => { DEV.forceError = e.target.checked; });
+  document.getElementById('devSlow').addEventListener('change', (e) => { DEV.slow = e.target.checked; });
+
+  // 초기 로드
+  (async () => {
+    await loadMe();
+    loadDashboard();
+  })();
+})();
+</script>
+
+</body>
+</html>

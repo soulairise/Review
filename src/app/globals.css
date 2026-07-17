@@ -1,0 +1,34 @@
+:root {
+  --paper: #f4f3f0;
+  --ink: #17141a;
+  --ink-2: #3f3946;
+  --muted: #7a7480;
+  --line: #e6e2dd;
+  --accent: #ee2c56;
+  --surface: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0d0c10;
+    --ink: #f0edf1;
+    --ink-2: #cac4d0;
+    --muted: #8b8492;
+    --line: #24222a;
+    --accent: #ff5573;
+    --surface: #17151b;
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard",
+    "Segoe UI", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; }

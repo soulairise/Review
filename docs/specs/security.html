@@ -1,0 +1,883 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>보안 명세 — 짓다 (JITDA)</title>
+<style>
+  :root {
+    --font-sans: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Segoe UI", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+    --paper: #f4f3f0; --surface: #ffffff; --surface-2: #ecebe6;
+    --ink: #17141a; --ink-2: #3f3946; --muted: #7a7480;
+    --line: #e6e2dd; --line-2: #d8d3cc;
+    --accent: #ee2c56; --gold: #c78e28;
+    --success: #2f8f5d; --warning: #d69a2a; --danger: #c94848;
+    --radius: 6px; --radius-lg: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0d0c10; --surface: #17151b; --surface-2: #1f1c25;
+      --ink: #f0edf1; --ink-2: #cac4d0; --muted: #8b8492;
+      --line: #24222a; --line-2: #33303a;
+      --accent: #ff5573; --gold: #e8b13a;
+      --success: #4bb87a; --warning: #e8b13a; --danger: #e07070;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0d0c10; --surface: #17151b; --surface-2: #1f1c25;
+    --ink: #f0edf1; --ink-2: #cac4d0; --muted: #8b8492;
+    --line: #24222a; --line-2: #33303a;
+    --accent: #ff5573; --gold: #e8b13a;
+    --success: #4bb87a; --warning: #e8b13a; --danger: #e07070;
+  }
+  :root[data-theme="light"] {
+    --paper: #f4f3f0; --surface: #ffffff; --surface-2: #ecebe6;
+    --ink: #17141a; --ink-2: #3f3946; --muted: #7a7480;
+    --line: #e6e2dd; --line-2: #d8d3cc;
+    --accent: #ee2c56; --gold: #c78e28;
+    --success: #2f8f5d; --warning: #d69a2a; --danger: #c94848;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { min-height: 100%; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: var(--font-sans); font-size: 15.5px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font-family: inherit; font-size: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  h1, h2, h3, h4 { margin: 0; font-weight: 700; text-wrap: balance; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .page {
+    display: grid; grid-template-columns: 240px minmax(0, 1fr);
+    gap: 60px; max-width: 1140px; margin: 0 auto;
+    padding: 40px 32px 80px;
+  }
+  @media (max-width: 900px) { .page { grid-template-columns: 1fr; gap: 32px; padding: 24px 20px 60px; } }
+
+  .toc {
+    position: sticky; top: 32px; align-self: start;
+    max-height: calc(100vh - 64px); overflow-y: auto;
+    padding-right: 8px; font-size: 13px; line-height: 1.55;
+    scrollbar-width: thin;
+  }
+  @media (max-width: 900px) {
+    .toc { position: static; max-height: none; border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 16px 18px; background: var(--surface); }
+  }
+  .toc-title {
+    font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--muted); font-weight: 700; margin-bottom: 14px;
+  }
+  .toc ol { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 3px; }
+  .toc a { color: var(--ink-2); display: flex; gap: 10px; padding: 5px 0; }
+  .toc a:hover { color: var(--accent); text-decoration: none; }
+  .toc-num { color: var(--muted); font-variant-numeric: tabular-nums; font-weight: 600; flex-shrink: 0; width: 22px; }
+
+  .doc { max-width: 720px; min-width: 0; }
+
+  .doc-header { border-bottom: 1px solid var(--line); padding-bottom: 32px; margin-bottom: 44px; }
+  .doc-brand { display: flex; align-items: baseline; gap: 10px; margin-bottom: 24px; }
+  .brand-mark { font-size: 20px; font-weight: 900; letter-spacing: -0.03em; color: var(--ink); }
+  .brand-mark::after {
+    content: ""; display: inline-block; width: 6px; height: 6px; background: var(--accent);
+    border-radius: 50%; margin-left: 3px; transform: translateY(-1px);
+  }
+  .brand-sub {
+    font-size: 10px; color: var(--muted); letter-spacing: 0.24em;
+    text-transform: uppercase; font-weight: 700;
+  }
+  .doc-eyebrow {
+    font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--accent); font-weight: 700; margin-bottom: 12px;
+  }
+  h1.doc-title { font-size: 40px; letter-spacing: -0.035em; line-height: 1.05; margin-bottom: 20px; font-weight: 800; }
+  @media (max-width: 640px) { h1.doc-title { font-size: 30px; } }
+  .doc-lede { color: var(--ink-2); font-size: 17px; line-height: 1.55; margin-bottom: 24px; max-width: 60ch; }
+  .meta-grid {
+    display: grid; grid-template-columns: repeat(4, auto); gap: 6px 28px;
+    font-size: 13px; color: var(--muted);
+  }
+  @media (max-width: 560px) { .meta-grid { grid-template-columns: repeat(2, auto); } }
+  .meta-grid dt {
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    font-weight: 700; color: var(--muted); margin: 0;
+  }
+  .meta-grid dd {
+    color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; margin: 0;
+  }
+  .status-badge {
+    display: inline-block; padding: 2px 8px; background: var(--accent); color: white;
+    border-radius: 3px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+  }
+
+  h2.section {
+    font-size: 26px; letter-spacing: -0.025em; line-height: 1.15;
+    margin-top: 60px; margin-bottom: 20px; padding-top: 12px;
+    display: flex; align-items: baseline; gap: 16px; scroll-margin-top: 24px;
+  }
+  h2.section .num {
+    color: var(--muted); font-size: 15px; font-weight: 700; letter-spacing: 0.08em;
+    font-variant-numeric: tabular-nums; flex-shrink: 0;
+  }
+  h3 {
+    font-size: 17px; letter-spacing: -0.01em; margin-top: 32px; margin-bottom: 12px;
+    color: var(--ink); display: flex; align-items: baseline; gap: 12px;
+  }
+  h3 .num {
+    color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 0.06em;
+    font-variant-numeric: tabular-nums; flex-shrink: 0;
+  }
+  h4 { font-size: 14px; margin-top: 20px; margin-bottom: 8px; color: var(--ink-2); letter-spacing: 0.02em; }
+
+  p { margin: 0 0 14px; }
+  ul, ol { padding-left: 22px; margin: 0 0 16px; }
+  li { margin-bottom: 6px; }
+  li > ul, li > ol { margin-top: 6px; margin-bottom: 8px; }
+  strong { color: var(--ink); font-weight: 700; }
+
+  code {
+    font-family: var(--font-mono); padding: 1px 6px; background: var(--line);
+    border-radius: 3px; font-size: 0.88em; color: var(--ink-2);
+  }
+  pre {
+    background: var(--surface); border: 1px solid var(--line);
+    padding: 16px 18px; border-radius: var(--radius);
+    overflow-x: auto; font-family: var(--font-mono);
+    font-size: 12.5px; line-height: 1.55; margin: 16px 0 20px;
+  }
+  pre code { background: none; padding: 0; font-size: inherit; color: var(--ink); }
+
+  .table-wrap {
+    overflow-x: auto; margin: 16px 0 24px;
+    border: 1px solid var(--line); border-radius: var(--radius);
+  }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; background: var(--surface); }
+  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:last-child th, tr:last-child td { border-bottom: 0; }
+  th { font-weight: 700; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); background: var(--paper); }
+  td code { font-size: 12px; }
+
+  .callout {
+    border-left: 3px solid var(--accent); padding: 10px 0 10px 16px;
+    margin: 20px 0; color: var(--ink-2); font-size: 14.5px; line-height: 1.6;
+    background: color-mix(in oklab, var(--accent) 4%, transparent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding-top: 12px; padding-bottom: 12px;
+  }
+  .callout strong { color: var(--accent); }
+  .callout.warn { border-left-color: var(--warning); background: color-mix(in oklab, var(--warning) 6%, transparent); }
+  .callout.warn strong { color: var(--warning); }
+  .callout.danger { border-left-color: var(--danger); background: color-mix(in oklab, var(--danger) 6%, transparent); }
+  .callout.danger strong { color: var(--danger); }
+  .callout.ok { border-left-color: var(--success); background: color-mix(in oklab, var(--success) 6%, transparent); }
+  .callout.ok strong { color: var(--success); }
+
+  .checklist { list-style: none; padding: 0; margin: 12px 0 24px; }
+  .checklist li {
+    padding-left: 28px; position: relative; margin-bottom: 10px;
+    color: var(--ink-2); font-size: 14.5px; line-height: 1.55;
+  }
+  .checklist li::before {
+    content: ""; position: absolute; left: 0; top: 5px;
+    width: 14px; height: 14px; border: 1.5px solid var(--line-2);
+    border-radius: 3px; background: var(--surface);
+  }
+  .checklist li.done::before {
+    background: var(--success); border-color: var(--success);
+  }
+  .checklist li.done::after {
+    content: ""; position: absolute; left: 3px; top: 8px;
+    width: 8px; height: 4px; border-left: 2px solid white;
+    border-bottom: 2px solid white; transform: rotate(-45deg);
+  }
+
+  .kv { display: grid; grid-template-columns: 180px 1fr; gap: 6px 20px; margin: 12px 0 20px; font-size: 14px; }
+  .kv dt { color: var(--muted); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; padding-top: 2px; }
+  .kv dd { color: var(--ink); margin: 0; }
+  @media (max-width: 560px) { .kv { grid-template-columns: 1fr; gap: 2px 0; } .kv dt { margin-top: 8px; } }
+
+  .doc-footer {
+    margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--line);
+    color: var(--muted); font-size: 12.5px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+  }
+  .theme-toggle {
+    position: fixed; top: 20px; right: 20px; height: 36px; width: 36px;
+    border-radius: 999px; display: flex; align-items: center; justify-content: center;
+    color: var(--muted); border: 1px solid var(--line); background: var(--surface);
+    z-index: 40; transition: border-color 0.15s, color 0.15s;
+  }
+  .theme-toggle:hover { border-color: var(--ink-2); color: var(--ink); }
+  .theme-toggle svg { width: 15px; height: 15px; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition-duration: 0ms !important; } }
+  ::selection { background: var(--accent); color: white; }
+</style>
+
+<button class="theme-toggle" id="themeToggle" aria-label="테마 전환" title="테마 전환">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+</button>
+
+<div class="page">
+  <aside class="toc" aria-label="목차">
+    <div class="toc-title">Contents</div>
+    <ol>
+      <li><a href="#s1"><span class="toc-num">01</span>개요 · 위협 모델</a></li>
+      <li><a href="#s2"><span class="toc-num">02</span>전송 계층 · 헤더</a></li>
+      <li><a href="#s3"><span class="toc-num">03</span>인증 · 세션</a></li>
+      <li><a href="#s4"><span class="toc-num">04</span>인가 · 권한</a></li>
+      <li><a href="#s5"><span class="toc-num">05</span>입력 검증</a></li>
+      <li><a href="#s6"><span class="toc-num">06</span>XSS 방어</a></li>
+      <li><a href="#s7"><span class="toc-num">07</span>Injection 방어</a></li>
+      <li><a href="#s8"><span class="toc-num">08</span>CSRF 방어</a></li>
+      <li><a href="#s9"><span class="toc-num">09</span>레이트 리밋</a></li>
+      <li><a href="#s10"><span class="toc-num">10</span>업로드 보안</a></li>
+      <li><a href="#s11"><span class="toc-num">11</span>결제 · Webhook</a></li>
+      <li><a href="#s12"><span class="toc-num">12</span>PII · 데이터 보호</a></li>
+      <li><a href="#s13"><span class="toc-num">13</span>감사 · 로깅</a></li>
+      <li><a href="#s14"><span class="toc-num">14</span>비밀 · 의존성</a></li>
+      <li><a href="#s15"><span class="toc-num">15</span>배포 체크리스트</a></li>
+    </ol>
+  </aside>
+
+  <article class="doc">
+    <header class="doc-header">
+      <div class="doc-brand">
+        <span class="brand-mark">짓다</span>
+        <span class="brand-sub">Security</span>
+      </div>
+      <div class="doc-eyebrow">Security Specification</div>
+      <h1 class="doc-title">보안 명세</h1>
+      <p class="doc-lede">
+        입력 검증, 인증·인가, 저장·전송 보호, 공격 벡터 방어에 대한 팀 표준. PRD v0.1 · API v0.1 을 전제로 한다.
+      </p>
+      <dl class="meta-grid">
+        <dt>버전</dt><dt>기준 문서</dt><dt>상태</dt><dt>주도</dt>
+        <dd>0.1</dd>
+        <dd>PRD · API v0.1</dd>
+        <dd><span class="status-badge">DRAFT</span></dd>
+        <dd>백엔드 · 보안</dd>
+      </dl>
+    </header>
+
+    <!-- 1 -->
+    <h2 class="section" id="s1"><span class="num">01</span>개요 · 위협 모델</h2>
+
+    <h3><span class="num">1.1</span>기본 원칙</h3>
+    <ol>
+      <li><strong>서버가 최종 방어선.</strong> 프론트엔드 검증은 UX 편의일 뿐, 모든 규칙은 서버에서 다시 강제한다.</li>
+      <li><strong>기본은 거부(deny by default).</strong> 화이트리스트 방식 — 허용된 것만 통과.</li>
+      <li><strong>최소 권한.</strong> 유저·서비스·DB 롤 모두 필요한 권한만.</li>
+      <li><strong>비밀은 코드 밖.</strong> 환경변수 · 시크릿 매니저. 커밋 금지.</li>
+      <li><strong>결제·개인정보는 우리가 저장하지 않는다.</strong> Stripe에 위임.</li>
+    </ol>
+
+    <h3><span class="num">1.2</span>주요 위협 시나리오</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>위협</th><th>영향</th><th>주 방어</th></tr></thead>
+      <tbody>
+        <tr><td>계정 탈취 (크리덴셜 스터핑)</td><td>구독·정산 금전 피해</td><td>강한 해시 · 레이트 리밋 · 이상 로그인 감지</td></tr>
+        <tr><td>회차 무단 접근</td><td>구독 수익 저하</td><td>서버 인가 재확인 (5장 15절)</td></tr>
+        <tr><td>저작권 침해 대량 업로드</td><td>법적 리스크</td><td>업로드 인증 · 이미지 해시 (v2) · 신고 처리</td></tr>
+        <tr><td>랭킹 어뷰징 (봇 조회)</td><td>공정성 훼손</td><td>세션·IP 중복 필터 · 신규 계정 가중치 감소</td></tr>
+        <tr><td>댓글·프로필 XSS</td><td>세션 하이재킹</td><td>출력 이스케이프 · CSP · 안전한 렌더</td></tr>
+        <tr><td>SQL / NoSQL Injection</td><td>DB 유출·파괴</td><td>ORM(Prisma) 파라미터 바인딩 강제</td></tr>
+        <tr><td>결제 웹훅 위조</td><td>가짜 구독 활성화</td><td>Stripe 서명 검증</td></tr>
+        <tr><td>업로드된 악성 파일</td><td>서버·다른 유저 감염</td><td>MIME 검증 · 스토리지 격리 · 이미지 재인코딩</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3><span class="num">1.3</span>범위 밖 (향후)</h3>
+    <ul>
+      <li>DDoS 완화 (CloudFlare 프록시로 위임)</li>
+      <li>사내망 침입 (SSO · MDM은 조직 확장 시점에)</li>
+      <li>내부자 위협 (감사 로그로 억제, 접근 통제는 v2)</li>
+    </ul>
+
+    <!-- 2 -->
+    <h2 class="section" id="s2"><span class="num">02</span>전송 계층 · 헤더</h2>
+
+    <h3><span class="num">2.1</span>HTTPS 전면 강제</h3>
+    <ul>
+      <li>모든 도메인(<code>jitda.com</code>, <code>api.jitda.com</code>, <code>cdn.jitda.com</code>)은 <strong>HTTPS 필수</strong>.</li>
+      <li>HTTP 요청은 CloudFlare/Vercel 엣지에서 <code>301</code>로 HTTPS 리다이렉트.</li>
+      <li>TLS 1.2 이상만. TLS 1.0 · 1.1 · SSLv3 비활성.</li>
+      <li>인증서: Let's Encrypt (CloudFlare 자동) 또는 Vercel 관리형.</li>
+    </ul>
+
+    <h3><span class="num">2.2</span>HSTS · 필수 응답 헤더</h3>
+    <p>모든 응답에 다음 헤더를 세팅한다 (프록시 또는 애플리케이션 미들웨어).</p>
+<pre><code>Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+Content-Security-Policy:  default-src 'self';
+                          img-src 'self' https://cdn.jitda.com data:;
+                          script-src 'self';
+                          style-src 'self' 'unsafe-inline';
+                          connect-src 'self' https://api.jitda.com https://api.stripe.com;
+                          frame-src https://js.stripe.com https://hooks.stripe.com;
+                          object-src 'none';
+                          base-uri 'self';
+                          form-action 'self';
+                          frame-ancestors 'none';
+                          upgrade-insecure-requests
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(self)
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Resource-Policy: same-site</code></pre>
+
+    <div class="callout warn">
+      <strong>CSP 예외:</strong> Stripe.js 로드를 위해 <code>script-src</code>에 <code>https://js.stripe.com</code>이 필요할 수 있음. 최소한으로만 열고, nonce·hash 방식이 가능하면 그쪽으로 이관.
+    </div>
+
+    <h3><span class="num">2.3</span>CORS</h3>
+    <ul>
+      <li>API 서버는 <code>Access-Control-Allow-Origin</code>을 <strong>화이트리스트</strong>로만 반환 (<code>https://jitda.com</code>, staging 도메인). 와일드카드 금지.</li>
+      <li><code>Access-Control-Allow-Credentials: true</code>는 필요한 경로만.</li>
+    </ul>
+
+    <!-- 3 -->
+    <h2 class="section" id="s3"><span class="num">03</span>인증 · 세션</h2>
+
+    <h3><span class="num">3.1</span>패스워드 정책</h3>
+    <dl class="kv">
+      <dt>최소 길이</dt><dd>10자</dd>
+      <dt>최대 길이</dt><dd>128자 (해시 서비스 거부 공격 방지)</dd>
+      <dt>문자 요건</dt><dd>강제하지 않음 (길이 우선). 흔한 패스워드 사전 차단.</dd>
+      <dt>흔한 패스워드 차단</dt><dd><code>zxcvbn</code> 점수 <strong>3 이상</strong> 요구. 또는 <code>haveibeenpwned</code> k-anonymity API 조회 (유출 시 거부).</dd>
+      <dt>이메일·닉네임 포함 금지</dt><dd>서버가 검사</dd>
+      <dt>변경 시 재해싱</dt><dd>비밀번호 변경 시 새 salt로 재해싱</dd>
+    </dl>
+
+    <h3><span class="num">3.2</span>패스워드 해싱 — Argon2id</h3>
+    <div class="callout ok">
+      <strong>알고리즘:</strong> <code>argon2id</code> 강제. bcrypt는 레거시 마이그레이션 용도로만.
+    </div>
+<pre><code>// Node.js — @node-rs/argon2 또는 argon2 라이브러리
+import { hash, verify, Algorithm } from '@node-rs/argon2';
+
+const HASH_OPTS = {
+  algorithm: Algorithm.Argon2id,
+  memoryCost: 19_456,     // 19 MiB (OWASP 2024 권장)
+  timeCost: 2,            // 2 iterations
+  parallelism: 1,
+  outputLen: 32,
+  // salt는 라이브러리가 자동 생성 (16 bytes)
+};
+
+// 저장
+const password_hash = await hash(raw_password, HASH_OPTS);
+// User.password_hash 컬럼에만 저장. 원문은 절대 로그·응답에 포함하지 않음.
+
+// 검증
+const ok = await verify(user.password_hash, submitted_password);</code></pre>
+    <ul>
+      <li>파라미터는 <strong>서버 CPU에서 500ms~1s</strong>가 걸리도록 튜닝 (Argon2id 저항성).</li>
+      <li>파라미터 상향 시: 로그인 성공 후 <code>needsRehash()</code> 체크하고 새 파라미터로 재해싱.</li>
+      <li>비교는 <strong>constant-time</strong> 라이브러리 함수만 사용. 직접 <code>===</code> 금지.</li>
+    </ul>
+
+    <h3><span class="num">3.3</span>세션 — JWT + Refresh</h3>
+    <dl class="kv">
+      <dt>Access token</dt><dd>JWT (HS256 · 서버 시크릿) · <strong>1시간</strong> 만료 · 상태 없음</dd>
+      <dt>Refresh token</dt><dd><strong>불투명 토큰</strong>(랜덤 256bit) · DB 저장 · <strong>30일</strong> 만료 · 1회용 회전(rotation)</dd>
+      <dt>저장 위치</dt><dd>Refresh: <strong>HttpOnly · Secure · SameSite=Strict</strong> 쿠키. Access: 메모리 (localStorage 금지)</dd>
+      <dt>Revoke</dt><dd>Logout · 패스워드 변경 · 이상 감지 시 refresh 즉시 무효화</dd>
+    </dl>
+    <div class="callout warn">
+      <strong>localStorage에 토큰 금지.</strong> XSS 발생 시 즉시 유출된다. HttpOnly 쿠키가 유일하게 안전한 위치.
+    </div>
+
+    <h3><span class="num">3.4</span>이메일 인증</h3>
+    <ul>
+      <li>가입 직후 이메일 발송 → 링크에 <strong>단회용 토큰</strong> (24시간 만료).</li>
+      <li>미인증 계정은 <strong>구독·후원 결제 불가</strong>. 감상·팔로우는 허용.</li>
+      <li>이메일 변경 시 재인증 필수.</li>
+    </ul>
+
+    <h3><span class="num">3.5</span>OAuth (Google · Apple)</h3>
+    <ul>
+      <li><strong>Authorization Code + PKCE</strong> 방식만. Implicit flow 금지.</li>
+      <li><code>state</code> 파라미터로 CSRF 방어 (crypto random, 세션에 바인딩).</li>
+      <li><code>redirect_uri</code>는 OAuth 콘솔에 등록된 정확한 값만.</li>
+      <li>서버는 ID 토큰 서명을 provider의 <code>jwks_uri</code>로 검증 (kid · aud · iss · exp).</li>
+      <li>이메일 미인증(<code>email_verified: false</code>) 계정은 거부.</li>
+    </ul>
+
+    <h3><span class="num">3.6</span>로그인 이상 감지 · 잠금</h3>
+    <ul>
+      <li>같은 계정에 대한 로그인 실패 <strong>5회 / 15분</strong> 초과 시 15분 잠금.</li>
+      <li>같은 IP에서 여러 계정 시도 <strong>50회 / 시간</strong> 초과 시 IP 차단.</li>
+      <li>새 국가·기기에서 로그인 시 이메일 알림.</li>
+      <li>차단은 <strong>토큰버킷 + 지수 백오프</strong>. 응답 시간 정보 누출 방지.</li>
+    </ul>
+
+    <!-- 4 -->
+    <h2 class="section" id="s4"><span class="num">04</span>인가 · 권한</h2>
+
+    <h3><span class="num">4.1</span>역할</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>role</th><th>권한 요약</th></tr></thead>
+      <tbody>
+        <tr><td><code>user</code></td><td>본인 프로필·구독·팁 관리, 공개 콘텐츠 열람, 구독한 작가의 유료 회차 열람</td></tr>
+        <tr><td><code>admin</code></td><td>+ 신고 처리 · 정산 실행 · 유저 상태 변경 · 전역 설정</td></tr>
+      </tbody>
+    </table></div>
+    <p><em>모든 유저는 자기 프로필을 <strong>author</strong>로 활성화할 수 있음(오픈 플랫폼 원칙). "AUTHOR" 태그는 <strong>본인 자원</strong>에 한정되는 인가.</em></p>
+
+    <h3><span class="num">4.2</span>리소스 소유권 검사</h3>
+    <p><strong>모든</strong> mutating 엔드포인트(<code>PATCH</code>·<code>DELETE</code>·게시)는 요청자가 리소스 소유자인지 서버가 재검증한다.</p>
+<pre><code>// PATCH /series/{id}
+const series = await db.series.findUnique({ where: { id }});
+if (!series) return notFound();
+if (series.author_id !== ctx.user.id) return forbidden();
+// ... 이후 업데이트</code></pre>
+
+    <h3><span class="num">4.3</span>유료 콘텐츠 접근</h3>
+    <ol>
+      <li>클라이언트에서 잠금 UI를 표시하는 것은 UX 편의. <strong>서버가 매번 확인.</strong></li>
+      <li><code>GET /episodes/{id}</code> 진입 시 회차가 <code>is_subscriber_only</code>이면 활성 구독을 DB에서 조회.</li>
+      <li>비구독자 요청은 <code>403 forbidden</code> + <code>details.required_subscription: true</code>.</li>
+      <li>이미지 URL은 <strong>서명된 URL</strong>(단기 만료 15분)로 발급 — CDN에서도 접근 통제 가능.</li>
+    </ol>
+
+    <div class="callout danger">
+      <strong>안티패턴:</strong> 프론트에서 잠금만 걸고 실제 이미지는 공개 URL로 서빙하면, 개발자 도구로 URL을 뽑아 무단 열람할 수 있음. 서명 URL 또는 인증 프록시 필수.
+    </div>
+
+    <!-- 5 -->
+    <h2 class="section" id="s5"><span class="num">05</span>입력 검증</h2>
+
+    <h3><span class="num">5.1</span>계층 원칙</h3>
+    <ol>
+      <li><strong>프론트 (UX):</strong> 즉각 피드백 · 잘못된 요청 방지 · 필드별 힌트</li>
+      <li><strong>API 게이트웨이 (형식):</strong> Content-Type · 크기 · 스키마</li>
+      <li><strong>서버 핸들러 (스키마):</strong> Zod · Pydantic · io-ts 등으로 타입·범위·형식 검증</li>
+      <li><strong>비즈니스 룰 (상태):</strong> 소유권 · 결제 상태 · 정산 가능 여부</li>
+      <li><strong>DB 스키마 (최종):</strong> NOT NULL · CHECK · FK 로 최후 방어</li>
+    </ol>
+
+    <h3><span class="num">5.2</span>스키마 예시 (Zod)</h3>
+<pre><code>// POST /auth/signup
+const SignupSchema = z.object({
+  email: z.string().email().max(254).toLowerCase(),
+  password: z.string().min(10).max(128)
+    .refine((p) =&gt; zxcvbn(p).score &gt;= 3, '너무 흔한 비밀번호'),
+  display_name: z.string().min(1).max(30).trim()
+    .refine((n) =&gt; !/[\p{Cc}\p{Cf}]/u.test(n), '제어 문자 포함 불가'),
+  handle: z.string().min(3).max(20).regex(/^[a-z0-9_]+$/,
+    '소문자·숫자·언더스코어만 (3–20자)')
+});
+
+// PATCH /authors/me
+const AuthorPatchSchema = z.object({
+  subscription: z.object({
+    enabled: z.boolean().optional(),
+    price: z.number().int().min(1000).max(30000).optional(),
+    currency: z.enum(['KRW']).optional()
+  }).optional()
+});
+
+// POST /tips
+const TipSchema = z.object({
+  author_id: z.string().regex(/^usr_[a-zA-Z0-9]{4,}$/),
+  amount: z.number().int().min(1000).max(1_000_000),
+  currency: z.enum(['KRW', 'USD']),
+  message: z.string().max(140).optional(),
+  message_public: z.boolean().optional()
+});</code></pre>
+
+    <h3><span class="num">5.3</span>정규화</h3>
+    <ul>
+      <li>이메일: 소문자 · 앞뒤 공백 제거 · <code>+</code> 뒷부분(예: <code>a+spam@x.com</code>)은 그대로 저장하되 조회 인덱스는 정규화된 것으로도 유지.</li>
+      <li>Handle: 소문자만. 유니코드 confusables 정규화 (NFKC) 후 ASCII 강제.</li>
+      <li>텍스트 필드: NFC 정규화. Zero-width joiner/space 제거.</li>
+    </ul>
+
+    <h3><span class="num">5.4</span>필드별 상한</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>필드</th><th>최대</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><td>이메일</td><td>254자</td><td>RFC 5321 상한</td></tr>
+        <tr><td>비밀번호</td><td>128자</td><td>Argon2 DoS 방지</td></tr>
+        <tr><td>display_name</td><td>30자</td><td>공백만인 이름 금지</td></tr>
+        <tr><td>handle</td><td>20자</td><td><code>[a-z0-9_]</code></td></tr>
+        <tr><td>bio</td><td>500자</td><td>제어 문자 금지</td></tr>
+        <tr><td>시리즈 title</td><td>100자</td><td></td></tr>
+        <tr><td>시리즈 description</td><td>2,000자</td><td>마크다운 sanitize 후 저장</td></tr>
+        <tr><td>회차 title</td><td>100자</td><td></td></tr>
+        <tr><td>회차 이미지 수</td><td>50장</td><td>과도한 요청 방지</td></tr>
+        <tr><td>이미지 파일 크기</td><td>100MB / 장</td><td></td></tr>
+        <tr><td>댓글 body</td><td>500자</td><td>대댓글도 동일</td></tr>
+        <tr><td>팁 message</td><td>140자</td><td></td></tr>
+        <tr><td>tags per work</td><td>10개</td><td>각 태그 20자</td></tr>
+        <tr><td>JSON 페이로드 총량</td><td>1MB</td><td>업로드 제외</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3><span class="num">5.5</span>거부 응답</h3>
+<pre><code>{
+  "error": {
+    "code": "validation_failed",
+    "message": "요청 값이 올바르지 않습니다.",
+    "details": {
+      "fields": {
+        "password": "10자 이상이어야 합니다.",
+        "handle": "이미 사용 중입니다."
+      }
+    }
+  }
+}</code></pre>
+    <p>클라이언트는 필드별 메시지를 인라인 표시. 사용자 존재 여부는 노출하지 않는다 (예: 로그인 실패 시 "이메일 또는 비밀번호가 잘못됨" 통일).</p>
+
+    <!-- 6 -->
+    <h2 class="section" id="s6"><span class="num">06</span>XSS 방어</h2>
+
+    <h3><span class="num">6.1</span>기본 원칙</h3>
+    <ol>
+      <li><strong>모든 사용자 입력은 렌더 시점에 이스케이프.</strong></li>
+      <li>React·Vue·Svelte 등 프레임워크의 자동 이스케이프에 의존. <code>innerHTML</code>·<code>dangerouslySetInnerHTML</code>·<code>v-html</code>은 <strong>금지</strong>. 예외는 코드 리뷰 게이팅.</li>
+      <li>서버 응답 JSON을 HTML 컨텍스트에 <strong>직접 삽입 금지</strong> (템플릿 리터럴로 <code>${data}</code> 넣기 등).</li>
+      <li>CSP로 인라인 스크립트 차단 → 침해되어도 스크립트 실행 저지.</li>
+    </ol>
+
+    <h3><span class="num">6.2</span>사용자 HTML (bio · 시리즈 description)</h3>
+    <p>마크다운 일부를 허용할 경우 <strong>DOMPurify + allowlist</strong>. 인라인 스타일 · 스크립트 · 이벤트 핸들러 전부 제거.</p>
+<pre><code>import DOMPurify from 'isomorphic-dompurify';
+
+const clean = DOMPurify.sanitize(userMarkdownRenderedHTML, {
+  ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'blockquote', 'code'],
+  ALLOWED_ATTR: ['href'],
+  ALLOWED_URI_REGEXP: /^(https?|mailto):/i,
+  // rel="noopener noreferrer" 강제
+  ADD_ATTR: ['target'],
+});</code></pre>
+    <ul>
+      <li>모든 <code>&lt;a&gt;</code>는 <strong><code>rel="noopener noreferrer"</code></strong> · <code>target="_blank"</code> 강제.</li>
+      <li>이미지 · 스크립트 · iframe 태그 전면 금지.</li>
+    </ul>
+
+    <h3><span class="num">6.3</span>URL 검증</h3>
+    <p>외부 링크(작가 프로필의 external_links 등)는 <strong>스킴 화이트리스트</strong>: <code>http:</code>, <code>https:</code>, <code>mailto:</code>만. <code>javascript:</code>, <code>data:</code>, <code>vbscript:</code> 거부.</p>
+
+    <h3><span class="num">6.4</span>현재 목업의 XSS 방어 감사</h3>
+    <div class="callout ok">
+      <strong>확인:</strong> 현재까지 만든 4개 목업(메인·작가·뷰어·스튜디오)은 모두 <code>escapeHtml()</code>을 렌더 시 사용. 유저 입력이 HTML 컨텍스트에 들어가는 지점을 감사했음.
+    </div>
+<pre><code>// 목업의 escapeHtml 구현 (참고)
+const escapeHtml = (s) =&gt; String(s ?? '').replace(/[&amp;&lt;&gt;"']/g, (c) =&gt; ({
+  '&amp;': '&amp;amp;', '&lt;': '&amp;lt;', '&gt;': '&amp;gt;',
+  '"': '&amp;quot;', "'": '&amp;#39;'
+}[c]));</code></pre>
+
+    <!-- 7 -->
+    <h2 class="section" id="s7"><span class="num">07</span>Injection 방어</h2>
+
+    <h3><span class="num">7.1</span>SQL · ORM</h3>
+    <ul>
+      <li><strong>Prisma · Drizzle · Kysely</strong> 등 파라미터 바인딩이 강제되는 ORM만 사용.</li>
+      <li>원시 SQL(<code>$queryRaw</code>·<code>db.raw</code>)은 리뷰 게이팅. 사용해야 하면 <strong>placeholder</strong> 필수.</li>
+    </ul>
+<pre><code>// ❌ 절대 금지
+db.$queryRawUnsafe(`SELECT * FROM users WHERE email = '${email}'`);
+
+// ✅ 파라미터 바인딩
+db.$queryRaw`SELECT * FROM users WHERE email = ${email}`;
+
+// ✅ ORM 쿼리 빌더
+db.user.findUnique({ where: { email } });</code></pre>
+
+    <h3><span class="num">7.2</span>NoSQL Injection</h3>
+    <p>사용자가 보낸 값이 쿼리 오브젝트로 <strong>바로 들어가는 것 금지</strong>. 항상 스키마 검증 후 사용.</p>
+<pre><code>// ❌ Mongo에서 { email: { $ne: null } } 로 조작 가능
+db.users.findOne({ email: req.body.email });
+
+// ✅ 스키마 검증 후 문자열만 허용
+const { email } = SignupSchema.parse(req.body);
+db.users.findOne({ email });</code></pre>
+
+    <h3><span class="num">7.3</span>Command · Path Injection</h3>
+    <ul>
+      <li>서버가 이미지 처리(<code>sharp</code>·<code>ffmpeg</code>) 시 <strong>파일명 · 경로에 사용자 입력 사용 금지</strong>. 항상 UUID/자체 생성 ID로 치환.</li>
+      <li>Shell exec는 사용하지 않는다. 라이브러리 API만.</li>
+      <li>사용자 제공 URL을 서버가 fetch하는 경우 <strong>SSRF 방어</strong>: DNS 해석 후 사설 IP 대역(10.x·192.168.x·127.x·169.254.x·::1) 차단.</li>
+    </ul>
+
+    <h3><span class="num">7.4</span>SSRF · 헤더 인젝션</h3>
+    <ul>
+      <li><code>fetch</code> 시 <strong>redirect follow 제한</strong> (예: max 3) — 리다이렉트로 내부망 우회 방지.</li>
+      <li>사용자 입력을 응답 헤더에 넣지 말 것 (CRLF 인젝션). 넣어야 하면 <code>\r\n</code> 제거.</li>
+    </ul>
+
+    <!-- 8 -->
+    <h2 class="section" id="s8"><span class="num">08</span>CSRF 방어</h2>
+
+    <ol>
+      <li><strong>Refresh token 쿠키:</strong> <code>SameSite=Strict; HttpOnly; Secure</code> — 크로스 오리진 요청에 자동 전송 안 됨.</li>
+      <li><strong>Access token:</strong> <code>Authorization: Bearer</code> 헤더로만 전송 — 브라우저가 자동으로 붙이지 않으므로 CSRF 자체가 성립 안 함.</li>
+      <li>쿠키 세션을 병행한다면 <strong>double submit cookie</strong> 또는 <strong>synchronizer token</strong>. 두 접근을 섞지 말 것.</li>
+      <li>상태 변경(<code>POST</code>·<code>PATCH</code>·<code>DELETE</code>) 시 <code>Origin</code>·<code>Referer</code> 헤더가 화이트리스트인지 확인 (defense in depth).</li>
+      <li>Stripe 웹훅 엔드포인트는 CSRF 미들웨어 <strong>bypass</strong> 필요 (서명 검증으로 대체).</li>
+    </ol>
+
+    <!-- 9 -->
+    <h2 class="section" id="s9"><span class="num">09</span>레이트 리밋 · 어뷰징</h2>
+
+    <div class="table-wrap"><table>
+      <thead><tr><th>구간</th><th>제한</th><th>키</th></tr></thead>
+      <tbody>
+        <tr><td>미인증 GET</td><td>60 req/min</td><td>IP</td></tr>
+        <tr><td>인증 GET</td><td>300 req/min</td><td>user_id</td></tr>
+        <tr><td>일반 POST/PATCH/DELETE</td><td>60 req/min</td><td>user_id</td></tr>
+        <tr><td>로그인 시도</td><td>5 실패 / 15분 → 잠금</td><td>account + IP</td></tr>
+        <tr><td>이메일 발송 (reset · verify)</td><td>3 / 시간</td><td>email + IP</td></tr>
+        <tr><td>업로드 init</td><td>10 / 분</td><td>user_id</td></tr>
+        <tr><td>댓글 작성</td><td>20 / 분, 200 / 일</td><td>user_id</td></tr>
+        <tr><td>결제 (subscribe · tip)</td><td>10 / 시간</td><td>user_id</td></tr>
+        <tr><td>Webhook</td><td>제한 없음</td><td>서명 검증으로 방어</td></tr>
+      </tbody>
+    </table></div>
+
+    <p><strong>초과 응답:</strong> <code>429 rate_limited</code> + <code>Retry-After</code> 헤더 (초 단위).</p>
+
+    <h3><span class="num">9.1</span>조회수 어뷰징 방어</h3>
+    <ul>
+      <li>같은 <code>(episode, user or session)</code>에 대한 조회는 <strong>1시간에 1회</strong>만 카운트.</li>
+      <li>세션 없는 익명 조회: IP + User-Agent 지문으로 중복 필터.</li>
+      <li>신규 계정(가입 후 7일 미만)의 조회·좋아요·구독 가중치는 <strong>0.5배</strong>.</li>
+      <li>비정상 패턴(초당 100 조회 등)은 자동 flag → 관리자 큐.</li>
+    </ul>
+
+    <!-- 10 -->
+    <h2 class="section" id="s10"><span class="num">10</span>업로드 보안</h2>
+
+    <h3><span class="num">10.1</span>presigned URL 방식</h3>
+    <p>서버가 다운로드/업로드 URL을 직접 노출하지 않고 <strong>단기 만료(15분) presigned URL</strong>을 발급. 서버 대역폭 절약 + 접근 통제 유연성.</p>
+
+    <h3><span class="num">10.2</span>파일 검증</h3>
+    <div class="table-wrap"><table>
+      <thead><tr><th>검사</th><th>기준</th></tr></thead>
+      <tbody>
+        <tr><td>MIME</td><td><code>image/png</code>, <code>image/jpeg</code>, <code>image/webp</code>만 허용</td></tr>
+        <tr><td>Magic bytes</td><td>MIME과 실제 시그니처가 일치하는지 서버가 확인</td></tr>
+        <tr><td>크기</td><td>회당 100MB, 이미지 1장당 20MB 상한</td></tr>
+        <tr><td>차원</td><td>최대 4000 × 20000 (초과 시 리사이즈)</td></tr>
+        <tr><td>재인코딩</td><td><code>sharp</code>로 <strong>재인코딩 후 저장</strong> — 임베디드 스크립트·메타데이터 제거</td></tr>
+        <tr><td>EXIF</td><td>회전 정보만 반영, 위치 등 개인정보 삭제</td></tr>
+        <tr><td>스토리지</td><td>공용 웹 오리진과 <strong>분리된 도메인</strong>(<code>cdn.jitda.com</code>)에서 서빙. 실행 스크립트 차단.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3><span class="num">10.3</span>이미지 서빙</h3>
+    <ul>
+      <li>업로드된 파일은 원본 파일명을 노출하지 않고 <strong>내부 ID</strong>로만 접근.</li>
+      <li>CDN 응답에 <code>Content-Type</code>을 서버가 강제 세팅 (<code>X-Content-Type-Options: nosniff</code> 필수).</li>
+      <li>구독자 전용 이미지는 <strong>서명된 URL</strong> (15분 만료) — CDN 캐시 키에 서명 미포함으로 캐싱은 유지.</li>
+    </ul>
+
+    <!-- 11 -->
+    <h2 class="section" id="s11"><span class="num">11</span>결제 · Webhook</h2>
+
+    <h3><span class="num">11.1</span>PCI DSS 회피</h3>
+    <ul>
+      <li>카드 정보는 <strong>Stripe Elements iframe</strong>에서만 입력받는다. 우리 서버는 절대 카드 원문을 받지 않는다.</li>
+      <li>PCI DSS SAQ A 범주(카드 데이터 처리 최소).</li>
+    </ul>
+
+    <h3><span class="num">11.2</span>결제 흐름</h3>
+    <ol>
+      <li>클라이언트: <code>POST /subscriptions</code> or <code>/tips</code> → 서버가 Stripe PaymentIntent 생성 → <code>client_secret</code> 반환</li>
+      <li>클라이언트: Stripe.js 로 결제 수행</li>
+      <li>Stripe → 우리 서버 <strong>Webhook</strong>: <code>payment_intent.succeeded</code> 수신 → DB 반영</li>
+      <li>DB 반영은 <strong>Webhook 이 유일한 진실</strong>. 클라이언트 콜백만 믿고 활성화하지 않는다.</li>
+    </ol>
+
+    <h3><span class="num">11.3</span>Webhook 서명 검증</h3>
+<pre><code>import Stripe from 'stripe';
+const stripe = new Stripe(SECRET);
+
+// Express 예시
+app.post('/api/v1/webhooks/stripe',
+  express.raw({ type: 'application/json' }),  // 원문 필수!
+  async (req, res) =&gt; {
+    const sig = req.headers['stripe-signature'];
+    let event;
+    try {
+      event = stripe.webhooks.constructEvent(req.body, sig, WEBHOOK_SECRET);
+    } catch (err) {
+      return res.status(400).send('signature verification failed');
+    }
+    // Idempotency: event.id 를 DB 에 기록. 중복 수신 방지.
+    if (await eventAlreadyProcessed(event.id)) return res.json({ received: true });
+    await handleEvent(event);
+    await markEventProcessed(event.id);
+    res.json({ received: true });
+});</code></pre>
+
+    <h3><span class="num">11.4</span>정산 · 이체</h3>
+    <ul>
+      <li>정산 배치는 <strong>periodic idempotency key</strong>(<code>{author_id, period}</code>)로 중복 지급 방지.</li>
+      <li>Payout 관련 액션은 반드시 감사 로그 기록.</li>
+      <li>관리자 수동 트리거는 2FA 필수 (v2).</li>
+    </ul>
+
+    <!-- 12 -->
+    <h2 class="section" id="s12"><span class="num">12</span>PII · 데이터 보호</h2>
+
+    <h3><span class="num">12.1</span>수집 최소화</h3>
+    <ul>
+      <li>필수: 이메일, 패스워드 해시, display_name, handle.</li>
+      <li>선택: bio, 아바타, 외부 링크. <strong>실명 · 주소 · 전화 수집 안 함.</strong></li>
+      <li>연령 인증(Phase 2)은 인증만 확인하고 생년월일 자체는 저장하지 않는다.</li>
+      <li>정산용 계좌 정보는 <strong>우리가 저장 안 함</strong> (Stripe Connect).</li>
+    </ul>
+
+    <h3><span class="num">12.2</span>암호화</h3>
+    <dl class="kv">
+      <dt>전송</dt><dd>TLS 1.2+ (2절)</dd>
+      <dt>저장 (DB)</dt><dd>Postgres 관리형 <strong>at-rest 암호화</strong> 활성화. 민감 컬럼(email, ip)은 컬럼 레벨 암호화 검토.</dd>
+      <dt>백업</dt><dd>암호화된 스냅샷. KMS 키 로테이션.</dd>
+      <dt>로그</dt><dd>이메일 · 토큰 · 비밀번호 <strong>절대 로깅 금지</strong>. redact 미들웨어.</dd>
+    </dl>
+
+    <h3><span class="num">12.3</span>탈퇴 · 삭제</h3>
+    <ul>
+      <li>탈퇴 요청 시 <strong>30일 유예</strong>. 유예 중 로그인 시 복구 가능.</li>
+      <li>유예 후: PII를 <strong>익명화</strong> (이메일 · 닉네임 마스킹, 회차·댓글은 "탈퇴한 사용자" 표시로 유지).</li>
+      <li>사용자 요청 시 개인정보 다운로드 (GDPR-style export).</li>
+    </ul>
+
+    <h3><span class="num">12.4</span>제3자 공유</h3>
+    <ul>
+      <li>Stripe(결제) · Cloudflare(CDN) · Resend(이메일) · Sentry(오류) · PostHog(분석) — 목록을 개인정보처리방침에 명시.</li>
+      <li>Sentry에는 요청 body를 <strong>기본 스크러빙</strong>. 이메일·토큰·body 전체 자동 마스킹.</li>
+      <li>PostHog는 <strong>autocapture 비활성</strong>. 이벤트를 명시적으로 지정.</li>
+    </ul>
+
+    <!-- 13 -->
+    <h2 class="section" id="s13"><span class="num">13</span>감사 · 로깅</h2>
+
+    <h3><span class="num">13.1</span>감사 대상</h3>
+    <ul>
+      <li>로그인 · 로그아웃 · 실패</li>
+      <li>비밀번호 · 이메일 변경</li>
+      <li>결제 · 정산 · 환불</li>
+      <li>신고 처리 · 관리자 액션 (콘텐츠 takedown, 유저 정지)</li>
+      <li>전역 설정 변경 (수수료율 · 랭킹 가중치)</li>
+      <li>데이터 export · 계정 삭제</li>
+    </ul>
+
+    <h3><span class="num">13.2</span>로그 스키마</h3>
+<pre><code>{
+  "ts": "2026-07-15T04:20:00Z",
+  "actor": { "user_id": "usr_...", "ip": "203.0.113.10", "ua": "..." },
+  "action": "content.takedown",
+  "target": { "type": "episode", "id": "epi_..." },
+  "reason": "copyright",
+  "request_id": "req_abc",
+  "outcome": "success"
+}</code></pre>
+
+    <h3><span class="num">13.3</span>보관 · 접근</h3>
+    <ul>
+      <li>감사 로그는 <strong>append-only</strong>. 애플리케이션이 수정·삭제 못하도록 별도 DB 계정으로 write.</li>
+      <li>보관 기간: <strong>3년</strong> (금전 관련은 5년).</li>
+      <li>Sentry · 애플리케이션 로그는 30일. PII 자동 스크러빙.</li>
+    </ul>
+
+    <!-- 14 -->
+    <h2 class="section" id="s14"><span class="num">14</span>비밀 · 의존성</h2>
+
+    <h3><span class="num">14.1</span>시크릿</h3>
+    <ul>
+      <li>환경 변수만 사용. 코드에 하드코드 금지 (린트로 강제 · pre-commit 훅).</li>
+      <li>Vercel · Fly · AWS Secrets Manager 등 관리형 시크릿.</li>
+      <li>DB · Stripe · JWT · Webhook 시크릿은 <strong>환경별로 분리</strong> (dev · staging · prod).</li>
+      <li>키 로테이션: JWT signing key는 <strong>90일마다</strong>. 이전 키로 발급된 토큰은 만료까지 유효.</li>
+      <li>git leak 스캐너: <code>gitleaks</code> 를 CI에 포함.</li>
+    </ul>
+
+    <h3><span class="num">14.2</span>의존성</h3>
+    <ul>
+      <li><code>npm audit</code> · Renovate 봇 · GitHub Dependabot 활성.</li>
+      <li>Critical CVE는 <strong>24시간 내</strong> 패치. High는 1주.</li>
+      <li>새 dependency 추가 시 리뷰. 다운로드 수·유지보수·라이선스 확인.</li>
+      <li>Lock 파일 커밋 필수. <code>npm ci</code> 로만 배포.</li>
+    </ul>
+
+    <!-- 15 -->
+    <h2 class="section" id="s15"><span class="num">15</span>배포 체크리스트</h2>
+
+    <p>Phase 1 프로덕션 배포 전 반드시 확인.</p>
+    <ul class="checklist">
+      <li>모든 도메인 HTTPS 강제 (HTTP → 301 리다이렉트)</li>
+      <li>HSTS 헤더 (<code>max-age ≥ 1년</code>, includeSubDomains, preload)</li>
+      <li>CSP 헤더 설정 · 인라인 스크립트 제거</li>
+      <li>보안 응답 헤더(X-Content-Type-Options, Referrer-Policy 등) 전부</li>
+      <li>CORS 화이트리스트만 허용, wildcard 없음</li>
+      <li>Argon2id 파라미터 튜닝 (단위 테스트로 목표 시간 검증)</li>
+      <li>zxcvbn · haveibeenpwned 연동</li>
+      <li>Refresh token: HttpOnly + Secure + SameSite=Strict</li>
+      <li>Access token: localStorage 절대 미사용</li>
+      <li>이메일 인증 흐름 · 재전송 레이트 리밋</li>
+      <li>OAuth: PKCE · state 검증 · ID 토큰 JWKS 검증</li>
+      <li>로그인 5회 실패 잠금 · 새 국가 로그인 알림</li>
+      <li>모든 mutating 엔드포인트에서 리소스 소유권 재확인</li>
+      <li>Zod 스키마로 전 엔드포인트 입력 검증</li>
+      <li>사용자 입력 렌더 시 이스케이프 · DOMPurify 적용 지점 리뷰</li>
+      <li>URL 스킴 화이트리스트 검증</li>
+      <li>ORM 파라미터 바인딩만 사용 · <code>$queryRawUnsafe</code> grep 확인</li>
+      <li>SSRF 방어 (사설 IP 대역 차단, redirect 제한)</li>
+      <li>레이트 리밋 미들웨어 활성 · 429 응답 확인</li>
+      <li>업로드: MIME magic bytes · 재인코딩 · EXIF 제거</li>
+      <li>구독자 전용 이미지 서명 URL</li>
+      <li>Stripe Webhook 서명 검증 · idempotency</li>
+      <li>정산 배치 idempotency key</li>
+      <li>감사 로그 append-only DB 계정 분리</li>
+      <li>Sentry · PostHog PII 스크러빙 설정</li>
+      <li>gitleaks · npm audit CI 통과</li>
+      <li>비밀 환경별 분리 · git 히스토리에 커밋된 비밀 없음</li>
+      <li>탈퇴 · export 흐름 QA</li>
+      <li>침투 테스트 (최소 자동 스캐너: <code>zap-baseline</code>) 통과</li>
+    </ul>
+
+    <div class="callout warn">
+      <strong>지속적:</strong> 이 문서는 살아있는 문서다. 새 엔드포인트를 추가할 때마다 5장(스키마) · 9장(레이트 리밋) · 13장(감사)에서 항목을 검토·추가한다.
+    </div>
+
+    <footer class="doc-footer">
+      <div>© 2026 짓다 · JITDA · Security v0.1 · <span class="status-badge">DRAFT</span></div>
+      <div>PRD · API v0.1 준수</div>
+    </footer>
+  </article>
+</div>
+
+<script>
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const root = document.documentElement;
+    const curr = root.getAttribute('data-theme');
+    const systemDark = matchMedia('(prefers-color-scheme: dark)').matches;
+    const isDark = curr === 'dark' || (!curr && systemDark);
+    root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  });
+  document.querySelectorAll('.toc a').forEach((a) => {
+    a.addEventListener('click', (e) => {
+      const id = a.getAttribute('href');
+      const el = document.querySelector(id);
+      if (el) {
+        e.preventDefault();
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.replaceState(null, '', id);
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

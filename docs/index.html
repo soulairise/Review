@@ -1,0 +1,882 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>짓다 (JITDA) — 프로젝트 쇼케이스</title>
+<style>
+  :root {
+    --font-sans: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Segoe UI", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+    --paper: #f4f3f0;
+    --paper-2: #ebe9e3;
+    --surface: #ffffff;
+    --ink: #17141a;
+    --ink-2: #3f3946;
+    --muted: #7a7480;
+    --line: #e6e2dd;
+    --line-2: #d8d3cc;
+    --accent: #ee2c56;
+    --accent-hover: #d61e46;
+    --gold: #c78e28;
+    --success: #2f8f5d;
+    --shadow-sm: 0 1px 2px rgba(30, 20, 40, 0.05);
+    --shadow-md: 0 2px 6px rgba(30, 20, 40, 0.06), 0 12px 32px rgba(30, 20, 40, 0.06);
+    --shadow-lg: 0 24px 80px rgba(30, 20, 40, 0.15);
+    --radius: 10px;
+    --radius-lg: 16px;
+
+    --m-get: #2b7fa0;
+    --m-post: #2f8f5d;
+    --m-patch: #c78e28;
+    --m-delete: #c94848;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0d0c10; --paper-2: #08070b; --surface: #17151b;
+      --ink: #f0edf1; --ink-2: #cac4d0; --muted: #8b8492;
+      --line: #24222a; --line-2: #33303a;
+      --accent: #ff5573; --accent-hover: #ff7a92;
+      --gold: #e8b13a; --success: #4bb87a;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.35);
+      --shadow-lg: 0 24px 80px rgba(0, 0, 0, 0.5);
+      --m-get: #5aaecc; --m-post: #4bb87a; --m-patch: #e8b13a; --m-delete: #e07070;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0d0c10; --paper-2: #08070b; --surface: #17151b;
+    --ink: #f0edf1; --ink-2: #cac4d0; --muted: #8b8492;
+    --line: #24222a; --line-2: #33303a;
+    --accent: #ff5573; --accent-hover: #ff7a92;
+    --gold: #e8b13a; --success: #4bb87a;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 24px 80px rgba(0, 0, 0, 0.5);
+    --m-get: #5aaecc; --m-post: #4bb87a; --m-patch: #e8b13a; --m-delete: #e07070;
+  }
+  :root[data-theme="light"] {
+    --paper: #f4f3f0; --paper-2: #ebe9e3; --surface: #ffffff;
+    --ink: #17141a; --ink-2: #3f3946; --muted: #7a7480;
+    --line: #e6e2dd; --line-2: #d8d3cc;
+    --accent: #ee2c56; --accent-hover: #d61e46;
+    --gold: #c78e28; --success: #2f8f5d;
+    --shadow-sm: 0 1px 2px rgba(30, 20, 40, 0.05);
+    --shadow-md: 0 2px 6px rgba(30, 20, 40, 0.06), 0 12px 32px rgba(30, 20, 40, 0.06);
+    --shadow-lg: 0 24px 80px rgba(30, 20, 40, 0.15);
+    --m-get: #2b7fa0; --m-post: #2f8f5d; --m-patch: #c78e28; --m-delete: #c94848;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { min-height: 100%; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: var(--font-sans); font-size: 15px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font-family: inherit; font-size: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  h1, h2, h3, h4 { margin: 0; font-weight: 700; text-wrap: balance; }
+  a { color: inherit; text-decoration: none; }
+  ::selection { background: var(--accent); color: white; }
+
+  .container { width: min(100% - 40px, 1180px); margin: 0 auto; }
+
+  /* Header */
+  .header {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in oklab, var(--paper) 90%, transparent);
+    backdrop-filter: saturate(140%) blur(10px);
+    -webkit-backdrop-filter: saturate(140%) blur(10px);
+    position: sticky; top: 0; z-index: 20;
+  }
+  .header .container { display: flex; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: baseline; gap: 10px; }
+  .brand-mark {
+    font-size: 24px; font-weight: 900; letter-spacing: -0.03em; color: var(--ink);
+  }
+  .brand-mark::after {
+    content: ""; display: inline-block; width: 7px; height: 7px;
+    background: var(--accent); border-radius: 50%;
+    margin-left: 3px; transform: translateY(-1px);
+  }
+  .brand-sub {
+    font-size: 10px; color: var(--muted); letter-spacing: 0.24em;
+    text-transform: uppercase; font-weight: 700;
+  }
+  .header-nav {
+    display: flex; gap: 24px; align-items: center;
+  }
+  .header-nav a {
+    font-size: 13px; color: var(--muted); font-weight: 500;
+    transition: color 0.15s;
+  }
+  .header-nav a:hover { color: var(--ink); }
+  .theme-toggle {
+    height: 34px; width: 34px; border-radius: 999px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); border: 1px solid var(--line); background: var(--surface);
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .theme-toggle:hover { border-color: var(--ink-2); color: var(--ink); }
+  .theme-toggle svg { width: 14px; height: 14px; }
+  @media (max-width: 720px) {
+    .header-nav a:not(:last-child) { display: none; }
+  }
+
+  /* Hero */
+  .hero {
+    padding: 80px 0 60px;
+    border-bottom: 1px solid var(--line);
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ""; position: absolute;
+    top: -80px; right: -80px; width: 400px; height: 400px;
+    background: radial-gradient(circle, color-mix(in oklab, var(--accent) 18%, transparent), transparent 60%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--accent); font-weight: 800; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .hero-eyebrow::before {
+    content: ""; width: 24px; height: 1px; background: var(--accent); display: inline-block;
+  }
+  .hero-title {
+    font-size: 64px; letter-spacing: -0.04em; line-height: 1.02;
+    font-weight: 800; margin-bottom: 24px;
+    max-width: 14ch;
+  }
+  @media (max-width: 760px) { .hero-title { font-size: 42px; } }
+  @media (max-width: 500px) { .hero-title { font-size: 34px; } .hero { padding: 48px 0 40px; } }
+  .hero-title em {
+    font-style: normal; color: var(--accent);
+  }
+  .hero-lede {
+    font-size: 18px; color: var(--ink-2); max-width: 52ch;
+    line-height: 1.55; margin-bottom: 32px;
+  }
+  .hero-stats {
+    display: flex; gap: 40px; flex-wrap: wrap;
+    padding-top: 24px; border-top: 1px solid var(--line);
+  }
+  .stat { display: flex; flex-direction: column; gap: 4px; }
+  .stat-value {
+    font-size: 32px; font-weight: 800; letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums; color: var(--ink);
+  }
+  .stat-value em { font-style: normal; color: var(--accent); }
+  .stat-label {
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--muted); font-weight: 700;
+  }
+
+  /* Section */
+  .section { padding: 72px 0; }
+  .section-head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 24px; margin-bottom: 32px;
+    padding-bottom: 20px; border-bottom: 1px solid var(--line);
+    flex-wrap: wrap;
+  }
+  .section-eyebrow {
+    font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--accent); font-weight: 700; margin-bottom: 10px;
+  }
+  .section-title {
+    font-size: 32px; letter-spacing: -0.03em; line-height: 1.1;
+    font-weight: 800;
+  }
+  .section-sub {
+    font-size: 14px; color: var(--muted); margin-top: 6px; max-width: 50ch;
+  }
+  @media (max-width: 640px) { .section-title { font-size: 24px; } .section { padding: 48px 0; } }
+
+  /* Artifact cards */
+  .art-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  }
+  @media (max-width: 900px) { .art-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .art-grid { grid-template-columns: 1fr; } }
+
+  .art-card {
+    display: flex; flex-direction: column;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.25s, border-color 0.25s;
+    cursor: pointer;
+  }
+  .art-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: transparent;
+  }
+  .art-thumb {
+    aspect-ratio: 4/3;
+    background: linear-gradient(135deg, var(--g1), var(--g2));
+    position: relative; overflow: hidden;
+  }
+  .art-thumb::after {
+    content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 70% 30%, rgba(255,255,255,0.14), transparent 60%),
+      linear-gradient(180deg, transparent 35%, rgba(0,0,0,0.4) 100%);
+    pointer-events: none;
+  }
+  .art-badge {
+    position: absolute; top: 14px; left: 14px;
+    padding: 3px 9px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 999px;
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: white; font-weight: 800; z-index: 2;
+  }
+  .art-open {
+    position: absolute; top: 14px; right: 14px;
+    width: 28px; height: 28px; border-radius: 999px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2;
+    transition: background 0.2s;
+  }
+  .art-card:hover .art-open { background: rgba(255,255,255,0.35); }
+  .art-open svg { width: 12px; height: 12px; }
+  .art-thumb-title {
+    position: absolute; bottom: 20px; left: 20px; right: 20px;
+    color: white; font-weight: 800;
+    font-size: 22px; letter-spacing: -0.02em; line-height: 1.1;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+    z-index: 2;
+  }
+  .art-body {
+    padding: 18px 20px 20px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .art-title-line {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  }
+  .art-title {
+    font-size: 16px; font-weight: 700; color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .art-sub {
+    font-size: 11px; color: var(--muted);
+    font-family: var(--font-mono);
+  }
+  .art-desc {
+    font-size: 13px; color: var(--ink-2); line-height: 1.5;
+    display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3;
+    -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .art-tags {
+    display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;
+  }
+  .art-tag {
+    padding: 2px 8px; border-radius: 999px;
+    font-size: 10.5px; font-weight: 600; letter-spacing: 0.02em;
+    color: var(--muted); background: var(--paper-2);
+  }
+  .art-tag.hot { color: var(--accent); background: color-mix(in oklab, var(--accent) 12%, transparent); }
+  .art-tag.done { color: var(--success); background: color-mix(in oklab, var(--success) 15%, transparent); }
+
+  /* Backend section */
+  .be-card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    display: grid; grid-template-columns: 220px 1fr; gap: 32px;
+  }
+  @media (max-width: 720px) { .be-card { grid-template-columns: 1fr; padding: 24px; gap: 20px; } }
+  .be-side .stat-value { font-size: 40px; }
+  .be-tech {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 20px;
+  }
+  .be-tech-pill {
+    padding: 3px 10px; border-radius: 999px;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+    background: var(--paper-2); color: var(--ink-2);
+    letter-spacing: 0.02em;
+  }
+  .be-groups {
+    display: flex; flex-direction: column; gap: 24px;
+  }
+  .be-group-title {
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    font-weight: 800; color: var(--muted);
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .be-group-title::after {
+    content: ""; flex: 1; height: 1px; background: var(--line);
+  }
+  .ep-list {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .ep {
+    display: flex; gap: 10px; align-items: center;
+    padding: 6px 10px; border-radius: 6px;
+    font-family: var(--font-mono); font-size: 12.5px;
+    transition: background 0.15s;
+  }
+  .ep:hover { background: var(--paper-2); }
+  .method {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 10px; font-weight: 800; color: white;
+    min-width: 52px; text-align: center;
+    letter-spacing: 0.06em; flex-shrink: 0;
+  }
+  .method-get { background: var(--m-get); }
+  .method-post { background: var(--m-post); }
+  .method-patch { background: var(--m-patch); }
+  .method-delete { background: var(--m-delete); }
+  .ep-path { color: var(--ink); flex: 1; word-break: break-all; }
+  .ep-note {
+    font-family: var(--font-sans); font-size: 11.5px;
+    color: var(--muted); font-weight: 500;
+  }
+
+  /* Roadmap */
+  .rm-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+  }
+  @media (max-width: 900px) { .rm-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .rm-grid { grid-template-columns: 1fr; } }
+  .rm-item {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .rm-num {
+    font-family: var(--font-mono); font-size: 13px; font-weight: 800;
+    color: var(--muted); flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+    margin-top: 1px;
+  }
+  .rm-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .rm-title { font-size: 14px; font-weight: 700; color: var(--ink); letter-spacing: -0.01em; }
+  .rm-desc { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+  .rm-status {
+    display: inline-block; padding: 1px 7px; border-radius: 999px;
+    font-size: 9.5px; font-weight: 800; letter-spacing: 0.06em;
+    text-transform: uppercase; margin-left: 6px;
+  }
+  .rm-status.done { color: var(--success); background: color-mix(in oklab, var(--success) 15%, transparent); }
+  .rm-status.next { color: var(--accent); background: color-mix(in oklab, var(--accent) 15%, transparent); }
+  .rm-status.later { color: var(--muted); background: var(--paper-2); }
+
+  /* Timeline (design decisions) */
+  .decisions {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 24px;
+    padding: 24px; background: var(--surface);
+    border: 1px solid var(--line); border-radius: var(--radius-lg);
+  }
+  @media (max-width: 720px) { .decisions { grid-template-columns: 1fr; padding: 20px; } }
+  .decision {
+    display: flex; gap: 12px; align-items: baseline;
+    padding: 8px 0; border-bottom: 1px solid var(--line);
+    font-size: 13.5px;
+  }
+  .decision:nth-last-child(-n+2) { border-bottom: 0; }
+  @media (max-width: 720px) { .decision:not(:last-child) { border-bottom: 1px solid var(--line); } }
+  .decision-key {
+    color: var(--muted); font-size: 11.5px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    font-weight: 700; min-width: 88px; flex-shrink: 0;
+  }
+  .decision-val { color: var(--ink); font-weight: 500; line-height: 1.5; }
+  .decision-val strong { font-weight: 700; }
+
+  /* Footer */
+  .footer {
+    border-top: 1px solid var(--line);
+    padding: 40px 0 32px;
+    color: var(--muted); font-size: 13px;
+  }
+  .footer .container {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 16px; flex-wrap: wrap;
+  }
+  .footer-brand {
+    display: flex; align-items: center; gap: 12px;
+  }
+
+  @media (prefers-reduced-motion: reduce) { * { transition-duration: 0ms !important; animation-duration: 0ms !important; } }
+</style>
+
+<header class="header">
+  <div class="container">
+    <div class="brand">
+      <span class="brand-mark">짓다</span>
+      <span class="brand-sub">JITDA</span>
+    </div>
+    <nav class="header-nav">
+      <a href="#screens">화면</a>
+      <a href="#docs">문서</a>
+      <a href="#backend">백엔드</a>
+      <a href="#roadmap">로드맵</a>
+      <button class="theme-toggle" id="themeToggle" aria-label="테마 전환" title="테마 전환">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="container">
+      <div class="hero-eyebrow">Project overview · v0.1 · 2026.07</div>
+      <h1 class="hero-title">
+        누구나 그리고,<br/>누구나 <em>만나는</em> 웹툰 오픈 플랫폼
+      </h1>
+      <p class="hero-lede">
+        아마추어부터 세미프로 작가까지, 자기 페이지를 갖고 팬 기반의 수익화를 시작할 수 있는
+        오픈 플랫폼. 기획부터 API 명세, 화면 목업, 백엔드 초기 구현까지의 전체 아웃풋을
+        한 곳에서 볼 수 있어요.
+      </p>
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="stat-value">5</div>
+          <div class="stat-label">화면 목업</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">3</div>
+          <div class="stat-label">기획 문서</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value"><em>16</em></div>
+          <div class="stat-label">구현된 API</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">45</div>
+          <div class="stat-label">백엔드 파일</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREENS -->
+  <section class="section" id="screens">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <div class="section-eyebrow">Mockups · Interactive</div>
+          <h2 class="section-title">화면 목업</h2>
+          <p class="section-sub">API 명세 그대로 fetch 호출 · Mock 어댑터로 즉시 인터랙션. 백엔드가 붙으면 어댑터만 벗어냄.</p>
+        </div>
+      </div>
+      <div class="art-grid">
+
+        <a class="art-card" href="./mockups/main.html" target="_blank" rel="noopener noreferrer">
+          <div class="art-thumb" style="--g1:#ff9db6;--g2:#e83e5c">
+            <span class="art-badge">Home</span>
+            <span class="art-open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg></span>
+            <span class="art-thumb-title">메인 페이지</span>
+          </div>
+          <div class="art-body">
+            <div class="art-title-line">
+              <div class="art-title">인기 TOP 10 · 최신작 TOP 3</div>
+              <div class="art-sub">/</div>
+            </div>
+            <p class="art-desc">인기 작품 · 인기 포스트 · 최신작을 탭으로 전환. 장르 카테고리, 검색, 라이트/다크 테마. 로딩 스켈레톤과 에러 재시도 포함.</p>
+            <div class="art-tags"><span class="art-tag done">API 연동</span><span class="art-tag">Rankings</span></div>
+          </div>
+        </a>
+
+        <a class="art-card" href="./mockups/author.html" target="_blank" rel="noopener noreferrer">
+          <div class="art-thumb" style="--g1:#9d7cff;--g2:#4a3fa8">
+            <span class="art-badge">Author</span>
+            <span class="art-open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg></span>
+            <span class="art-thumb-title">작가 페이지</span>
+          </div>
+          <div class="art-body">
+            <div class="art-title-line">
+              <div class="art-title">프로필 · 시리즈 · 사랑방</div>
+              <div class="art-sub">/@handle</div>
+            </div>
+            <p class="art-desc">그라디언트 배너 + 아바타 · 팔로우(옵티미스틱 토글) · 구독 · 팁 모달. Phase 2 사랑방 잠금 상태. 다중 작가 스위처.</p>
+            <div class="art-tags"><span class="art-tag done">API 연동</span><span class="art-tag">Payments</span><span class="art-tag">Optimistic UI</span></div>
+          </div>
+        </a>
+
+        <a class="art-card" href="./mockups/viewer.html" target="_blank" rel="noopener noreferrer">
+          <div class="art-thumb" style="--g1:#3a1e5c;--g2:#0e0620">
+            <span class="art-badge">Viewer</span>
+            <span class="art-open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg></span>
+            <span class="art-thumb-title">회차 뷰어</span>
+          </div>
+          <div class="art-body">
+            <div class="art-title-line">
+              <div class="art-title">스크롤 · 페이지 · 잠금</div>
+              <div class="art-sub">/episode/{id}</div>
+            </div>
+            <p class="art-desc">세로 스크롤과 페이지 모드 모두 지원. 구독자 전용 회차 자동 잠금 UI (403 감지). 좋아요, 팁, 댓글, 이전/다음 네비게이션.</p>
+            <div class="art-tags"><span class="art-tag done">API 연동</span><span class="art-tag hot">Access control</span></div>
+          </div>
+        </a>
+
+        <a class="art-card" href="./mockups/studio.html" target="_blank" rel="noopener noreferrer">
+          <div class="art-thumb" style="--g1:#6cb6d9;--g2:#2a4e7a">
+            <span class="art-badge">Studio</span>
+            <span class="art-open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg></span>
+            <span class="art-thumb-title">작가 스튜디오</span>
+          </div>
+          <div class="art-body">
+            <div class="art-title-line">
+              <div class="art-title">대시보드 · 업로드 · 정산</div>
+              <div class="art-sub">/studio</div>
+            </div>
+            <p class="art-desc">5개 섹션(대시보드 · 작품 · 업로드 · 정산 · 설정) 사이드바 네비게이션. 실제 파일 drag-drop + presigned URL 시뮬레이션. 스파크라인 KPI.</p>
+            <div class="art-tags"><span class="art-tag done">API 연동</span><span class="art-tag hot">Upload flow</span></div>
+          </div>
+        </a>
+
+        <a class="art-card" href="./mockups/auth.html" target="_blank" rel="noopener noreferrer">
+          <div class="art-thumb" style="--g1:#c78e28;--g2:#8a5f14">
+            <span class="art-badge">Auth</span>
+            <span class="art-open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg></span>
+            <span class="art-thumb-title">로그인 · 회원가입</span>
+          </div>
+          <div class="art-body">
+            <div class="art-title-line">
+              <div class="art-title">검증 · 잠금 · 통일 오류</div>
+              <div class="art-sub">/login · /signup</div>
+            </div>
+            <p class="art-desc">패스워드 강도 미터, 로그인 실패 5회 잠금, 통일된 실패 메시지, timing attack 방어. 데모 계정 <code style="font-family:ui-monospace,monospace;font-size:11.5px">demo@jitda.com</code>.</p>
+            <div class="art-tags"><span class="art-tag done">API 연동</span><span class="art-tag hot">Security</span></div>
+          </div>
+        </a>
+
+        <div class="art-card" style="border-style: dashed; opacity: 0.65; cursor: default;">
+          <div class="art-thumb" style="--g1:#7a7480;--g2:#3f3946">
+            <span class="art-badge">Next</span>
+            <span class="art-thumb-title">더 만들기</span>
+          </div>
+          <div class="art-body">
+            <div class="art-title-line">
+              <div class="art-title">검색 · 관리자 콘솔 · 결제</div>
+              <div class="art-sub">upcoming</div>
+            </div>
+            <p class="art-desc">아직 안 만든 화면. 로드맵 참고. 우선순위: 결제/구독 관리 (독자) · 관리자 신고 처리 콘솔 · 검색 결과.</p>
+            <div class="art-tags"><span class="art-tag">Later</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- DOCS -->
+  <section class="section" id="docs" style="background: var(--paper-2);">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <div class="section-eyebrow">Documents</div>
+          <h2 class="section-title">기획 · 명세 문서</h2>
+          <p class="section-sub">이 세 문서가 프로젝트의 단일 진실 원본(single source of truth). 프론트와 백엔드는 여기서 갈라진다.</p>
+        </div>
+      </div>
+      <div class="art-grid">
+
+        <a class="art-card" href="./specs/prd.html" target="_blank" rel="noopener noreferrer">
+          <div class="art-thumb" style="--g1:#ffdc7a;--g2:#c78e28">
+            <span class="art-badge">PRD</span>
+            <span class="art-open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg></span>
+            <span class="art-thumb-title">Product<br/>Requirements</span>
+          </div>
+          <div class="art-body">
+            <div class="art-title-line">
+              <div class="art-title">PRD v0.1</div>
+              <div class="art-sub">11 sections</div>
+            </div>
+            <p class="art-desc">제품 개요 · 타겟 사용자 · 시나리오 · 정보 아키텍처 · 12개 기능 요구사항 · 16개 데이터 모델 · 로드맵 · 오픈 이슈.</p>
+            <div class="art-tags"><span class="art-tag">Source of truth</span></div>
+          </div>
+        </a>
+
+        <a class="art-card" href="./specs/api.html" target="_blank" rel="noopener noreferrer">
+          <div class="art-thumb" style="--g1:#7fdcd6;--g2:#2b8f8a">
+            <span class="art-badge">API</span>
+            <span class="art-open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg></span>
+            <span class="art-thumb-title">API Spec</span>
+          </div>
+          <div class="art-body">
+            <div class="art-title-line">
+              <div class="art-title">API 명세 v0.1</div>
+              <div class="art-sub">60+ endpoints</div>
+            </div>
+            <p class="art-desc">공통 규약 · 스키마 · 15개 도메인의 엔드포인트 요청/응답 JSON · Stripe Webhook 이벤트 매핑. 목업이 이 shape 그대로 호출.</p>
+            <div class="art-tags"><span class="art-tag">Contract</span></div>
+          </div>
+        </a>
+
+        <a class="art-card" href="./specs/security.html" target="_blank" rel="noopener noreferrer">
+          <div class="art-thumb" style="--g1:#ff6c5c;--g2:#6b1e2a">
+            <span class="art-badge">Security</span>
+            <span class="art-open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg></span>
+            <span class="art-thumb-title">Security<br/>Specification</span>
+          </div>
+          <div class="art-body">
+            <div class="art-title-line">
+              <div class="art-title">보안 명세 v0.1</div>
+              <div class="art-sub">15 sections</div>
+            </div>
+            <p class="art-desc">전송/헤더 · 인증(Argon2id) · 인가 · 입력검증 · XSS/Injection/CSRF · 업로드 · 결제 · PII · 감사 · 배포 체크리스트 29항목.</p>
+            <div class="art-tags"><span class="art-tag hot">Hardening</span></div>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- BACKEND -->
+  <section class="section" id="backend">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <div class="section-eyebrow">Backend · Implemented</div>
+          <h2 class="section-title">지금까지 붙인 API</h2>
+          <p class="section-sub">보안 명세 그대로 구현. 모든 mutating 엔드포인트는 서버가 소유권을 재검증하고, 구독자 전용 회차는 매 요청 활성 구독 확인.</p>
+        </div>
+      </div>
+
+      <div class="be-card">
+        <div class="be-side">
+          <div class="stat">
+            <div class="stat-value"><em>16</em></div>
+            <div class="stat-label">엔드포인트</div>
+          </div>
+          <p style="font-size: 13px; color: var(--ink-2); line-height: 1.55; margin: 16px 0;">
+            Next.js 15 (App Router · TypeScript). <code style="font-family:var(--font-mono);font-size:11px">C:\Users\kor\jitda\</code> 에 45 파일.
+          </p>
+          <div class="be-tech">
+            <span class="be-tech-pill">Next.js 15</span>
+            <span class="be-tech-pill">TypeScript</span>
+            <span class="be-tech-pill">Prisma</span>
+            <span class="be-tech-pill">PostgreSQL</span>
+            <span class="be-tech-pill">Argon2id</span>
+            <span class="be-tech-pill">jose</span>
+            <span class="be-tech-pill">zod</span>
+            <span class="be-tech-pill">stripe</span>
+          </div>
+        </div>
+
+        <div class="be-groups">
+          <div>
+            <div class="be-group-title">Auth · Session</div>
+            <div class="ep-list">
+              <div class="ep"><span class="method method-post">POST</span><span class="ep-path">/api/v1/auth/signup</span><span class="ep-note">Zod + Argon2 + 강도 체크</span></div>
+              <div class="ep"><span class="method method-post">POST</span><span class="ep-path">/api/v1/auth/login</span><span class="ep-note">잠금 + timing 방어</span></div>
+              <div class="ep"><span class="method method-post">POST</span><span class="ep-path">/api/v1/auth/refresh</span><span class="ep-note">rotation</span></div>
+              <div class="ep"><span class="method method-post">POST</span><span class="ep-path">/api/v1/auth/logout</span></div>
+              <div class="ep"><span class="method method-get">GET</span><span class="ep-path">/api/v1/auth/me</span></div>
+              <div class="ep"><span class="method method-delete">DEL</span><span class="ep-path">/api/v1/auth/me</span><span class="ep-note">30일 유예</span></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="be-group-title">Content — Series</div>
+            <div class="ep-list">
+              <div class="ep"><span class="method method-get">GET</span><span class="ep-path">/api/v1/series</span><span class="ep-note">필터 · 커서</span></div>
+              <div class="ep"><span class="method method-post">POST</span><span class="ep-path">/api/v1/series</span></div>
+              <div class="ep"><span class="method method-get">GET</span><span class="ep-path">/api/v1/series/{id}</span></div>
+              <div class="ep"><span class="method method-patch">PATCH</span><span class="ep-path">/api/v1/series/{id}</span><span class="ep-note">소유권 검증</span></div>
+              <div class="ep"><span class="method method-delete">DEL</span><span class="ep-path">/api/v1/series/{id}</span></div>
+              <div class="ep"><span class="method method-get">GET</span><span class="ep-path">/api/v1/series/{id}/episodes</span></div>
+              <div class="ep"><span class="method method-post">POST</span><span class="ep-path">/api/v1/series/{id}/episodes</span><span class="ep-note">자동 회차 번호</span></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="be-group-title">Content — Episode · Post</div>
+            <div class="ep-list">
+              <div class="ep"><span class="method method-get">GET</span><span class="ep-path">/api/v1/episodes/{id}</span><span class="ep-note">구독자 전용 403</span></div>
+              <div class="ep"><span class="method method-patch">PATCH</span><span class="ep-path">/api/v1/episodes/{id}</span></div>
+              <div class="ep"><span class="method method-delete">DEL</span><span class="ep-path">/api/v1/episodes/{id}</span></div>
+              <div class="ep"><span class="method method-post">POST</span><span class="ep-path">/api/v1/episodes/{id}/view</span><span class="ep-note">1h dedup</span></div>
+              <div class="ep"><span class="method method-get">GET</span><span class="ep-path">/api/v1/posts</span></div>
+              <div class="ep"><span class="method method-post">POST</span><span class="ep-path">/api/v1/posts</span></div>
+              <div class="ep"><span class="method method-get">GET</span><span class="ep-path">/api/v1/posts/{id}</span></div>
+              <div class="ep"><span class="method method-patch">PATCH</span><span class="ep-path">/api/v1/posts/{id}</span></div>
+              <div class="ep"><span class="method method-delete">DEL</span><span class="ep-path">/api/v1/posts/{id}</span></div>
+              <div class="ep"><span class="method method-post">POST</span><span class="ep-path">/api/v1/posts/{id}/view</span></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="be-group-title">System</div>
+            <div class="ep-list">
+              <div class="ep"><span class="method method-get">GET</span><span class="ep-path">/api/v1/health</span><span class="ep-note">DB sanity + latency</span></div>
+              <div class="ep"><span class="method method-post">POST</span><span class="ep-path">/api/v1/webhooks/stripe</span><span class="ep-note">서명 검증 + idempotency</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DECISIONS -->
+  <section class="section" id="decisions" style="background: var(--paper-2);">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <div class="section-eyebrow">Baseline decisions</div>
+          <h2 class="section-title">핵심 결정 요약</h2>
+          <p class="section-sub">기획 대화에서 하나씩 정한 것들. 이후 모든 화면 · API · 데이터 모델이 이 결정들에서 파생됨.</p>
+        </div>
+      </div>
+      <div class="decisions">
+        <div class="decision"><span class="decision-key">포지셔닝</span><span class="decision-val">누구나 올리는 <strong>오픈 플랫폼</strong></span></div>
+        <div class="decision"><span class="decision-key">수익</span><span class="decision-val">유료 정기 <strong>구독</strong> + 일회성 <strong>팁</strong></span></div>
+        <div class="decision"><span class="decision-key">콘텐츠</span><span class="decision-val">시리즈 + 개별 포스트 <strong>둘 다</strong></span></div>
+        <div class="decision"><span class="decision-key">뷰어</span><span class="decision-val">세로 스크롤 · 페이지 <strong>회차별 선택</strong></span></div>
+        <div class="decision"><span class="decision-key">인기 기준</span><span class="decision-val">최근 7일 <strong>가중 복합 지표</strong></span></div>
+        <div class="decision"><span class="decision-key">구독 혜택</span><span class="decision-val">구독자 전용 회차 <strong>상시 존재</strong></span></div>
+        <div class="decision"><span class="decision-key">구독료</span><span class="decision-val">작가가 <strong>단일 가격</strong> 자유 설정</span></div>
+        <div class="decision"><span class="decision-key">플랫폼 수수료</span><span class="decision-val"><strong>5–10%</strong> · 작가 친화적</span></div>
+        <div class="decision"><span class="decision-key">결제</span><span class="decision-val">글로벌 <strong>Stripe</strong> 포함</span></div>
+        <div class="decision"><span class="decision-key">정산</span><span class="decision-val"><strong>월 1회</strong> · 익월 15일</span></div>
+        <div class="decision"><span class="decision-key">언어</span><span class="decision-val">한국어 · <strong>영어 이중언어</strong></span></div>
+        <div class="decision"><span class="decision-key">플랫폼</span><span class="decision-val">데스크톱 웹 우선 · <strong>작가 도구 중심</strong></span></div>
+        <div class="decision"><span class="decision-key">모더레이션</span><span class="decision-val"><strong>사후 신고 기반</strong> + 수동 검토</span></div>
+        <div class="decision"><span class="decision-key">발견</span><span class="decision-val">고정 <strong>장르 카테고리</strong> + 검색</span></div>
+        <div class="decision"><span class="decision-key">관계</span><span class="decision-val">무료 <strong>팔로우</strong> + 유료 <strong>구독</strong> 분리</span></div>
+        <div class="decision"><span class="decision-key">스택</span><span class="decision-val"><strong>Next.js 15</strong> + Prisma + PostgreSQL</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROADMAP -->
+  <section class="section" id="roadmap">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <div class="section-eyebrow">Roadmap · Phase 1</div>
+          <h2 class="section-title">다음 붙일 것</h2>
+          <p class="section-sub">읽기·쓰기 CRUD 는 완결. 남은 건 소셜/결제/업로드로 화면이 진짜 end-to-end 로 돌아가게 만드는 일.</p>
+        </div>
+      </div>
+
+      <div class="rm-grid">
+        <div class="rm-item">
+          <span class="rm-num">01</span>
+          <div class="rm-body">
+            <div class="rm-title">이미지 업로드<span class="rm-status next">Next</span></div>
+            <div class="rm-desc">R2/S3 presigned URL 발급 · PUT 완료 → complete → 서버에서 재인코딩 (EXIF 제거) → ready.</div>
+          </div>
+        </div>
+        <div class="rm-item">
+          <span class="rm-num">02</span>
+          <div class="rm-body">
+            <div class="rm-title">소셜 액션<span class="rm-status next">Next</span></div>
+            <div class="rm-desc">Follow · Comment · Reaction · Notification 발생 hook. 옵티미스틱 UI 는 프론트가 이미 대비.</div>
+          </div>
+        </div>
+        <div class="rm-item">
+          <span class="rm-num">03</span>
+          <div class="rm-body">
+            <div class="rm-title">Stripe 결제 완결<span class="rm-status next">Next</span></div>
+            <div class="rm-desc">Subscription · Tip PaymentIntent · Webhook 이벤트별 DB 반영 (invoice.payment_succeeded 등).</div>
+          </div>
+        </div>
+        <div class="rm-item">
+          <span class="rm-num">04</span>
+          <div class="rm-body">
+            <div class="rm-title">OAuth<span class="rm-status later">Later</span></div>
+            <div class="rm-desc">Google · Apple · PKCE + state 검증 + JWKS 서명 확인. 이메일 미인증 계정 거부.</div>
+          </div>
+        </div>
+        <div class="rm-item">
+          <span class="rm-num">05</span>
+          <div class="rm-body">
+            <div class="rm-title">이메일 인증 · 리셋<span class="rm-status later">Later</span></div>
+            <div class="rm-desc">Resend 연동. 이메일 인증 전에는 유료 구독/팁 결제 불가.</div>
+          </div>
+        </div>
+        <div class="rm-item">
+          <span class="rm-num">06</span>
+          <div class="rm-body">
+            <div class="rm-title">랭킹 배치<span class="rm-status later">Later</span></div>
+            <div class="rm-desc">1시간 주기로 <code style="font-family:var(--font-mono);font-size:11px">RankingSnapshot</code> 계산. 어뷰징 필터 적용된 가중 점수.</div>
+          </div>
+        </div>
+        <div class="rm-item">
+          <span class="rm-num">07</span>
+          <div class="rm-body">
+            <div class="rm-title">관리자 콘솔 API<span class="rm-status later">Later</span></div>
+            <div class="rm-desc">신고 큐 · takedown/strike/suspend 액션 · 정산 배치 트리거 · 전역 설정 튜닝.</div>
+          </div>
+        </div>
+        <div class="rm-item">
+          <span class="rm-num">08</span>
+          <div class="rm-body">
+            <div class="rm-title">Redis 로 dedup 이관<span class="rm-status later">Later</span></div>
+            <div class="rm-desc">현재 view dedup 은 in-memory (단일 인스턴스). 프로덕션은 Upstash Redis로.</div>
+          </div>
+        </div>
+        <div class="rm-item">
+          <span class="rm-num">09</span>
+          <div class="rm-body">
+            <div class="rm-title">Phase 2<span class="rm-status later">Phase 2</span></div>
+            <div class="rm-desc">영어 UI 확장 · 구독자 사랑방 · 성인 콘텐츠 별도 구독업 · 웹 푸시 알림.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-brand">
+      <span class="brand-mark" style="font-size: 18px;">짓다</span>
+      <span style="color: var(--muted); font-size: 12px;">© 2026 · v0.1 · Mockup showcase</span>
+    </div>
+    <div style="display: flex; gap: 20px; font-size: 12.5px;">
+      <a href="#screens">화면</a>
+      <a href="#docs">문서</a>
+      <a href="#backend">백엔드</a>
+      <a href="#roadmap">로드맵</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Theme toggle
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const root = document.documentElement;
+    const curr = root.getAttribute('data-theme');
+    const systemDark = matchMedia('(prefers-color-scheme: dark)').matches;
+    const isDark = curr === 'dark' || (!curr && systemDark);
+    root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  });
+  // Smooth scroll for anchors
+  document.querySelectorAll('a[href^="#"]').forEach((a) => {
+    a.addEventListener('click', (e) => {
+      const id = a.getAttribute('href');
+      if (!id || id === '#') return;
+      const el = document.querySelector(id);
+      if (el) {
+        e.preventDefault();
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.replaceState(null, '', id);
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

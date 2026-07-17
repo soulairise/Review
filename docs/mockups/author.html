@@ -1,0 +1,1812 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>작가 페이지 — 짓다</title>
+<style>
+  :root {
+    --font-sans: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Segoe UI", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+
+    --paper: #f4f3f0;
+    --surface: #ffffff;
+    --ink: #17141a;
+    --ink-2: #3f3946;
+    --muted: #7a7480;
+    --line: #e6e2dd;
+    --accent: #ee2c56;
+    --accent-hover: #d61e46;
+    --gold: #c78e28;
+    --success: #2f8f5d;
+    --shadow-sm: 0 1px 2px rgba(30, 20, 40, 0.05);
+    --shadow-md: 0 2px 6px rgba(30, 20, 40, 0.06), 0 12px 32px rgba(30, 20, 40, 0.06);
+    --shadow-xl: 0 24px 80px rgba(30, 20, 40, 0.2);
+    --radius: 8px;
+    --radius-lg: 14px;
+    --skeleton-a: rgba(30, 20, 40, 0.06);
+    --skeleton-b: rgba(30, 20, 40, 0.10);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0d0c10;
+      --surface: #17151b;
+      --ink: #f0edf1;
+      --ink-2: #b8b2be;
+      --muted: #8b8492;
+      --line: #24222a;
+      --accent: #ff5573;
+      --accent-hover: #ff7a92;
+      --gold: #e8b13a;
+      --success: #4bb87a;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.35);
+      --shadow-xl: 0 24px 80px rgba(0, 0, 0, 0.6);
+      --skeleton-a: rgba(255, 255, 255, 0.05);
+      --skeleton-b: rgba(255, 255, 255, 0.10);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0d0c10; --surface: #17151b; --ink: #f0edf1; --ink-2: #b8b2be;
+    --muted: #8b8492; --line: #24222a; --accent: #ff5573; --accent-hover: #ff7a92;
+    --gold: #e8b13a; --success: #4bb87a;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.35);
+    --shadow-xl: 0 24px 80px rgba(0, 0, 0, 0.6);
+    --skeleton-a: rgba(255, 255, 255, 0.05); --skeleton-b: rgba(255, 255, 255, 0.10);
+  }
+  :root[data-theme="light"] {
+    --paper: #f4f3f0; --surface: #ffffff; --ink: #17141a; --ink-2: #3f3946;
+    --muted: #7a7480; --line: #e6e2dd; --accent: #ee2c56; --accent-hover: #d61e46;
+    --gold: #c78e28; --success: #2f8f5d;
+    --shadow-sm: 0 1px 2px rgba(30, 20, 40, 0.05);
+    --shadow-md: 0 2px 6px rgba(30, 20, 40, 0.06), 0 12px 32px rgba(30, 20, 40, 0.06);
+    --shadow-xl: 0 24px 80px rgba(30, 20, 40, 0.2);
+    --skeleton-a: rgba(30, 20, 40, 0.06); --skeleton-b: rgba(30, 20, 40, 0.10);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { min-height: 100%; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: var(--font-sans); font-size: 15px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+  }
+  button {
+    font-family: inherit; font-size: inherit; color: inherit;
+    background: none; border: 0; padding: 0; cursor: pointer;
+  }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  input, select, textarea { font-family: inherit; font-size: inherit; color: inherit; }
+  h1, h2, h3 { font-weight: 700; text-wrap: balance; margin: 0; }
+  a { color: inherit; text-decoration: none; }
+
+  .app { min-height: 100vh; display: flex; flex-direction: column; }
+  .container { width: min(100% - 40px, 1240px); margin: 0 auto; }
+
+  /* Site header — 메인 목업과 동일 구조 */
+  .site-header {
+    background: color-mix(in oklab, var(--paper) 88%, transparent);
+    backdrop-filter: saturate(140%) blur(10px);
+    -webkit-backdrop-filter: saturate(140%) blur(10px);
+    border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 20;
+  }
+  .site-header .container { display: flex; align-items: center; gap: 24px; height: 68px; }
+  .brand { display: flex; align-items: baseline; gap: 10px; flex-shrink: 0; }
+  .brand-mark { font-size: 26px; font-weight: 900; letter-spacing: -0.03em; color: var(--ink); }
+  .brand-mark::after {
+    content: ""; display: inline-block; width: 7px; height: 7px; background: var(--accent);
+    border-radius: 50%; margin-left: 3px; transform: translateY(-1px);
+  }
+  .brand-sub {
+    font-size: 11px; color: var(--muted); letter-spacing: 0.22em;
+    text-transform: uppercase; font-weight: 700;
+  }
+  .searchbox { flex: 1; max-width: 480px; position: relative; }
+  .searchbox input {
+    width: 100%; height: 40px; padding: 0 16px 0 42px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 999px; outline: none; transition: border-color 0.15s;
+  }
+  .searchbox input:focus { border-color: var(--ink-2); }
+  .search-icon {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    width: 18px; height: 18px; color: var(--muted); pointer-events: none;
+  }
+  .user-nav { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+  .btn {
+    height: 40px; padding: 0 18px; border-radius: 999px;
+    font-weight: 600; font-size: 14px;
+    transition: background 0.15s, color 0.15s, opacity 0.15s; white-space: nowrap;
+  }
+  .btn-ghost { color: var(--ink-2); }
+  .btn-ghost:hover { background: var(--line); }
+  .btn-primary { background: var(--ink); color: var(--paper); }
+  .btn-primary:hover { opacity: 0.88; }
+  .theme-toggle {
+    height: 40px; width: 40px; border-radius: 999px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted); border: 1px solid var(--line); background: var(--surface);
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .theme-toggle:hover { border-color: var(--ink-2); color: var(--ink); }
+  .theme-toggle svg { width: 16px; height: 16px; }
+
+  /* Author page container */
+  .page { flex: 1; }
+  .page-inner { max-width: 1240px; margin: 0 auto; }
+
+  /* Banner */
+  .banner {
+    height: 260px; position: relative; overflow: hidden;
+    background: linear-gradient(135deg, var(--g1, #ff9db6) 0%, var(--g2, #e83e5c) 100%);
+  }
+  .banner::before, .banner::after {
+    content: ""; position: absolute; border-radius: 50%;
+    background: rgba(255,255,255,0.18); filter: blur(60px);
+    pointer-events: none;
+  }
+  .banner::before { top: -60px; right: -40px; width: 340px; height: 340px; }
+  .banner::after  { bottom: -100px; left: 20%; width: 240px; height: 240px; background: rgba(0,0,0,0.15); }
+  @media (max-width: 640px) { .banner { height: 180px; } }
+
+  /* Hero (avatar + info + actions) */
+  .hero {
+    padding: 0 40px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 24px;
+    align-items: flex-end;
+    margin-top: -60px;
+    position: relative;
+    z-index: 2;
+    padding-bottom: 24px;
+  }
+  @media (max-width: 900px) {
+    .hero {
+      grid-template-columns: auto 1fr;
+      grid-template-areas:
+        "avatar info"
+        "actions actions";
+      padding: 0 20px 20px;
+    }
+    .hero-actions { grid-area: actions; justify-content: flex-start; }
+  }
+  @media (max-width: 500px) {
+    .hero {
+      grid-template-columns: 1fr;
+      grid-template-areas: "avatar" "info" "actions";
+      justify-items: start;
+      padding: 0 16px 20px;
+    }
+  }
+  .hero-avatar {
+    width: 128px; height: 128px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--g1, #ff9db6) 0%, var(--g2, #e83e5c) 100%);
+    border: 5px solid var(--paper);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 900; font-size: 52px; letter-spacing: -0.02em;
+    box-shadow: var(--shadow-md);
+    flex-shrink: 0; grid-area: avatar;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.2);
+  }
+  @media (max-width: 640px) { .hero-avatar { width: 96px; height: 96px; font-size: 40px; border-width: 4px; } }
+  .hero-info { grid-area: info; padding-bottom: 4px; min-width: 0; }
+  .hero-name {
+    font-size: 30px; font-weight: 800; letter-spacing: -0.03em; color: var(--ink);
+    line-height: 1.1;
+  }
+  @media (max-width: 640px) { .hero-name { font-size: 24px; } }
+  .hero-handle {
+    font-size: 14px; color: var(--muted); font-weight: 500;
+    margin-top: 2px; font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  .hero-bio {
+    margin-top: 14px; font-size: 14.5px; color: var(--ink-2);
+    line-height: 1.55; max-width: 60ch;
+  }
+  .hero-links {
+    display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap;
+  }
+  .link-pill {
+    padding: 4px 12px; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 999px; font-size: 12px; color: var(--ink-2);
+    display: inline-flex; align-items: center; gap: 5px;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .link-pill:hover { border-color: var(--ink-2); color: var(--ink); }
+
+  .hero-actions {
+    grid-area: actions;
+    display: flex; gap: 8px; align-self: flex-end;
+    padding-bottom: 4px;
+  }
+  .act-btn {
+    height: 40px; padding: 0 18px; border-radius: 999px;
+    font-weight: 700; font-size: 14px;
+    transition: background 0.15s, color 0.15s, border-color 0.15s, opacity 0.15s;
+    border: 1px solid transparent;
+    display: inline-flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  .act-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .act-btn.follow { background: var(--ink); color: var(--paper); }
+  .act-btn.follow:hover:not(:disabled) { opacity: 0.88; }
+  .act-btn.following { background: var(--surface); color: var(--ink-2); border-color: var(--line); }
+  .act-btn.following:hover:not(:disabled) { background: var(--line); color: var(--ink); }
+  .act-btn.subscribe { background: var(--accent); color: white; }
+  .act-btn.subscribe:hover:not(:disabled) { background: var(--accent-hover); }
+  .act-btn.subscribed { background: transparent; color: var(--gold); border-color: var(--gold); }
+  .act-btn.subscribed:hover:not(:disabled) { background: color-mix(in oklab, var(--gold) 10%, transparent); }
+  .act-btn.tip { background: var(--surface); color: var(--ink-2); border-color: var(--line); }
+  .act-btn.tip:hover:not(:disabled) { border-color: var(--ink-2); color: var(--ink); }
+  .act-btn svg { width: 14px; height: 14px; }
+
+  /* Stats bar */
+  .stats {
+    display: flex; gap: 28px;
+    padding: 18px 40px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    font-size: 13px; color: var(--muted);
+    overflow-x: auto; scrollbar-width: none;
+    background: color-mix(in oklab, var(--surface) 40%, transparent);
+  }
+  .stats::-webkit-scrollbar { display: none; }
+  @media (max-width: 640px) { .stats { padding: 14px 20px; gap: 20px; } }
+  .stat { display: flex; gap: 6px; align-items: baseline; white-space: nowrap; }
+  .stat .num {
+    color: var(--ink); font-weight: 800; font-size: 16px;
+    font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
+  }
+
+  /* Tabs row */
+  .tabs-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 40px; margin-top: 8px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 32px;
+    gap: 16px;
+  }
+  @media (max-width: 640px) { .tabs-row { padding: 0 20px; margin-bottom: 24px; } }
+  .tabs {
+    display: flex; gap: 28px;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    padding: 16px 0;
+    color: var(--muted); font-weight: 600; font-size: 15px;
+    position: relative; transition: color 0.15s; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .tab:hover { color: var(--ink-2); }
+  .tab.active { color: var(--ink); }
+  .tab.active::after {
+    content: ""; position: absolute; bottom: -1px; left: 0; right: 0;
+    height: 2px; background: var(--ink);
+  }
+  .tab-count {
+    font-size: 12px; color: var(--muted);
+    font-variant-numeric: tabular-nums; letter-spacing: 0.05em; font-weight: 500;
+  }
+  .tab-lock { width: 12px; height: 12px; opacity: 0.6; }
+
+  .sort-select {
+    height: 32px; padding: 0 32px 0 12px;
+    border-radius: 999px; border: 1px solid var(--line);
+    background: var(--surface); color: var(--ink-2);
+    font-size: 12.5px; font-weight: 600; cursor: pointer;
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'><path d='M2 4l3 3 3-3' stroke='%237a7480' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+
+  .panel { display: none; min-height: 300px; }
+  .panel.active { display: block; animation: fade 0.25s ease-out; }
+  @keyframes fade {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* Series grid */
+  .series-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px 22px;
+    padding: 0 40px 60px;
+  }
+  @media (max-width: 900px) { .series-grid { grid-template-columns: repeat(3, 1fr); padding: 0 20px 60px; } }
+  @media (max-width: 560px) { .series-grid { grid-template-columns: repeat(2, 1fr); gap: 24px 14px; padding: 0 16px 60px; } }
+
+  .series-card { display: flex; flex-direction: column; gap: 12px; cursor: pointer; }
+  .series-card .thumb {
+    aspect-ratio: 3/4; border-radius: var(--radius); position: relative; overflow: hidden;
+    background: linear-gradient(135deg, var(--g1, #999) 0%, var(--g2, #555) 100%);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.25s;
+  }
+  .series-card:hover .thumb { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+  .thumb::after {
+    content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 70% 30%, rgba(255,255,255,0.14), transparent 60%),
+      linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.35) 100%);
+    pointer-events: none;
+  }
+  .thumb-title {
+    position: absolute; bottom: 14px; left: 14px; right: 14px;
+    color: white; font-weight: 800; font-size: 18px;
+    letter-spacing: -0.015em; line-height: 1.15;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.25); z-index: 2;
+  }
+  .badge {
+    position: absolute; top: 12px; right: 12px; padding: 3px 9px;
+    border-radius: 4px; font-size: 10px; font-weight: 800; color: white;
+    background: rgba(0,0,0,0.45); backdrop-filter: blur(6px);
+    letter-spacing: 0.05em; z-index: 2;
+  }
+  .badge-sub { background: rgba(199, 142, 40, 0.95); }
+  .badge-end { background: rgba(0,0,0,0.55); }
+
+  .series-meta { padding: 0 2px; display: flex; flex-direction: column; gap: 4px; }
+  .series-title {
+    font-size: 15px; font-weight: 700; color: var(--ink);
+    letter-spacing: -0.01em; line-height: 1.3;
+    display: -webkit-box; -webkit-line-clamp: 1; line-clamp: 1;
+    -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .series-sub { font-size: 13px; color: var(--muted); }
+  .series-stats {
+    display: flex; gap: 10px; margin-top: 4px;
+    font-size: 12px; color: var(--muted);
+    font-variant-numeric: tabular-nums; align-items: center;
+  }
+  .series-genre {
+    color: var(--ink-2); font-weight: 600; font-size: 11px;
+    letter-spacing: 0.02em; padding: 2px 6px;
+    background: var(--line); border-radius: 3px;
+  }
+
+  /* Post grid — dense square */
+  .post-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
+    padding: 0 40px 60px;
+  }
+  @media (max-width: 900px) { .post-grid { grid-template-columns: repeat(3, 1fr); padding: 0 20px 60px; } }
+  @media (max-width: 560px) { .post-grid { grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 0 12px 60px; } }
+  .post-cell {
+    aspect-ratio: 1/1; position: relative; overflow: hidden; cursor: pointer;
+    background: linear-gradient(135deg, var(--g1, #999) 0%, var(--g2, #555) 100%);
+  }
+  .post-cell::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 55%, rgba(0,0,0,0.5) 100%);
+    pointer-events: none;
+  }
+  .post-cell-title {
+    position: absolute; bottom: 10px; left: 12px; right: 12px;
+    color: white; font-size: 12.5px; font-weight: 700; line-height: 1.2;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.4); z-index: 1;
+    display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .post-overlay {
+    position: absolute; inset: 0; opacity: 0;
+    transition: opacity 0.15s;
+    background: rgba(0,0,0,0.55); padding: 16px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    color: white; z-index: 2;
+  }
+  .post-cell:hover .post-overlay { opacity: 1; }
+  .post-overlay-title { font-weight: 700; font-size: 14px; line-height: 1.25; }
+  .post-overlay-stats {
+    display: flex; gap: 12px; font-size: 12px; opacity: 0.9;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Salon (locked / phase 2) */
+  .locked-state {
+    padding: 80px 24px; text-align: center;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    margin: 0 40px 60px;
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+  }
+  @media (max-width: 640px) { .locked-state { margin: 0 20px 60px; padding: 60px 20px; } }
+  .locked-icon {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: color-mix(in oklab, var(--gold) 15%, transparent);
+    color: var(--gold);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .locked-icon svg { width: 24px; height: 24px; }
+  .locked-title { font-size: 18px; font-weight: 700; color: var(--ink); }
+  .locked-desc {
+    font-size: 14px; color: var(--muted); max-width: 42ch;
+    line-height: 1.55;
+  }
+  .locked-cta {
+    margin-top: 8px; height: 40px; padding: 0 20px;
+    border-radius: 999px; background: var(--accent); color: white;
+    font-weight: 700; font-size: 14px; transition: background 0.15s;
+  }
+  .locked-cta:hover { background: var(--accent-hover); }
+
+  /* Skeletons */
+  .skeleton {
+    background: linear-gradient(90deg, var(--skeleton-a) 0%, var(--skeleton-b) 50%, var(--skeleton-a) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+    border-radius: var(--radius);
+  }
+  @keyframes shimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+  }
+  .skeleton-card .thumb {
+    background: linear-gradient(90deg, var(--skeleton-a) 0%, var(--skeleton-b) 50%, var(--skeleton-a) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+  }
+  .skeleton-card .thumb::after { display: none; }
+  .skeleton-line { height: 12px; border-radius: 3px; }
+  .skeleton-hero {
+    padding: 0 40px 24px;
+    display: flex; gap: 24px; align-items: flex-end;
+    margin-top: -60px; position: relative; z-index: 2;
+  }
+  .skel-avatar {
+    width: 128px; height: 128px; border-radius: 50%;
+    border: 5px solid var(--paper); flex-shrink: 0;
+  }
+  .skel-info { flex: 1; display: flex; flex-direction: column; gap: 10px; padding-bottom: 12px; }
+  @media (max-width: 500px) { .skeleton-hero { flex-direction: column; align-items: flex-start; padding: 0 16px 20px; } }
+
+  /* Error state */
+  .error-state {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 12px; padding: 80px 24px; text-align: center;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); margin: 0 40px;
+  }
+  .error-icon {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: color-mix(in oklab, var(--accent) 12%, transparent);
+    color: var(--accent);
+  }
+  .error-icon svg { width: 22px; height: 22px; }
+  .error-title { font-size: 16px; font-weight: 700; color: var(--ink); }
+  .error-message { font-size: 14px; color: var(--ink-2); max-width: 40ch; }
+  .error-code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px; color: var(--muted);
+    padding: 3px 8px; background: var(--paper); border-radius: 3px;
+    letter-spacing: 0.02em;
+  }
+  .btn-retry {
+    margin-top: 4px; height: 36px; padding: 0 16px;
+    border-radius: 999px; background: var(--ink); color: var(--paper);
+    font-weight: 600; font-size: 13px; transition: opacity 0.15s;
+  }
+  .btn-retry:hover { opacity: 0.85; }
+
+  .empty-state {
+    padding: 60px 24px; text-align: center;
+    color: var(--muted); font-size: 14px;
+  }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100; padding: 20px;
+    animation: fade 0.15s ease-out;
+  }
+  .modal {
+    background: var(--surface); color: var(--ink);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    max-width: 440px; width: 100%;
+    box-shadow: var(--shadow-xl);
+    animation: modal-in 0.2s cubic-bezier(0.2, 0, 0, 1);
+    max-height: 90vh; overflow-y: auto;
+  }
+  @keyframes modal-in {
+    from { opacity: 0; transform: translateY(10px) scale(0.98); }
+    to { opacity: 1; transform: none; }
+  }
+  .modal-head {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 12px; margin-bottom: 20px;
+  }
+  .modal-title { font-size: 18px; font-weight: 800; letter-spacing: -0.01em; }
+  .modal-subtitle { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .modal-close {
+    width: 32px; height: 32px; border-radius: 999px;
+    color: var(--muted); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, color 0.15s;
+  }
+  .modal-close:hover { background: var(--line); color: var(--ink); }
+  .modal-close svg { width: 16px; height: 16px; }
+
+  .price-block {
+    padding: 20px 0; text-align: center;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 20px;
+  }
+  .price-amount {
+    font-size: 34px; font-weight: 800; letter-spacing: -0.02em;
+    color: var(--ink); font-variant-numeric: tabular-nums;
+  }
+  .price-per { font-size: 14px; color: var(--muted); font-weight: 500; margin-left: 6px; }
+  .benefits { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  .benefit { display: flex; gap: 10px; font-size: 14px; color: var(--ink-2); align-items: flex-start; }
+  .benefit-check {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: color-mix(in oklab, var(--success) 20%, transparent);
+    color: var(--success); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .benefit-check svg { width: 11px; height: 11px; }
+
+  .modal-cta {
+    width: 100%; height: 46px; border-radius: 999px;
+    background: var(--accent); color: white;
+    font-weight: 700; font-size: 15px;
+    transition: background 0.15s, opacity 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .modal-cta:hover:not(:disabled) { background: var(--accent-hover); }
+  .modal-cta:disabled { opacity: 0.65; cursor: not-allowed; }
+  .modal-note { font-size: 12px; color: var(--muted); margin-top: 12px; text-align: center; }
+
+  .spinner {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.35);
+    border-top-color: white;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Tip modal */
+  .tip-presets {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    margin-bottom: 12px;
+  }
+  .tip-preset {
+    height: 46px; border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface); color: var(--ink-2);
+    font-weight: 700; font-size: 13.5px;
+    font-variant-numeric: tabular-nums;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  .tip-preset:hover { border-color: var(--ink-2); color: var(--ink); }
+  .tip-preset.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .tip-custom-wrap { position: relative; margin-bottom: 14px; }
+  .tip-custom-wrap::before {
+    content: "₩"; position: absolute; left: 14px; top: 50%;
+    transform: translateY(-50%); color: var(--muted); font-weight: 600;
+    pointer-events: none;
+  }
+  .tip-custom {
+    width: 100%; height: 44px; padding: 0 14px 0 28px;
+    border-radius: 8px; border: 1px solid var(--line);
+    background: var(--surface); color: var(--ink);
+    font-size: 14px; outline: none;
+    font-variant-numeric: tabular-nums;
+    transition: border-color 0.15s;
+  }
+  .tip-custom:focus { border-color: var(--ink-2); }
+  .tip-message {
+    width: 100%; padding: 10px 14px;
+    border-radius: 8px; border: 1px solid var(--line);
+    background: var(--surface); color: var(--ink);
+    font-size: 14px; resize: vertical; min-height: 64px;
+    font-family: inherit; outline: none;
+    margin-bottom: 10px;
+    transition: border-color 0.15s;
+  }
+  .tip-message:focus { border-color: var(--ink-2); }
+  .tip-message-count {
+    text-align: right; font-size: 11px; color: var(--muted);
+    margin-top: -4px; margin-bottom: 10px;
+  }
+  .tip-public {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--muted); margin-bottom: 18px; cursor: pointer;
+  }
+  .tip-public input { accent-color: var(--accent); }
+
+  /* Toast */
+  .toast-root {
+    position: fixed; bottom: 88px; left: 50%; transform: translateX(-50%);
+    z-index: 200;
+    display: flex; flex-direction: column; gap: 8px; align-items: center;
+    pointer-events: none;
+  }
+  .toast {
+    padding: 11px 20px; border-radius: 999px;
+    background: var(--ink); color: var(--paper);
+    font-size: 14px; font-weight: 600;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+    animation: toast-in 0.2s cubic-bezier(0.2, 0, 0, 1);
+    max-width: 90vw;
+  }
+  .toast.error { background: var(--accent); color: white; }
+  @keyframes toast-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* Footer */
+  .site-footer {
+    border-top: 1px solid var(--line); padding: 32px 0; background: var(--paper);
+    margin-top: 24px;
+  }
+  .site-footer .container {
+    display: flex; justify-content: space-between; align-items: center;
+    color: var(--muted); font-size: 13px; flex-wrap: wrap; gap: 16px;
+  }
+  .footer-links { display: flex; gap: 20px; }
+  .footer-links a:hover { color: var(--ink); }
+
+  /* Dev panel */
+  .dev-panel {
+    position: fixed; right: 20px; bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px 8px 10px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 999px; box-shadow: var(--shadow-md);
+    font-size: 12px; z-index: 30;
+  }
+  .dev-badge {
+    padding: 3px 8px; border-radius: 999px; background: var(--accent);
+    color: white; font-weight: 800; font-size: 10px; letter-spacing: 0.12em;
+  }
+  .dev-panel button {
+    padding: 4px 10px; border-radius: 999px;
+    color: var(--ink-2); background: var(--paper);
+    font-weight: 600; font-size: 12px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .dev-panel button:hover { background: var(--line); color: var(--ink); }
+  .dev-panel label {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--muted); font-size: 12px; cursor: pointer;
+  }
+  .dev-panel input[type="checkbox"] { margin: 0; accent-color: var(--accent); }
+  .dev-panel select {
+    height: 26px; padding: 0 8px;
+    border-radius: 999px; border: 1px solid var(--line);
+    background: var(--paper); color: var(--ink-2);
+    font-size: 12px; font-weight: 600; cursor: pointer; outline: none;
+  }
+  @media (max-width: 640px) {
+    .dev-panel { bottom: 12px; right: 12px; padding: 6px 10px 6px 8px; }
+    .dev-panel label:nth-of-type(2) { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      transition-duration: 0ms !important;
+      animation-duration: 0ms !important;
+    }
+  }
+</style>
+
+<div class="app">
+  <header class="site-header">
+    <div class="container">
+      <div class="brand">
+        <span class="brand-mark">짓다</span>
+        <span class="brand-sub">JITDA</span>
+      </div>
+      <div class="searchbox">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input type="search" placeholder="작품 · 작가 · 태그 검색" aria-label="검색" />
+      </div>
+      <nav class="user-nav">
+        <button class="theme-toggle" id="themeToggle" aria-label="테마 전환" title="테마 전환">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        </button>
+        <button class="btn btn-ghost">로그인</button>
+        <button class="btn btn-primary">작가로 시작</button>
+      </nav>
+    </div>
+  </header>
+
+  <div class="page">
+    <div class="page-inner" id="authorRoot"></div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div>© 2026 짓다 · JITDA · 작가 페이지 <span style="color: var(--accent); font-weight: 600; margin-left: 8px;">MOCKUP</span></div>
+      <div class="footer-links">
+        <a href="#">이용약관</a>
+        <a href="#">개인정보처리방침</a>
+        <a href="#">저작권 신고</a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<div class="dev-panel" id="devPanel">
+  <span class="dev-badge">MOCK</span>
+  <select id="devAuthor" title="작가 전환">
+    <option value="kimdalbit">@kimdalbit</option>
+    <option value="ireid">@ireid</option>
+    <option value="choinyaong">@choinyaong</option>
+  </select>
+  <button id="devReload" title="현재 화면 재요청">↻</button>
+  <label title="이후 요청을 500으로 응답"><input type="checkbox" id="devError" /> 에러</label>
+  <label title="지연 늘림"><input type="checkbox" id="devSlow" /> 느리게</label>
+</div>
+
+<div id="modalRoot"></div>
+<div id="toastRoot" class="toast-root" aria-live="polite"></div>
+
+<script>
+(() => {
+  // ============================================================
+  //  Config
+  // ============================================================
+  const API_BASE = '/api/v1';
+  const USE_MOCK = true;
+
+  // ============================================================
+  //  Mock Database
+  // ============================================================
+  const nowMinus = (min) => new Date(Date.now() - min * 60_000).toISOString();
+
+  const DB = {
+    kimdalbit: {
+      profile: {
+        id: 'usr_2fN1a',
+        handle: 'kimdalbit',
+        display_name: '김달빛',
+        avatar_url: null,
+        banner_url: null,
+        bio: '달빛 그리는 사람. 매주 화요일 · 금요일 연재. 팬 편지는 트위터 DM으로 받아요 💌',
+        external_links: [
+          { label: 'Twitter', url: 'https://twitter.com/kimdalbit' },
+          { label: 'Instagram', url: 'https://instagram.com/kimdalbit' },
+          { label: 'Portfolio', url: 'https://dalbit.com' }
+        ],
+        subscription: { enabled: true, price: 4900, currency: 'KRW' },
+        stats: { followers: 12480, subscribers: 842, series_count: 3, post_count: 12 },
+        created_at: '2026-01-05T10:00:00Z'
+      },
+      banner: ['#ff9db6', '#e83e5c'],
+      series: [
+        { id: 'srs_v7QeK', title: '달빛 아래 우리', genre: 'romance', ep: 42, views: 1234567, likes: 84230, status: 'ongoing',   subs_only: 0, desc: '고요한 마을에 온 낯선 소년, 그리고 나.' },
+        { id: 'srs_kd2',   title: '세 번째 여름',   genre: 'romance', ep: 15, views: 342100,  likes: 21400, status: 'ongoing',   subs_only: 2, desc: '세 번째 여름, 우리는 다시 그곳으로 돌아갔다.' },
+        { id: 'srs_kd3',   title: '우리의 겨울',   genre: 'drama',   ep: 24, views: 890200,  likes: 52100, status: 'completed', subs_only: 0, desc: '스물넷의 겨울, 우리는 헤어지기로 했다. 전 24화 완결.' }
+      ],
+      posts: [
+        { id: 'pst_kd1',  title: '오늘의 그림',                  genre: 'daily',    views: 8420, likes: 621, comments: 34, minAgo: 60*3 },
+        { id: 'pst_kd2',  title: '캐릭터 시안 공개',             genre: 'daily',    views: 6210, likes: 512, comments: 42, minAgo: 60*24 },
+        { id: 'pst_kd3',  title: '팬아트 정말 감사합니다',       genre: 'daily',    views: 5890, likes: 720, comments: 89, minAgo: 60*24*2 },
+        { id: 'pst_kd4',  title: '잠깐만요...',                  genre: 'daily',    views: 4120, likes: 340, comments: 28, minAgo: 60*24*3 },
+        { id: 'pst_kd5',  title: '겨울 준비',                    genre: 'daily',    views: 3820, likes: 298, comments: 21, minAgo: 60*24*5 },
+        { id: 'pst_kd6',  title: '여름 스케치',                  genre: 'daily',    views: 3410, likes: 261, comments: 18, minAgo: 60*24*6 },
+        { id: 'pst_kd7',  title: '다음 화 예고 컷',              genre: 'romance',  views: 12400,likes: 1420,comments: 214,minAgo: 60*24*7 },
+        { id: 'pst_kd8',  title: '커피 브레이크',                genre: 'daily',    views: 2890, likes: 198, comments: 14, minAgo: 60*24*9 },
+        { id: 'pst_kd9',  title: '내가 쓰는 도구들',             genre: 'daily',    views: 4210, likes: 348, comments: 62, minAgo: 60*24*12 },
+        { id: 'pst_kd10', title: '오래된 낙서 발굴',             genre: 'daily',    views: 2410, likes: 172, comments: 11, minAgo: 60*24*18 },
+        { id: 'pst_kd11', title: '밤 산책',                      genre: 'daily',    views: 1980, likes: 148, comments: 9,  minAgo: 60*24*22 },
+        { id: 'pst_kd12', title: '팬 편지 답장 (조금씩)',        genre: 'daily',    views: 5240, likes: 420, comments: 78, minAgo: 60*24*28 }
+      ]
+    },
+    ireid: {
+      profile: {
+        id: 'usr_3gH2b',
+        handle: 'ireid',
+        display_name: '이레이드',
+        avatar_url: null,
+        banner_url: null,
+        bio: '판타지 · 액션 웹툰 그립니다. 매주 일요일 정기 업로드.',
+        external_links: [
+          { label: 'Twitter', url: 'https://twitter.com/ireid' }
+        ],
+        subscription: { enabled: true, price: 6900, currency: 'KRW' },
+        stats: { followers: 8420, subscribers: 512, series_count: 2, post_count: 6 },
+        created_at: '2026-02-18T10:00:00Z'
+      },
+      banner: ['#9d7cff', '#4a3fa8'],
+      series: [
+        { id: 'srs_p8RfL', title: '던전 배달부',   genre: 'fantasy', ep: 68, views: 892140, likes: 61240, status: 'ongoing', subs_only: 0, desc: '오늘도 던전 20층으로 짜장면을 배달한다.' },
+        { id: 'srs_ir2',   title: '검은 성벽 너머', genre: 'fantasy', ep: 8,  views: 42300,  likes: 2810,  status: 'ongoing', subs_only: 1, desc: '왕국의 마지막 방벽, 그 너머에 무엇이 있는가.' }
+      ],
+      posts: [
+        { id: 'pst_ir1', title: '캐릭터 컨셉',       genre: 'daily',   views: 3820, likes: 320, comments: 18, minAgo: 60*8 },
+        { id: 'pst_ir2', title: '배경 스터디',       genre: 'daily',   views: 2140, likes: 189, comments: 12, minAgo: 60*24*2 },
+        { id: 'pst_ir3', title: '오늘 컷',           genre: 'action',  views: 4120, likes: 421, comments: 34, minAgo: 60*24*3 },
+        { id: 'pst_ir4', title: '무기 디자인',       genre: 'fantasy', views: 5810, likes: 621, comments: 48, minAgo: 60*24*7 },
+        { id: 'pst_ir5', title: '작업 공간',         genre: 'daily',   views: 1820, likes: 142, comments: 8,  minAgo: 60*24*14 },
+        { id: 'pst_ir6', title: '이번 주 마감',      genre: 'daily',   views: 1420, likes: 98,  comments: 6,  minAgo: 60*24*21 }
+      ]
+    },
+    choinyaong: {
+      profile: {
+        id: 'usr_5mL4d',
+        handle: 'choinyaong',
+        display_name: '최냐옹',
+        avatar_url: null,
+        banner_url: null,
+        bio: '고양이랑 사무실 이야기. 매일 한 컷씩.',
+        external_links: [
+          { label: 'Instagram', url: 'https://instagram.com/choinyaong' }
+        ],
+        subscription: { enabled: true, price: 3500, currency: 'KRW' },
+        stats: { followers: 21400, subscribers: 1240, series_count: 1, post_count: 8 },
+        created_at: '2025-11-02T10:00:00Z'
+      },
+      banner: ['#ffdc7a', '#f39a5a'],
+      series: [
+        { id: 'srs_r0ThN', title: '고양이 사무소', genre: 'daily', ep: 89, views: 691200, likes: 52140, status: 'ongoing', subs_only: 0, desc: '고양이가 사장인 사무소, 사람이 직원인 이야기.' }
+      ],
+      posts: [
+        { id: 'pst_cn1', title: '오늘의 사무소',     genre: 'daily',  views: 4820, likes: 512, comments: 42, minAgo: 60*4 },
+        { id: 'pst_cn2', title: '사장님의 아침',     genre: 'daily',  views: 5210, likes: 621, comments: 48, minAgo: 60*24 },
+        { id: 'pst_cn3', title: '점심시간',           genre: 'daily',  views: 3810, likes: 342, comments: 21, minAgo: 60*24*3 },
+        { id: 'pst_cn4', title: '회의는 짧게',       genre: 'comedy', views: 6420, likes: 720, comments: 68, minAgo: 60*24*5 },
+        { id: 'pst_cn5', title: '퇴근',               genre: 'daily',  views: 4120, likes: 401, comments: 32, minAgo: 60*24*8 },
+        { id: 'pst_cn6', title: '주말',               genre: 'daily',  views: 3210, likes: 289, comments: 18, minAgo: 60*24*12 },
+        { id: 'pst_cn7', title: '월요일',             genre: 'comedy', views: 5210, likes: 512, comments: 42, minAgo: 60*24*15 },
+        { id: 'pst_cn8', title: '이번 주 야근...',   genre: 'daily',  views: 4210, likes: 398, comments: 28, minAgo: 60*24*20 }
+      ]
+    }
+  };
+
+  // Viewer state (mocks 서버측에 저장돼야 할 상태를 클라이언트에 임시 보관)
+  const viewerState = {
+    kimdalbit:   { is_following: false, is_subscribed: false, subscription_id: null },
+    ireid:       { is_following: false, is_subscribed: false, subscription_id: null },
+    choinyaong:  { is_following: false, is_subscribed: false, subscription_id: null }
+  };
+  const authorByUserId = () =>
+    Object.fromEntries(Object.entries(DB).map(([h, a]) => [a.profile.id, h]));
+
+  // Response builders
+  const publicUser = (p) => ({
+    id: p.id, handle: p.handle, display_name: p.display_name,
+    avatar_url: p.avatar_url, bio: p.bio, is_author: true,
+    created_at: p.created_at
+  });
+
+  const buildSeries = (s, authorProfile) => ({
+    id: s.id,
+    author: publicUser(authorProfile),
+    title: s.title,
+    description: s.desc,
+    cover_image: null,
+    viewer_mode_default: 'scroll',
+    status: s.status,
+    genres: [s.genre],
+    tags: [],
+    episode_count: s.ep,
+    stats: { views_total: s.views, likes_total: s.likes, subscribers_only_count: s.subs_only },
+    is_adult: false,
+    created_at: '2026-01-10T09:00:00Z',
+    updated_at: '2026-07-14T22:00:00Z'
+  });
+
+  const buildPost = (p, authorProfile) => ({
+    id: p.id,
+    author: publicUser(authorProfile),
+    title: p.title,
+    description: null,
+    viewer_mode: 'scroll',
+    is_subscriber_only: false,
+    is_adult: false,
+    images: [],
+    genres: [p.genre],
+    tags: [],
+    stats: { views: p.views, likes: p.likes, comments: p.comments },
+    published_at: nowMinus(p.minAgo),
+    created_at: nowMinus(p.minAgo + 5)
+  });
+
+  // ============================================================
+  //  Mock fetch adapter
+  // ============================================================
+  const DEV = { forceError: false, slow: false };
+
+  if (USE_MOCK) {
+    const jsonResp = (data, status = 200) =>
+      new Response(JSON.stringify(data), {
+        status,
+        headers: { 'Content-Type': 'application/json; charset=utf-8' }
+      });
+    const errResp = (status, code, message) => jsonResp({ error: { code, message } }, status);
+
+    const originalFetch = window.fetch.bind(window);
+
+    const handlers = [
+      // GET /authors/{handle}
+      {
+        match: (m, path) => m === 'GET' && /^\/authors\/[^/]+$/.test(path),
+        handle: (path) => {
+          let handle = decodeURIComponent(path.split('/')[2]);
+          if (handle.startsWith('@')) handle = handle.slice(1);
+          const a = DB[handle];
+          if (!a) return errResp(404, 'not_found', `작가를 찾을 수 없습니다: @${handle}`);
+          const vs = viewerState[handle] || { is_following: false, is_subscribed: false, subscription_id: null };
+          return jsonResp({
+            author: {
+              ...publicUser(a.profile),
+              banner_url: a.profile.banner_url,
+              external_links: a.profile.external_links,
+              subscription: a.profile.subscription,
+              stats: a.profile.stats
+            },
+            viewer: vs
+          });
+        }
+      },
+      // GET /series?author_id=...&sort=...
+      {
+        match: (m, path) => m === 'GET' && path === '/series',
+        handle: (path, url) => {
+          const authorId = url.searchParams.get('author_id');
+          const sort = url.searchParams.get('sort') || 'latest';
+          const handle = authorByUserId()[authorId];
+          const a = DB[handle];
+          if (!a) return jsonResp({ items: [], next_cursor: null, has_more: false });
+          const items = a.series.map((s) => buildSeries(s, a.profile));
+          if (sort === 'popular') items.sort((a, b) => b.stats.views_total - a.stats.views_total);
+          else items.sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+          return jsonResp({ items, next_cursor: null, has_more: false });
+        }
+      },
+      // GET /posts?author_id=...&sort=...
+      {
+        match: (m, path) => m === 'GET' && path === '/posts',
+        handle: (path, url) => {
+          const authorId = url.searchParams.get('author_id');
+          const sort = url.searchParams.get('sort') || 'latest';
+          const handle = authorByUserId()[authorId];
+          const a = DB[handle];
+          if (!a) return jsonResp({ items: [], next_cursor: null, has_more: false });
+          const items = a.posts.map((p) => buildPost(p, a.profile));
+          if (sort === 'popular') items.sort((a, b) => b.stats.views - a.stats.views);
+          else items.sort((a, b) => b.published_at.localeCompare(a.published_at));
+          return jsonResp({ items, next_cursor: null, has_more: false });
+        }
+      },
+      // POST /follows/{author_id}
+      {
+        match: (m, path) => m === 'POST' && /^\/follows\/[^/]+$/.test(path),
+        handle: (path) => {
+          const authorId = path.split('/')[2];
+          const handle = authorByUserId()[authorId];
+          if (!handle) return errResp(404, 'not_found', '작가를 찾을 수 없습니다.');
+          const vs = viewerState[handle];
+          if (vs.is_following) return errResp(409, 'conflict', '이미 팔로우 중입니다.');
+          vs.is_following = true;
+          DB[handle].profile.stats.followers += 1;
+          return jsonResp({ author_id: authorId, followed_at: new Date().toISOString() }, 201);
+        }
+      },
+      // DELETE /follows/{author_id}
+      {
+        match: (m, path) => m === 'DELETE' && /^\/follows\/[^/]+$/.test(path),
+        handle: (path) => {
+          const authorId = path.split('/')[2];
+          const handle = authorByUserId()[authorId];
+          if (!handle) return errResp(404, 'not_found', '작가를 찾을 수 없습니다.');
+          const vs = viewerState[handle];
+          if (vs.is_following) {
+            vs.is_following = false;
+            DB[handle].profile.stats.followers = Math.max(0, DB[handle].profile.stats.followers - 1);
+          }
+          return new Response(null, { status: 204 });
+        }
+      },
+      // POST /subscriptions
+      {
+        match: (m, path) => m === 'POST' && path === '/subscriptions',
+        handle: async (path, url, init) => {
+          const body = init?.body ? JSON.parse(init.body) : {};
+          const authorId = body.author_id;
+          const handle = authorByUserId()[authorId];
+          if (!handle) return errResp(404, 'not_found', '작가를 찾을 수 없습니다.');
+          const a = DB[handle];
+          const subId = 'sub_' + Math.random().toString(36).slice(2, 8);
+          return jsonResp({
+            subscription: {
+              id: subId,
+              subscriber_id: 'usr_me',
+              author: publicUser(a.profile),
+              price: a.profile.subscription.price,
+              currency: a.profile.subscription.currency,
+              status: 'pending',
+              started_at: new Date().toISOString(),
+              current_period_start: new Date().toISOString(),
+              current_period_end: new Date(Date.now() + 30 * 86400000).toISOString(),
+              canceled_at: null,
+              stripe_subscription_id: 'sub_stripe_mock'
+            },
+            stripe_client_secret: 'pi_mock_secret_' + subId,
+            publishable_key: 'pk_test_mock'
+          }, 201);
+        }
+      },
+      // POST /tips
+      {
+        match: (m, path) => m === 'POST' && path === '/tips',
+        handle: async (path, url, init) => {
+          const body = init?.body ? JSON.parse(init.body) : {};
+          const authorId = body.author_id;
+          const handle = authorByUserId()[authorId];
+          if (!handle) return errResp(404, 'not_found', '작가를 찾을 수 없습니다.');
+          const a = DB[handle];
+          const tipId = 'tip_' + Math.random().toString(36).slice(2, 8);
+          return jsonResp({
+            tip: {
+              id: tipId,
+              sender: { id: 'usr_me', handle: 'me', display_name: '나', avatar_url: null, bio: null, is_author: false, created_at: '2026-01-01T00:00:00Z' },
+              author_id: authorId,
+              amount: body.amount,
+              currency: body.currency || 'KRW',
+              message: body.message || '',
+              message_public: !!body.message_public,
+              created_at: new Date().toISOString()
+            },
+            stripe_client_secret: 'pi_mock_secret_' + tipId
+          }, 201);
+        }
+      }
+    ];
+
+    window.fetch = async (input, init) => {
+      const url = typeof input === 'string' ? input : input.url;
+      if (!url.startsWith(API_BASE)) return originalFetch(input, init);
+
+      const delayMin = DEV.slow ? 1500 : 350;
+      const delayMax = DEV.slow ? 3000 : 900;
+      await new Promise(r => setTimeout(r, delayMin + Math.random() * (delayMax - delayMin)));
+
+      if (DEV.forceError) {
+        return errResp(500, 'internal_error', '서버가 응답하지 않습니다. 잠시 후 다시 시도해 주세요.');
+      }
+
+      const method = (init?.method || 'GET').toUpperCase();
+      const u = new URL(url, 'http://mock.local');
+      const path = u.pathname.slice(API_BASE.length);
+
+      for (const h of handlers) {
+        if (h.match(method, path)) {
+          try { return await h.handle(path, u, init); }
+          catch (e) { return errResp(500, 'mock_error', e.message || 'Mock 처리 실패'); }
+        }
+      }
+      return errResp(404, 'not_found', `엔드포인트를 찾을 수 없습니다: ${method} ${path}`);
+    };
+  }
+
+  // ============================================================
+  //  API client (명세와 동일)
+  // ============================================================
+  class APIError extends Error {
+    constructor(status, code, message) {
+      super(message);
+      this.name = 'APIError';
+      this.status = status;
+      this.code = code;
+    }
+  }
+  const parseError = async (res) => {
+    try {
+      const body = await res.json();
+      return new APIError(res.status, body?.error?.code || 'unknown', body?.error?.message || `HTTP ${res.status}`);
+    } catch {
+      return new APIError(res.status, 'unknown', `HTTP ${res.status}`);
+    }
+  };
+
+  const jsonFetch = async (path, init) => {
+    const opts = { ...init };
+    if (opts.body && typeof opts.body !== 'string') {
+      opts.body = JSON.stringify(opts.body);
+      opts.headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+    }
+    const res = await fetch(`${API_BASE}${path}`, opts);
+    if (!res.ok) throw await parseError(res);
+    if (res.status === 204) return null;
+    return res.json();
+  };
+
+  const api = {
+    getAuthor: (handle) => jsonFetch(`/authors/${encodeURIComponent(handle)}`),
+    getSeriesByAuthor: (authorId, sort = 'latest') =>
+      jsonFetch(`/series?author_id=${encodeURIComponent(authorId)}&sort=${sort}&limit=20`),
+    getPostsByAuthor: (authorId, sort = 'latest') =>
+      jsonFetch(`/posts?author_id=${encodeURIComponent(authorId)}&sort=${sort}&limit=20`),
+    follow: (authorId) => jsonFetch(`/follows/${encodeURIComponent(authorId)}`, { method: 'POST' }),
+    unfollow: (authorId) => jsonFetch(`/follows/${encodeURIComponent(authorId)}`, { method: 'DELETE' }),
+    subscribe: (authorId) => jsonFetch(`/subscriptions`, { method: 'POST', body: { author_id: authorId } }),
+    sendTip: ({ authorId, amount, currency, message, messagePublic, context }) =>
+      jsonFetch(`/tips`, {
+        method: 'POST',
+        body: {
+          author_id: authorId, amount, currency: currency || 'KRW',
+          message: message || '', message_public: !!messagePublic,
+          context: context || undefined
+        }
+      })
+  };
+
+  // ============================================================
+  //  Utils
+  // ============================================================
+  const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])
+  );
+  const fmtNum = (n) => {
+    if (n == null) return '—';
+    if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (n >= 1_000)     return (n / 1_000).toFixed(1).replace(/\.0$/, '') + 'k';
+    return String(n);
+  };
+  const fmtKRW = (n) => '₩' + n.toLocaleString('ko-KR');
+  const relTime = (iso) => {
+    const then = new Date(iso).getTime();
+    if (isNaN(then)) return '';
+    const diffMin = Math.max(0, (Date.now() - then) / 60_000);
+    if (diffMin < 1)       return '방금 전';
+    if (diffMin < 60)      return `${Math.floor(diffMin)}분 전`;
+    if (diffMin < 60*24)   return `${Math.floor(diffMin/60)}시간 전`;
+    if (diffMin < 60*24*7) return `${Math.floor(diffMin/60/24)}일 전`;
+    return `${Math.floor(diffMin/60/24/7)}주 전`;
+  };
+  const GENRE_BASE = {
+    romance:  ['#ff9db6', '#e83e5c'],
+    fantasy:  ['#9d7cff', '#4a3fa8'],
+    thriller: ['#ff6c5c', '#6b1e2a'],
+    daily:    ['#ffdc7a', '#f39a5a'],
+    bl_gl:    ['#d9a0ff', '#7846d3'],
+    action:   ['#ff8a3d', '#c93516'],
+    comedy:   ['#ffe266', '#ffa626'],
+    drama:    ['#6cb6d9', '#2a4e7a'],
+    youth:    ['#7fdcd6', '#2b8f8a'],
+    horror:   ['#6b5580', '#1a0e26']
+  };
+  const GENRE_NAME = {
+    romance: '로맨스', fantasy: '판타지', thriller: '스릴러', daily: '일상',
+    bl_gl: 'BL/GL', action: '액션', comedy: '개그', drama: '드라마',
+    youth: '청춘', horror: '공포'
+  };
+  const hashString = (s) => {
+    let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+    return Math.abs(h);
+  };
+  const shift = (hex, dh) => {
+    const n = parseInt(hex.slice(1), 16);
+    let r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+    let h, s, l = (mx + mn) / 2;
+    if (mx === mn) h = s = 0;
+    else {
+      const d = mx - mn;
+      s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+      switch (mx) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        case b: h = (r - g) / d + 4; break;
+      }
+      h /= 6;
+    }
+    h = (h + dh / 360 + 1) % 1;
+    const hue2rgb = (p, q, t) => {
+      t = (t + 1) % 1;
+      if (t < 1/6) return p + (q - p) * 6 * t;
+      if (t < 1/2) return q;
+      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    };
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    const rr = Math.round(hue2rgb(p, q, h + 1/3) * 255);
+    const gg = Math.round(hue2rgb(p, q, h) * 255);
+    const bb = Math.round(hue2rgb(p, q, h - 1/3) * 255);
+    return '#' + [rr, gg, bb].map(x => x.toString(16).padStart(2, '0')).join('');
+  };
+  const gradientFor = (genre, seed) => {
+    const base = GENRE_BASE[genre] || GENRE_BASE.daily;
+    const dh = ((hashString(seed || '') % 24) - 12);
+    return [shift(base[0], dh), shift(base[1], dh)];
+  };
+
+  // ============================================================
+  //  Toast
+  // ============================================================
+  const toast = (msg, type = 'success') => {
+    const el = document.createElement('div');
+    el.className = 'toast ' + (type === 'error' ? 'error' : 'success');
+    el.textContent = msg;
+    document.getElementById('toastRoot').appendChild(el);
+    setTimeout(() => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(-8px)';
+      el.style.transition = 'opacity 0.25s, transform 0.25s';
+      setTimeout(() => el.remove(), 300);
+    }, 2500);
+  };
+
+  // ============================================================
+  //  Renderers
+  // ============================================================
+  const renderHeroSkeleton = () => `
+    <div class="banner skeleton" style="border-radius:0"></div>
+    <div class="skeleton-hero">
+      <div class="skel-avatar skeleton"></div>
+      <div class="skel-info">
+        <div class="skeleton skeleton-line" style="width: 200px; height: 24px;"></div>
+        <div class="skeleton skeleton-line" style="width: 100px;"></div>
+        <div class="skeleton skeleton-line" style="width: 320px; height: 16px; margin-top: 6px;"></div>
+      </div>
+    </div>
+  `;
+
+  const renderErrorFull = (err) => `
+    <div style="height: 260px; background: var(--line);"></div>
+    <div class="error-state" style="margin-top: 32px;" role="alert">
+      <div class="error-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div class="error-title">작가 정보를 불러오지 못했어요</div>
+      <div class="error-message">${escapeHtml(err.message)}</div>
+      <div class="error-code">code: ${escapeHtml(err.code)} · HTTP ${err.status ?? '—'}</div>
+      <button class="btn-retry" data-action="reload-author">다시 시도</button>
+    </div>
+  `;
+
+  const renderErrorInline = (err) => `
+    <div class="error-state" role="alert">
+      <div class="error-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div class="error-title">불러오지 못했어요</div>
+      <div class="error-message">${escapeHtml(err.message)}</div>
+      <div class="error-code">code: ${escapeHtml(err.code)} · HTTP ${err.status ?? '—'}</div>
+      <button class="btn-retry" data-action="retry-tab">다시 시도</button>
+    </div>
+  `;
+
+  const seriesSkeleton = (n = 4) =>
+    `<div class="series-grid">${Array.from({ length: n }, () => `
+      <article class="series-card skeleton-card">
+        <div class="thumb"></div>
+        <div class="series-meta">
+          <div class="skeleton skeleton-line" style="width: 70%;"></div>
+          <div class="skeleton skeleton-line" style="width: 45%;"></div>
+          <div class="skeleton skeleton-line" style="width: 60%;"></div>
+        </div>
+      </article>
+    `).join('')}</div>`;
+
+  const postSkeleton = (n = 8) =>
+    `<div class="post-grid">${Array.from({ length: n }, () => `
+      <div class="post-cell skeleton" style="background: none"></div>
+    `).join('')}</div>`;
+
+  const renderHero = (author, viewer, banner) => {
+    const [g1, g2] = banner;
+    const followBtn = viewer.is_following
+      ? `<button class="act-btn following" data-action="unfollow">팔로잉</button>`
+      : `<button class="act-btn follow" data-action="follow">＋ 팔로우</button>`;
+    const subBtn = author.subscription?.enabled
+      ? (viewer.is_subscribed
+          ? `<button class="act-btn subscribed" disabled>구독 중</button>`
+          : `<button class="act-btn subscribe" data-action="subscribe">구독하기 · ${fmtKRW(author.subscription.price)}/월</button>`)
+      : '';
+    const tipBtn = `<button class="act-btn tip" data-action="tip">💝 팁 보내기</button>`;
+
+    const links = (author.external_links || []).map((l) => `
+      <a class="link-pill" href="${escapeHtml(l.url)}" target="_blank" rel="noopener">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        ${escapeHtml(l.label)}
+      </a>
+    `).join('');
+
+    const initial = author.display_name?.[0] || '?';
+
+    return `
+      <div class="banner" style="--g1:${g1};--g2:${g2}"></div>
+      <div class="hero">
+        <div class="hero-avatar" style="--g1:${g1};--g2:${g2}">${escapeHtml(initial)}</div>
+        <div class="hero-info">
+          <h1 class="hero-name">${escapeHtml(author.display_name)}</h1>
+          <div class="hero-handle">@${escapeHtml(author.handle)}</div>
+          ${author.bio ? `<p class="hero-bio">${escapeHtml(author.bio)}</p>` : ''}
+          ${links ? `<div class="hero-links">${links}</div>` : ''}
+        </div>
+        <div class="hero-actions">
+          ${followBtn}
+          ${subBtn}
+          ${tipBtn}
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><span class="num">${fmtNum(author.stats.followers)}</span> 팔로워</div>
+        <div class="stat"><span class="num">${fmtNum(author.stats.subscribers)}</span> 구독자</div>
+        <div class="stat"><span class="num">${author.stats.series_count}</span> 시리즈</div>
+        <div class="stat"><span class="num">${author.stats.post_count}</span> 포스트</div>
+      </div>
+      <div class="tabs-row">
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-tab="series" role="tab">시리즈<span class="tab-count">${author.stats.series_count}</span></button>
+          <button class="tab" data-tab="posts" role="tab">포스트<span class="tab-count">${author.stats.post_count}</span></button>
+          <button class="tab" data-tab="salon" role="tab">
+            <svg class="tab-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            사랑방
+          </button>
+        </div>
+        <select class="sort-select" id="sortSelect" aria-label="정렬">
+          <option value="latest">최신순</option>
+          <option value="popular">인기순</option>
+        </select>
+      </div>
+      <div class="panel active" data-panel="series" id="panel-series"></div>
+      <div class="panel"        data-panel="posts"  id="panel-posts"></div>
+      <div class="panel"        data-panel="salon"  id="panel-salon"></div>
+    `;
+  };
+
+  const seriesBadges = (s) => {
+    if (s.status === 'completed') return '<span class="badge badge-end">완결</span>';
+    if (s.stats.subscribers_only_count > 0) return '<span class="badge badge-sub">구독자 전용 회차</span>';
+    return '';
+  };
+
+  const renderSeriesCard = (s) => {
+    const [g1, g2] = gradientFor(s.genres[0], s.id);
+    return `
+      <article class="series-card" data-series="${escapeHtml(s.id)}">
+        <div class="thumb" style="--g1:${g1};--g2:${g2}">
+          ${seriesBadges(s)}
+          <span class="thumb-title">${escapeHtml(s.title)}</span>
+        </div>
+        <div class="series-meta">
+          <div class="series-title">${escapeHtml(s.title)}</div>
+          <div class="series-sub">${s.episode_count}화 ${s.status === 'completed' ? '완결' : '연재중'}</div>
+          <div class="series-stats">
+            <span class="series-genre">${escapeHtml(GENRE_NAME[s.genres[0]] || s.genres[0])}</span>
+            <span>조회 ${fmtNum(s.stats.views_total)}</span>
+            <span>❤ ${fmtNum(s.stats.likes_total)}</span>
+          </div>
+        </div>
+      </article>
+    `;
+  };
+
+  const renderPostCell = (p) => {
+    const [g1, g2] = gradientFor(p.genres[0], p.id);
+    return `
+      <div class="post-cell" style="--g1:${g1};--g2:${g2}" data-post="${escapeHtml(p.id)}">
+        <span class="post-cell-title">${escapeHtml(p.title)}</span>
+        <div class="post-overlay">
+          <div class="post-overlay-title">${escapeHtml(p.title)}</div>
+          <div class="post-overlay-stats">
+            <span>❤ ${fmtNum(p.stats.likes)}</span>
+            <span>💬 ${fmtNum(p.stats.comments)}</span>
+            <span>${relTime(p.published_at)}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  };
+
+  const renderSalonLocked = (author, viewer) => {
+    if (viewer.is_subscribed) {
+      return `<div class="empty-state">구독자 사랑방은 Phase 2 에서 오픈됩니다.</div>`;
+    }
+    return `
+      <div class="locked-state">
+        <div class="locked-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        </div>
+        <div class="locked-title">구독자 전용 사랑방</div>
+        <div class="locked-desc">
+          <strong>${escapeHtml(author.display_name)}</strong>님을 구독하면 사랑방에서 작가와 직접 이야기를 나눌 수 있어요.
+          <br/>월 ${fmtKRW(author.subscription.price)}
+        </div>
+        <button class="locked-cta" data-action="subscribe">구독하기</button>
+      </div>
+    `;
+  };
+
+  // ============================================================
+  //  State & controllers
+  // ============================================================
+  const state = {
+    handle: 'kimdalbit',
+    author: { status: 'idle', data: null, viewer: null, banner: null, error: null },
+    series: { status: 'idle', data: null, error: null, sort: 'latest' },
+    posts:  { status: 'idle', data: null, error: null, sort: 'latest' },
+    activeTab: 'series'
+  };
+
+  const root = document.getElementById('authorRoot');
+
+  const renderPanel = (tab) => {
+    const target = document.getElementById(`panel-${tab}`);
+    if (!target) return;
+
+    if (tab === 'salon') {
+      target.innerHTML = renderSalonLocked(state.author.data, state.author.viewer);
+      return;
+    }
+
+    const st = state[tab];
+    if (st.status === 'loading') {
+      target.innerHTML = tab === 'series' ? seriesSkeleton(4) : postSkeleton(8);
+      return;
+    }
+    if (st.status === 'error') {
+      target.innerHTML = renderErrorInline(st.error);
+      return;
+    }
+    if (st.status === 'success') {
+      const items = st.data?.items || [];
+      if (items.length === 0) {
+        target.innerHTML = `<div class="empty-state">아직 ${tab === 'series' ? '시리즈' : '포스트'}가 없어요.</div>`;
+        return;
+      }
+      target.innerHTML = tab === 'series'
+        ? `<div class="series-grid">${items.map(renderSeriesCard).join('')}</div>`
+        : `<div class="post-grid">${items.map(renderPostCell).join('')}</div>`;
+      return;
+    }
+    target.innerHTML = '';
+  };
+
+  const loadTab = async (tab, { force = false } = {}) => {
+    if (tab === 'salon') { renderPanel('salon'); return; }
+    const st = state[tab];
+    if (!force && st.status === 'success') return;
+    st.status = 'loading'; st.error = null;
+    renderPanel(tab);
+    try {
+      const authorId = state.author.data.id;
+      const data = tab === 'series'
+        ? await api.getSeriesByAuthor(authorId, st.sort)
+        : await api.getPostsByAuthor(authorId, st.sort);
+      st.status = 'success';
+      st.data = data;
+    } catch (err) {
+      st.status = 'error';
+      st.error = err instanceof APIError ? err : new APIError(0, 'network_error', err.message || '네트워크 오류');
+    }
+    renderPanel(tab);
+  };
+
+  const activateTab = (tab) => {
+    state.activeTab = tab;
+    document.querySelectorAll('.tab').forEach((t) => {
+      const on = t.dataset.tab === tab;
+      t.classList.toggle('active', on);
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('.panel').forEach((p) => {
+      p.classList.toggle('active', p.dataset.panel === tab);
+    });
+    loadTab(tab);
+  };
+
+  const loadAuthor = async () => {
+    const handle = state.handle;
+    state.author = { status: 'loading', data: null, viewer: null, banner: null, error: null };
+    state.series = { status: 'idle', data: null, error: null, sort: 'latest' };
+    state.posts  = { status: 'idle', data: null, error: null, sort: 'latest' };
+    root.innerHTML = renderHeroSkeleton();
+
+    try {
+      const res = await api.getAuthor(handle);
+      const banner = DB[handle]?.banner || ['#999', '#555']; // mock 전용 — 실 API에선 author.banner_url 사용
+      state.author = { status: 'success', data: res.author, viewer: res.viewer, banner, error: null };
+      root.innerHTML = renderHero(res.author, res.viewer, banner);
+      bindHeroEvents();
+      // 기본 탭 로드
+      activateTab('series');
+    } catch (err) {
+      const e = err instanceof APIError ? err : new APIError(0, 'network_error', err.message || '네트워크 오류');
+      state.author = { status: 'error', data: null, viewer: null, banner: null, error: e };
+      root.innerHTML = renderErrorFull(e);
+    }
+  };
+
+  // ============================================================
+  //  Actions
+  // ============================================================
+  const doFollow = async () => {
+    const authorId = state.author.data.id;
+    const prev = state.author.viewer.is_following;
+    // Optimistic
+    state.author.viewer.is_following = true;
+    state.author.data.stats.followers += 1;
+    updateHeroActions();
+    updateStatsBar();
+    try {
+      await api.follow(authorId);
+      toast(`${state.author.data.display_name}님을 팔로우했어요`);
+    } catch (err) {
+      // Rollback
+      state.author.viewer.is_following = prev;
+      state.author.data.stats.followers -= 1;
+      updateHeroActions();
+      updateStatsBar();
+      toast(err.message || '팔로우 실패', 'error');
+    }
+  };
+
+  const doUnfollow = async () => {
+    const authorId = state.author.data.id;
+    state.author.viewer.is_following = false;
+    state.author.data.stats.followers = Math.max(0, state.author.data.stats.followers - 1);
+    updateHeroActions();
+    updateStatsBar();
+    try {
+      await api.unfollow(authorId);
+    } catch (err) {
+      state.author.viewer.is_following = true;
+      state.author.data.stats.followers += 1;
+      updateHeroActions();
+      updateStatsBar();
+      toast(err.message || '언팔로우 실패', 'error');
+    }
+  };
+
+  const updateHeroActions = () => {
+    const actions = document.querySelector('.hero-actions');
+    if (!actions) return;
+    const author = state.author.data;
+    const viewer = state.author.viewer;
+    const followBtn = viewer.is_following
+      ? `<button class="act-btn following" data-action="unfollow">팔로잉</button>`
+      : `<button class="act-btn follow" data-action="follow">＋ 팔로우</button>`;
+    const subBtn = author.subscription?.enabled
+      ? (viewer.is_subscribed
+          ? `<button class="act-btn subscribed" disabled>구독 중</button>`
+          : `<button class="act-btn subscribe" data-action="subscribe">구독하기 · ${fmtKRW(author.subscription.price)}/월</button>`)
+      : '';
+    actions.innerHTML = `${followBtn}${subBtn}<button class="act-btn tip" data-action="tip">💝 팁 보내기</button>`;
+  };
+
+  const updateStatsBar = () => {
+    const stats = document.querySelector('.stats');
+    if (!stats) return;
+    const a = state.author.data;
+    stats.innerHTML = `
+      <div class="stat"><span class="num">${fmtNum(a.stats.followers)}</span> 팔로워</div>
+      <div class="stat"><span class="num">${fmtNum(a.stats.subscribers)}</span> 구독자</div>
+      <div class="stat"><span class="num">${a.stats.series_count}</span> 시리즈</div>
+      <div class="stat"><span class="num">${a.stats.post_count}</span> 포스트</div>
+    `;
+  };
+
+  // ============================================================
+  //  Modals
+  // ============================================================
+  const closeModal = () => { document.getElementById('modalRoot').innerHTML = ''; };
+  const openModal = (html) => {
+    const mr = document.getElementById('modalRoot');
+    mr.innerHTML = `<div class="modal-backdrop" data-close-backdrop>${html}</div>`;
+  };
+
+  const openSubscribeModal = () => {
+    const a = state.author.data;
+    openModal(`
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="subTitle">
+        <div class="modal-head">
+          <div>
+            <div class="modal-title" id="subTitle">@${escapeHtml(a.handle)} 구독하기</div>
+            <div class="modal-subtitle">${escapeHtml(a.display_name)}</div>
+          </div>
+          <button class="modal-close" data-close-modal aria-label="닫기">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="price-block">
+          <span class="price-amount">${fmtKRW(a.subscription.price)}</span>
+          <span class="price-per">/ 월</span>
+        </div>
+        <div class="benefits">
+          <div class="benefit"><span class="benefit-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M2.5 6.5l2.5 2.5 4.5-5"/></svg></span>구독자 전용 회차 즉시 열람</div>
+          <div class="benefit"><span class="benefit-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M2.5 6.5l2.5 2.5 4.5-5"/></svg></span>사랑방 · 작가와의 대화 참여 (Phase 2)</div>
+          <div class="benefit"><span class="benefit-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M2.5 6.5l2.5 2.5 4.5-5"/></svg></span>언제든 해지 · 7일 이내 미시청 환불</div>
+        </div>
+        <button class="modal-cta" id="subCta">Stripe로 결제 진행</button>
+        <div class="modal-note">POST /api/v1/subscriptions → Stripe Payment Intent</div>
+      </div>
+    `);
+
+    document.getElementById('subCta').addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> 결제 진행 중...';
+      try {
+        const res = await api.subscribe(state.author.data.id);
+        // 실제로는 Stripe.js로 client_secret 사용, 여기서는 성공 처리 시뮬레이션
+        await new Promise((r) => setTimeout(r, 800));
+        state.author.viewer.is_subscribed = true;
+        state.author.viewer.subscription_id = res.subscription.id;
+        state.author.data.stats.subscribers += 1;
+        updateHeroActions();
+        updateStatsBar();
+        // salon 재렌더
+        if (state.activeTab === 'salon') renderPanel('salon');
+        closeModal();
+        toast(`${state.author.data.display_name}님의 구독자가 되었어요!`);
+      } catch (err) {
+        btn.disabled = false;
+        btn.innerHTML = '다시 시도';
+        toast(err.message || '결제 실패', 'error');
+      }
+    });
+  };
+
+  const openTipModal = () => {
+    const a = state.author.data;
+    const PRESETS = [1000, 3000, 5000, 10000];
+    let selectedAmount = 5000;
+    let messagePublic = true;
+
+    openModal(`
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tipTitle">
+        <div class="modal-head">
+          <div>
+            <div class="modal-title" id="tipTitle">팁 보내기</div>
+            <div class="modal-subtitle">${escapeHtml(a.display_name)} · @${escapeHtml(a.handle)}</div>
+          </div>
+          <button class="modal-close" data-close-modal aria-label="닫기">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="tip-presets" id="tipPresets">
+          ${PRESETS.map((v) => `
+            <button class="tip-preset ${v === selectedAmount ? 'active' : ''}" data-amount="${v}">${fmtKRW(v)}</button>
+          `).join('')}
+        </div>
+        <div class="tip-custom-wrap">
+          <input type="number" class="tip-custom" id="tipCustom" min="1000" step="500" placeholder="직접 입력" />
+        </div>
+        <textarea class="tip-message" id="tipMessage" maxlength="140" placeholder="응원 메시지 (선택, 최대 140자)"></textarea>
+        <div class="tip-message-count"><span id="tipCount">0</span>/140</div>
+        <label class="tip-public">
+          <input type="checkbox" id="tipPublic" checked /> 메시지를 다른 팬들에게도 공개
+        </label>
+        <button class="modal-cta" id="tipCta">${fmtKRW(selectedAmount)} 보내기</button>
+        <div class="modal-note">POST /api/v1/tips → Stripe Payment Intent</div>
+      </div>
+    `);
+
+    const cta = document.getElementById('tipCta');
+    const custom = document.getElementById('tipCustom');
+    const msgEl = document.getElementById('tipMessage');
+    const cntEl = document.getElementById('tipCount');
+    const publicEl = document.getElementById('tipPublic');
+
+    const updateCta = () => { cta.textContent = `${fmtKRW(selectedAmount)} 보내기`; };
+
+    document.querySelectorAll('#tipPresets .tip-preset').forEach((b) => {
+      b.addEventListener('click', () => {
+        selectedAmount = Number(b.dataset.amount);
+        document.querySelectorAll('#tipPresets .tip-preset').forEach((x) =>
+          x.classList.toggle('active', x === b)
+        );
+        custom.value = '';
+        updateCta();
+      });
+    });
+    custom.addEventListener('input', () => {
+      const v = parseInt(custom.value, 10);
+      if (!isNaN(v) && v > 0) {
+        selectedAmount = v;
+        document.querySelectorAll('#tipPresets .tip-preset').forEach((x) => x.classList.remove('active'));
+        updateCta();
+      }
+    });
+    msgEl.addEventListener('input', () => { cntEl.textContent = msgEl.value.length; });
+    publicEl.addEventListener('change', () => { messagePublic = publicEl.checked; });
+
+    cta.addEventListener('click', async () => {
+      if (selectedAmount < 1000) { toast('최소 ₩1,000 이상 입력해주세요.', 'error'); return; }
+      cta.disabled = true;
+      cta.innerHTML = '<span class="spinner"></span> 결제 진행 중...';
+      try {
+        await api.sendTip({
+          authorId: state.author.data.id,
+          amount: selectedAmount,
+          currency: 'KRW',
+          message: msgEl.value.trim(),
+          messagePublic
+        });
+        await new Promise((r) => setTimeout(r, 800));
+        closeModal();
+        toast(`${fmtKRW(selectedAmount)} 팁을 보냈어요. 고마움을 전해드릴게요.`);
+      } catch (err) {
+        cta.disabled = false;
+        cta.innerHTML = '다시 시도';
+        toast(err.message || '결제 실패', 'error');
+      }
+    });
+  };
+
+  // ============================================================
+  //  Event binding
+  // ============================================================
+  const bindHeroEvents = () => {
+    // tab clicks
+    document.querySelectorAll('.tab').forEach((t) => {
+      t.addEventListener('click', () => activateTab(t.dataset.tab));
+    });
+    // sort change
+    const sortSel = document.getElementById('sortSelect');
+    sortSel?.addEventListener('change', () => {
+      const v = sortSel.value;
+      state.series.sort = v; state.series.status = 'idle';
+      state.posts.sort = v;  state.posts.status = 'idle';
+      loadTab(state.activeTab, { force: true });
+    });
+  };
+
+  // Delegated clicks (actions in hero, retry buttons, locked cta, modal close)
+  document.addEventListener('click', (e) => {
+    const t = e.target;
+    const closest = (sel) => t.closest?.(sel);
+    const action = closest('[data-action]')?.dataset.action;
+    if (action === 'follow') { doFollow(); return; }
+    if (action === 'unfollow') { doUnfollow(); return; }
+    if (action === 'subscribe') { openSubscribeModal(); return; }
+    if (action === 'tip') { openTipModal(); return; }
+    if (action === 'retry-tab') { loadTab(state.activeTab, { force: true }); return; }
+    if (action === 'reload-author') { loadAuthor(); return; }
+    if (closest('[data-close-modal]')) { closeModal(); return; }
+    if (t.matches?.('[data-close-backdrop]')) { closeModal(); return; }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  // Theme toggle
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const root = document.documentElement;
+    const curr = root.getAttribute('data-theme');
+    const systemDark = matchMedia('(prefers-color-scheme: dark)').matches;
+    const isDark = curr === 'dark' || (!curr && systemDark);
+    root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  });
+
+  // Dev panel
+  document.getElementById('devAuthor').addEventListener('change', (e) => {
+    state.handle = e.target.value;
+    loadAuthor();
+  });
+  document.getElementById('devReload').addEventListener('click', () => {
+    if (state.author.status === 'success') loadTab(state.activeTab, { force: true });
+    else loadAuthor();
+  });
+  document.getElementById('devError').addEventListener('change', (e) => { DEV.forceError = e.target.checked; });
+  document.getElementById('devSlow').addEventListener('change', (e) => { DEV.slow = e.target.checked; });
+
+  // 초기 로드
+  loadAuthor();
+})();
+</script>
+
+</body>
+</html>
