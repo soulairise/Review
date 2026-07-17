@@ -9,12 +9,10 @@
 
 브라우저에서 즉시 볼 수 있는 라이브 데모:
 
-- **포탈**: <https://YOUR-GH-USERNAME.github.io/jitda/> — 모든 목업·문서의 진입점
+- **포탈**: <https://yj78615-blip.github.io/jitda/> — 모든 목업·문서의 진입점
 - **화면 목업** 5개 (인터랙티브, Mock adapter 내장):
-  - [메인](./docs/mockups/main.html) · [작가](./docs/mockups/author.html) · [뷰어](./docs/mockups/viewer.html) · [스튜디오](./docs/mockups/studio.html) · [로그인](./docs/mockups/auth.html)
-- **문서** 3개: [PRD](./docs/specs/prd.html) · [API 명세](./docs/specs/api.html) · [보안 명세](./docs/specs/security.html)
-
-> Pages 활성화: Settings → Pages → Source: Deploy from a branch → **main / /docs** → Save.
+  - [메인](https://yj78615-blip.github.io/jitda/mockups/main.html) · [작가](https://yj78615-blip.github.io/jitda/mockups/author.html) · [뷰어](https://yj78615-blip.github.io/jitda/mockups/viewer.html) · [스튜디오](https://yj78615-blip.github.io/jitda/mockups/studio.html) · [로그인](https://yj78615-blip.github.io/jitda/mockups/auth.html)
+- **문서** 3개: [PRD](https://yj78615-blip.github.io/jitda/specs/prd.html) · [API 명세](https://yj78615-blip.github.io/jitda/specs/api.html) · [보안 명세](https://yj78615-blip.github.io/jitda/specs/security.html)
 
 ## 스택
 
